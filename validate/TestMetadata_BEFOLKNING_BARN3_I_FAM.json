@@ -1,0 +1,235 @@
+{
+    "name": "BEFOLKNING_BARN3_I_FAM",
+    "title": [
+        {"languageCode": "no", "value": "Antall barn i familien, uansett alder"},
+        {"languageCode": "en", "value": "This is title in english bla, bla, bla ............"}
+    ],
+    "description": [
+        {"languageCode": "no", "value": "Som barn regnes her alle personer, uansett alder, som er registrert bosatt i familien til minst en av foreldrene. Familie er definert som personer som er bosatt i samme bolig og som er knyttet til hverandre som ektefeller, registrerte partnere, samboere og/eller som foreldre og barn (uansett barnets alder). \n \n Variabelen omfatter bosatte per 01.01.ÅÅÅÅ, avgrenset til privathusholdninger."},
+        {"languageCode": "en", "value": "This is description in english bla, bla, bla ............"}
+    ],
+    "populationDescription": [
+        {"languageCode": "no", "value": "Variabelen omfatter bosatte per 1.1.ÅÅÅÅ, avgrenset til privathusholdninger."},
+        {"languageCode": "en", "value": "This is populationDescription in english bla, bla, bla ............"}
+    ],
+    "temporalityType": "STATUS",
+    "spatialCoverageDescription": [
+        {"languageCode": "no", "value": "Norge"},
+        {"languageCode": "en", "value": "Norway"}
+    ],    
+    "dataRevision": {
+        "version": "2.0.0",
+        "releaseStatus": "RELEASED",
+        "operationType": "CHANGE_DATA",
+        "description": [
+            {"languageCode": "no", "value": "Nye årganger. Endret populasjon, nå inkludert alle verdier."},
+            {"languageCode": "en", "value": "This is dataRevision.description in english bla, bla, bla ............"}
+        ],  
+        "temporalCoverageStart": "2005-01-01",
+        "temporalEndOfSeries": false,
+        "releaseDate": "2017-01-01",
+        "temporalCoverageLatest": "2020-01-01",
+        "temporalStatusDates": [
+            "2009-01-01",
+            "2013-01-01",
+            "2007-01-01",
+            "2015-01-01",
+            "2012-01-01",
+            "2016-01-01",
+            "2006-01-01",
+            "2014-01-01",
+            "2019-01-01",
+            "2018-01-01",
+            "2005-01-01",
+            "2010-01-01",
+            "2011-01-01",
+            "2008-01-01",
+            "2020-01-01",
+            "2017-01-01"
+        ]
+    },
+    "measure": {
+        "name": "BEFOLKNING_BARN3_I_FAM",
+        "uriDefinition": [
+            "https://www.ssb.no/a/metadata/conceptvariable/vardok/932/nb"
+        ],
+        "dataType": "STRING",
+        "subjectField": [
+            {
+                "name": "FAMILIE",
+                "title": [
+                    {"languageCode": "no", "value": "Familie"},
+                    {"languageCode": "en", "value": "Familie"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Familie"},
+                    {"languageCode": "en", "value": "Familie"}
+                ]
+            },
+            {
+                "name": "BEFOLKNING",
+                "title": [
+                    {"languageCode": "no", "value": "Befolkning"},
+                    {"languageCode": "en", "value": "Population"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Befolkning"},
+                    {"languageCode": "en", "value": "Population"}
+                ]
+            },
+            {
+                "name": "HUSHOLDNING",
+                "title": [
+                    {"languageCode": "no", "value": "Husholdning"},
+                    {"languageCode": "en", "value": "Household"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Husholdning"},
+                    {"languageCode": "en", "value": "Household"}
+                ]
+            }
+        ],
+        "valueDomain": {
+            "name": "ANTALL_BARN",
+            "title": [
+                {"languageCode": "no", "value": "Antall barn"},
+                {"languageCode": "en", "value": "Number of children"}
+            ],
+            "uriDefinition": [null],
+            "codeList": {
+                "name": "ANTALL_BARN",
+                "topLevelCodeItems": [
+                    {
+                        "code": "1",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Ett barn"},
+                            {"languageCode": "en", "value": "One child"}
+                        ],
+                        "validityPeriodStart": "1992-01-01"
+                    },
+                    {
+                        "code": "2",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "To barn"},
+                            {"languageCode": "en", "value": "Two children"}
+                        ],
+                        "validityPeriodStart": "1992-01-01"
+                    },
+                    {
+                        "code": "3",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Tre eller flere barn"},
+                            {"languageCode": "en", "value": "Three or more children"}
+                        ],
+                        "validityPeriodStart": "1992-01-01"
+                    }
+                ]
+            }
+        }
+    },
+    "ssbProperty": [
+        {
+            "key": "GENERERT",
+            "value": "27 Februar 2020"
+        },
+        {
+            "key": "KILDE_FIL",
+            "value": "($BESTAT/familie/wk14/hush_fam_samord_bolig) (2014-)"
+        },
+        {
+            "key": "KILDE_FIL",
+            "value": "$BESTAT/familie/arkiv/hush_fam_formell (2005-2013)"
+        }
+    ],
+    "identifier": [
+        {
+            "name": "PERSONID_1",
+            "title": [
+                {"languageCode": "no", "value": "Personidentifikator"},
+                {"languageCode": "en", "value": "National identity number"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Identifikator for person"},
+                {"languageCode": "en", "value": "Persons national identity number"}
+            ],
+            "format": "RandomUInt48",
+            "unitType": {
+                "name": "PERSON",
+                "title": [
+                    {"languageCode": "no", "value": "Person"},
+                    {"languageCode": "en", "value": "Person"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Statistisk enhet er person (individ, enkeltmenneske)."},
+                    {"languageCode": "en", "value": "Statistical unit is person"}
+                ]
+            },
+            "valueDomain": {
+                "name": "FOEDSELSNUMMER",
+                "title": [
+                    {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
+                    {"languageCode": "en", "value": "Pseudonym for persons national identity number"}
+                ],
+                "uriDefinition": [
+                    "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb"
+                ],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        }
+    ],
+    "attribute": [
+        {
+            "name": "START",
+            "title": [
+                {"languageCode": "no", "value": "Startdato"},
+                {"languageCode": "en", "value": "Start date"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Startdato/måletidspunktet for hendelsen"},
+                {"languageCode": "en", "value": "Event start date"}
+            ],
+            "dataType": "DATE",
+            "attributeType": "START",
+            "valueDomain": {
+                "name": "START_DATE_EVENT",
+                "title": [
+                    {"languageCode": "no", "value": "Startdato"},
+                    {"languageCode": "en", "value": "Start date"}
+                ],
+                "uriDefinition": [null],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        },
+        {
+            "name": "STOP",
+            "title": [
+                {"languageCode": "no", "value": "Stoppdato"},
+                {"languageCode": "en", "value": "Stop date"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Stoppdato/sluttdato for hendelsen"},
+                {"languageCode": "en", "value": "Event stop/end date"}
+            ],
+            "dataType": "DATE",
+            "attributeType": "STOP",
+            "valueDomain": {
+                "name": "STOP_DATE_EVENT",
+                "title": [
+                    {"languageCode": "no", "value": "Stoppdato/sluttdato"},
+                    {"languageCode": "en", "value": "Stop/end date"}
+                ],
+                "uriDefinition": [null],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        }
+    ]
+}
