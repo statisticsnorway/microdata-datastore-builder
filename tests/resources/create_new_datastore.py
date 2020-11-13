@@ -87,13 +87,13 @@ def generate_test_data():
         test_file_pets = "test_data_pets__1_0"
         os.mkdir(datastore_data_pets)
         table_pets = pv.read_csv(input_file=current_directory + "/" + test_file_pets+".txt", parse_options=csv_parse_options, convert_options=csv_convert_options)
-        pq.write_table(table_pets, datastore_data_pets + "/" + test_file_pets+".parqet")
+        pq.write_table(table_pets, datastore_data_pets + "/" + test_file_pets+".parquet")
         # income dataset
         datastore_data_income = os.path.join(datastore_data, "test_data_income")
         os.mkdir(datastore_data_income)
         test_file_income = "test_data_income__1_0"
         table_income = pv.read_csv(input_file=current_directory + "/" + test_file_income+".txt", parse_options=csv_parse_options, convert_options=csv_convert_options)
-        pq.write_table(table_income, datastore_data_income + "/" + test_file_income+".parqet")
+        pq.write_table(table_income, datastore_data_income + "/" + test_file_income+".parquet")
 
         #writer = pq.ParquetWriter('parquest_user_defined_schema.parquet', schema=test_dataset_parquet_schema)
         #writer = pq.ParquetWriter('parquest_user_defined_schema.parquet', schema=test_dataset_parquet_schema)
