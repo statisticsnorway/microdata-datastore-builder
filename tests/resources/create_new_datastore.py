@@ -1,4 +1,5 @@
 import os
+import shutil
 import json
 import datetime
 import pyarrow as pa
@@ -11,6 +12,7 @@ datastore_name = "test"  # <--- Set your datastore name <---
 include_testdata = True  # <--- Include testdataset pets and income? <---
 
 
+current_directory = os.path.dirname(__file__)
 datastore_directoy_name = str(conf.datastore_main_domain).replace(".", "_") + "_" + datastore_name.lower()  # E.g. no_ssb_test, no_nsd_test or no_kreftregisteret_test
 datastore_root = os.path.join(conf.datastore_path, datastore_directoy_name)
 datastore_metadata = os.path.join(datastore_root, "metadata")
@@ -59,15 +61,8 @@ def generate_version_file():
     with open(datastore_metadata + "/version.json", "w") as datastore_version_file:  
         json.dump(datastore_version, datastore_version_file, indent=4) 
 
-# Generate test data files "test_data_pets__1_0.parquet" and "test_data_income__1_0.parquet"
+# Generate test data files "TEST_PERSON_PETS__1_0.parquet" and "TEST_PERSON_INCOME__1_0.parquet" in the new datastore.
 def generate_test_data():
-    # test_dataset_parquet_schema = pa.schema([
-    #     ('unit_id', pa.string()),
-    #     ('value', pa.string()),
-    #     ('start', pa.date32()),
-    #     ('stop', pa.date32())
-    #     #('attributes', pa.????)
-    # ])
     fields = [
         ('unit_id', pa.string()),
         ('value', pa.string()),
@@ -81,17 +76,16 @@ def generate_test_data():
     csv_parse_options = pv.ParseOptions(delimiter=';')
     csv_convert_options = pv.ConvertOptions(column_types=data_schema)
     if include_testdata:
-        current_directory = os.path.dirname(__file__)
         # pets dataset
-        datastore_data_pets = os.path.join(datastore_data, "test_data_pets")
-        test_file_pets = "test_data_pets__1_0"
+        datastore_data_pets = os.path.join(datastore_data, "TEST_PERSON_PETS")
+        test_file_pets = "TEST_PERSON_PETS__1_0"
         os.mkdir(datastore_data_pets)
         table_pets = pv.read_csv(input_file=current_directory + "/" + test_file_pets+".txt", parse_options=csv_parse_options, convert_options=csv_convert_options)
         pq.write_table(table_pets, datastore_data_pets + "/" + test_file_pets+".parquet")
         # income dataset
-        datastore_data_income = os.path.join(datastore_data, "test_data_income")
+        datastore_data_income = os.path.join(datastore_data, "TEST_PERSON_INCOME")
         os.mkdir(datastore_data_income)
-        test_file_income = "test_data_income__1_0"
+        test_file_income = "TEST_PERSON_INCOME__1_0"
         table_income = pv.read_csv(input_file=current_directory + "/" + test_file_income+".txt", parse_options=csv_parse_options, convert_options=csv_convert_options)
         pq.write_table(table_income, datastore_data_income + "/" + test_file_income+".parquet")
 
@@ -101,11 +95,14 @@ def generate_test_data():
         #writer.close()
 
 
-# Generate test metadata files "test_metadata_pets__1_0_0.json" and "test_metadata_income__1_0_0.json"
+# Generate (copy) test metadata files "TEST_PERSON_PETS__1_0_0.json" and "TEST_PERSON_INCOME__1_0_0.json" to the new datastore.
 def generate_test_metadata():
-    # TODO
     if include_testdata:
-        None
+        datastore_data_pets = os.path.join(datastore_data, "TEST_PERSON_PETS")
+        shutil.copy(current_directory + "/TEST_PERSON_PETS__1_0_0.json", datastore_data_pets + "/TEST_PERSON_PETS__1_0_0.json")
+        datastore_data_income = os.path.join(datastore_data, "TEST_PERSON_INCOME")
+        shutil.copy(current_directory + "/TEST_PERSON_INCOME__1_0_0.json", datastore_data_income + "/TEST_PERSON_INCOME__1_0_0.json")
+
 
 # Create a new datastore
 def create_new_datastore():
