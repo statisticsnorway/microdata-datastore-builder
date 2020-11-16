@@ -160,7 +160,7 @@
                 "description": {"$ref": "#/definitions/multilingualStringType"},
                 "uriDefinition": {
                     "type": "array",
-                    "items": {"type": "string" }
+                    "items": {"type": ["string", "null"] }
                 },
                 "dataType": {"type": "string",
                     "enum": ["STRING", "LONG", "DOUBLE", "DATE"]

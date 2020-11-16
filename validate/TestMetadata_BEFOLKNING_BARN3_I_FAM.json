@@ -127,20 +127,6 @@
             }
         }
     },
-    "ssbProperty": [
-        {
-            "key": "GENERERT",
-            "value": "27 Februar 2020"
-        },
-        {
-            "key": "KILDE_FIL",
-            "value": "($BESTAT/familie/wk14/hush_fam_samord_bolig) (2014-)"
-        },
-        {
-            "key": "KILDE_FIL",
-            "value": "$BESTAT/familie/arkiv/hush_fam_formell (2005-2013)"
-        }
-    ],
     "identifier": [
         {
             "name": "PERSONID_1",
@@ -230,6 +216,20 @@
                     {"languageCode": "en", "value": "N/A"}
                 ]
             }
+        }
+    ],
+    "ssbProperty": [
+        {
+            "key": "GENERERT",
+            "value": "27 Februar 2020"
+        },
+        {
+            "key": "KILDE_FIL",
+            "value": "($BESTAT/familie/wk14/hush_fam_samord_bolig) (2014-)"
+        },
+        {
+            "key": "KILDE_FIL",
+            "value": "$BESTAT/familie/arkiv/hush_fam_formell (2005-2013)"
         }
     ]
 }
