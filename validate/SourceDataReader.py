@@ -1,3 +1,4 @@
+from os.path import dirname
 import sqlite3 as db
 import os
 import datetime
@@ -13,12 +14,14 @@ class SourceDataReader:
         
         self.__file_directory = os.path.dirname(data_file)
         self.__file_name = os.path.basename(data_file)
+        self.__sorted_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".sorted"
         self.__database_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".db"
         self.__db_connection = None
         self.__db_curs = None
         self.__data_errors = []
 
 
+    # TODO: remove
     def test(self, param1, param2) -> bool:
         """TODO: Doc bla, bla, bla, ...
 
@@ -31,12 +34,15 @@ class SourceDataReader:
         """
         None
 
-    """Read lines in the data file and insert as rows in a temporary Sqlite database (file)."""
-    def read_csv_file(self):
+
+    """Read and validate the lines/rows in the data file and insert as rows in a temporary Sqlite database (file)."""
+    def read_csv_file(self) -> bool:
+        print("Reading file " + self.data_file + " - " + str(datetime.datetime.now()))
         self.create_temp_database()
         sql_insert = """\
             INSERT INTO temp_data(unit_id, value, start, stop) VALUES (?, ?, ?, ?)
             """
+        # TODO: support for attributes
         #sql_insert = """\
         #    INSERT INTO temp_data(unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?)
         #    """
@@ -49,42 +55,35 @@ class SourceDataReader:
                 row = line.replace("\n", "").split(self.field_separator)
                 if not self.is_data_row_valid(row, i):
                     rows_with_error += 1
+                    if rows_with_error >= self.data_error_limit:
+                        self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                        break  # exit loop if too many errors found
                 if rows_with_error == 0:
                     rows.append(row)
                     if i % 100000 == 0:
                         self.__db_curs.executemany(sql_insert, rows)   # Insert rows in batch to speed up writes to db.
                         rows = []
                         if i % 1000000 == 0:
-                            print(".. rows validated: " + str(i))
+                            print(".. rows read: " + str(i))
             if rows_with_error == 0:
                 self.__db_curs.executemany(sql_insert, rows)
                 rows = []
-            ### TODO: break if i == self.data_error_limit
         self.__db_connection.commit()
-        self.__db_connection.close()
         if rows_with_error == 0:
-            print("OK - " + str(i) +" rows/lines validated")
-        else:
-            print("ERROR: rows in datafile not valid:")
-            for error in self.__data_errors:
-                print("  " + "Line/row " + str(error[0]) + " - " + str(error[1]) + ": " + str(error[2]))
-                self.delete_temp_database()  # Clean up
+            print("  read " + str(i) +" rows/lines")
+            return True  # OK - no error found in file
+        else:            
+            self.print_data_errors()
+            self.__db_connection.close()
+            self.delete_temp_database()  # Clean up
+            return False  # Errors
 
-        #self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
-        #self.__db_curs.execute("SELECT * FROM temp_data LIMIT 10")
-        #for row in self.__db_curs:
-        #    print(row)
 
-        #self.__db_connection.commit()
-        #self.__db_connection.close()
-        #self.delete_temp_database()  # Clean up
-        
-        # validate_data_row
-        # create_temp_database
-        # insert_rows_to_db_table
-
-    """Validate fields in each data row (unit_id, value, start, stop, attribute)."""
+    """Validate fields in a data row (unit_id, value, start, stop, attribute)."""
     def is_data_row_valid(self, data_row, row_number) -> bool:
+ 
+        # TODO: support for validation of attributes
+
         if not data_row:
             self.__data_errors.append((row_number, "Empty data line (Null/missing)", None))
             return False
@@ -124,6 +123,7 @@ class SourceDataReader:
             except:
                 self.__data_errors.append((row_number, "STOP-date not valid", stop))
                 return False
+
         return True
 
 
@@ -146,8 +146,10 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "2 or more rows with same UNIT_ID and START-date", None))
             return False
 
-        print(start)
-        print(prev_stop)
+        if (unit_id == prev_unit_id) and (not prev_stop or prev_stop == ""):
+            self.__data_errors.append((row_number, "Previous row not ended (missing STOP-date in line/row " + str(row_number-1) + ")", None))
+            return False
+
         if (unit_id == prev_unit_id) and (start < prev_stop):
             self.__data_errors.append((row_number, "Previous STOP-date is greater than START-date", None))
             return False
@@ -156,21 +158,16 @@ class SourceDataReader:
 
 
     """Read and validate sorted data rows from temporary Sqlite database (file)."""
-    def sort_and_validate_data_rows(self):
-        if not self.__db_connection:
-            self.__db_connection = db.connect(self.__database_temp_file)
-            self.__db_curs = self.__db_connection.cursor()
-        
+    def sort_and_validate_data_rows(self) -> bool:
+        # if not self.__db_connection:
+        #     self.__db_connection = db.connect(self.__database_temp_file)
+        #     self.__db_curs = self.__db_connection.cursor()
+        print("Sorting file " + self.data_file + " - " + str(datetime.datetime.now()))
+        sorted_rows_to_write = []
+        fpsort = open(self.__sorted_temp_file, 'w')
         previous_row = None
-        is_valid_event_history = True
-        i = 1
-        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
-        for row in self.__db_curs:
-            i += 1
-            if self.is_data_row_valid(row, i):
-                if i >= 2:
-                    is_valid_event_history = self.is_data_row_event_history_valid(row, previous_row, i)
-            previous_row = row
+        rows_with_error = 0
+        i = 0
         ## Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
         # while True:
         #     rows = self.__db_curs.fetchmany(100000)
@@ -178,13 +175,76 @@ class SourceDataReader:
         #         # some code ...
         #     if not rows:
         #         break
+        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
+        for row in self.__db_curs:
+            i += 1
+            if i >= 2 and not self.is_data_row_event_history_valid(row, previous_row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
+            previous_row = row
+            sorted_rows_to_write.append(row)
+            if i % 100000 == 0:
+                for sorted_row in sorted_rows_to_write:
+                    fpsort.write(';'.join(sorted_row) + '\n')
+                sorted_rows_to_write = []
+                if i % 1000000 == 0:
+                    print(".. rows written: " + str(i))
+        for sorted_row in sorted_rows_to_write:
+            fpsort.write(';'.join(sorted_row) + '\n')
+            sorted_rows_to_write = []
+        fpsort.close()
         #self.__db_connection.commit()
         self.__db_connection.close()
+        if rows_with_error == 0:
+            print("  wrote " + str(i) + " sorted rows/lines")
+            print("Data file sorted. Event-History validation done - " + str(datetime.datetime.now()))
+            return True # OK
+        else:
+            self.print_data_errors()
+            return False
 
 
+    # TODO validering av konsistens mellom data og metadata
+    def consistencyValidation():
+        None
 
-    # def insert_rows_to_db_table(self, row_list):
-    #     None
+
+    # TODO oppdatere temporalCoverageStart og temporaleCoverageLatest
+    # Bør flyttes til egen klasse
+    def meta_update_temporale_coverage(self) -> dict:
+        None
+
+    # TODO lese json-metadata
+    # Bør flyttes til egen klasse
+    def meta_read_dataset_metadata(self):
+        None
+
+    # TODO write sorted file or Sqlite-table to Parquet dataset
+    def write_parquet_file(self):
+        # Read from sorted Sqlite???
+        # or read from sorted csv-file???
+        None
+
+
+    # TODO - pseudonymisering
+    def identifier_pseudonymization(self):
+        None
+
+
+    """Print data errors (if any)"""
+    def print_data_errors(self):
+        if len(self.__data_errors) > 0:
+            print("Data errors found:")
+            for error in self.__data_errors:
+                print("  " + "Line/row " + str(error[0]) + " - " + str(error[1]), end='')
+                if error[2]:
+                    print(": " + str(error[2]), end='')
+                print("")
+        else:
+            print("No data errors found")
+
 
 
     """Create temporary Sqlite database (file) and data table."""
@@ -193,6 +253,7 @@ class SourceDataReader:
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
         self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
+        # TODO 
         #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, attributes TEXT)")
         # Speed up insert operations in Sqlite3
         self.__db_curs.execute("PRAGMA synchronous = OFF")
@@ -205,53 +266,24 @@ class SourceDataReader:
             os.remove(self.__database_temp_file)
 
 
-# TODO - tester her bare!!!!
-    def sort_data(self):
-        self.__db_connection = db.connect(self.__database_temp_file)
-        self.__db_curs = self.__db_connection.cursor()
-        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
-        i = 1
-        for row in self.__db_curs:
-            i += 1
-            if i <= 10:
-                print(row)
-
-        # Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
-        # while True:
-        #     rows = self.__db_curs.fetchmany(100000)
-        #     for row in rows:
-        #         # some code ...
-        #     if not rows:
-        #         break
-        
-        print(str(i) + " rows sorted")
-        self.__db_connection.close()
-
-
-    # def temptemp(self):
-    #     til = open(self.data_file + "_ny", "a")
-    #     rows = []
-    #     row = None
-    #     i = 0
-    #     with open(self.data_file, "r") as fp:
-    #         for line in fp:
-    #             i += 1
-    #             row = line.split(self.field_separator)
-    #             row = str(row[0]) + ";" + str(row[1]) + ";" + str(row[2]) + ";" + str(row[3])
-    #             rows.append(row)
-    #             if i % 100000 == 0:
-    #                 til.writelines(rows)
-    #                 rows = []
-    #         til.writelines(rows)
-    #     til.close()
+    """Start validation of dataset (main program)"""
+    def validate_dataset(self):
+        if self.read_csv_file():
+            if self.sort_and_validate_data_rows():
+                print("OK")
+            else:
+                print("ERROR: Event-history validation found data inconsistency i data file!")
+        else:
+            #self.__data_errors.append((0, "ERROR: Validation terminated when reading file. To many errors found!", None))
+            print("ERROR: Validation terminated when reading data file. To many errors found!")
 
 
 # TODO: Skrive UNIT-tester !!!!!!
 
-# Test
+### Test cases ###
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME__1_0.txt")
-start = datetime.datetime.now()
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
+sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
@@ -260,7 +292,6 @@ start = datetime.datetime.now()
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
 
-#sdr.read_csv_file()
-#sdr.sort_data()
-#print(start)
-#print(datetime.datetime.now())
+sdr.data_error_limit = 100
+sdr.validate_dataset()
+

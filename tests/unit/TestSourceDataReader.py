@@ -129,7 +129,7 @@ class TestSourceDataReader(unittest.TestCase):
             self.sdr.is_data_row_valid(self.row_22, self.dummy_rownum)
         )
 
-    ### Methods for testing event-history (several data rows) ###
+    ### Methods for testing event-history (consistency in several data rows as a set) ###
     # Event-history OK:
     rows_history_01 = [
         ("12345678901", "A", "2000-01-01", "2000-12-31"),
@@ -152,6 +152,14 @@ class TestSourceDataReader(unittest.TestCase):
     rows_history_13 = [
         ("12345678901", "A", "2000-01-01", "2003-12-31"),
         ("12345678901", "B", "2001-01-01", None)  # Not valid - previous stop-date is greater than start
+    ]
+    rows_history_14 = [
+        ("12345678901", "A", "2000-01-01", None),
+        ("12345678901", "B", "2001-01-01", "2001-12-31") # Not valid - previous row not ended (missing stop)
+    ]
+    rows_history_15 = [
+        ("12345678901", "A", "2000-01-01", ""),
+        ("12345678901", "B", "2001-01-01", "2001-12-31") # Not valid - previous row not ended (missing stop)
     ]
 
     row_idx = 1
@@ -203,6 +211,23 @@ class TestSourceDataReader(unittest.TestCase):
             )
         )
 
+    def test_event_history_14(self):
+        self.assertFalse(
+            self.sdr.is_data_row_event_history_valid(
+                self.rows_history_14[self.row_idx],
+                self.rows_history_14[self.prev_row_idx],
+                self.dummy_rownum
+            )
+        )
+
+    def test_event_history_15(self):
+        self.assertFalse(
+            self.sdr.is_data_row_event_history_valid(
+                self.rows_history_15[self.row_idx],
+                self.rows_history_15[self.prev_row_idx],
+                self.dummy_rownum
+            )
+        )
 
 ### MAIN ###
 if __name__ == '__main__':
