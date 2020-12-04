@@ -2,6 +2,7 @@ from os.path import dirname
 import sqlite3 as db
 import os
 import datetime
+import json
 
 class SourceDataReader:
     """TODO: Doc """
@@ -19,6 +20,10 @@ class SourceDataReader:
         self.__db_connection = None
         self.__db_curs = None
         self.__data_errors = []
+
+        self.__metadata_file = self.__file_directory + "/doc_" + str(self.__file_name).split(".")[0] + ".json"
+        self.__meta_value_domain_codes = []
+        self.__meta_value_datatype = ""
 
 
     # TODO: remove
@@ -158,7 +163,9 @@ class SourceDataReader:
 
 
     """Read and validate sorted data rows from temporary Sqlite database (file)."""
+    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
     def sort_and_validate_data_rows(self) -> bool:
+        self.meta_read_dataset_metadata()
         # if not self.__db_connection:
         #     self.__db_connection = db.connect(self.__database_temp_file)
         #     self.__db_curs = self.__db_connection.cursor()
@@ -178,6 +185,11 @@ class SourceDataReader:
         self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
         for row in self.__db_curs:
             i += 1
+            if not self.is_data_row_consistent_with_metadata(row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
             if i >= 2 and not self.is_data_row_event_history_valid(row, previous_row, i):
                 rows_with_error += 1
                 if rows_with_error >= self.data_error_limit:
@@ -199,7 +211,7 @@ class SourceDataReader:
         self.__db_connection.close()
         if rows_with_error == 0:
             print("  wrote " + str(i) + " sorted rows/lines")
-            print("Data file sorted. Event-History validation done - " + str(datetime.datetime.now()))
+            print("Data file sorted. Metadata and Event-History validation done - " + str(datetime.datetime.now()))
             return True # OK
         else:
             self.print_data_errors()
@@ -207,8 +219,40 @@ class SourceDataReader:
 
 
     # TODO validering av konsistens mellom data og metadata
-    def consistencyValidation():
-        None
+    """Validate consistency between data and metadata"""
+    def is_data_row_consistent_with_metadata(self, data_row, row_number) -> bool:
+        #unit_id = data_row[0]
+        value = data_row[1]
+        #start = data_row[2]
+        #stop = data_row[3]
+
+        if value not in self.__meta_value_domain_codes:
+            self.__data_errors.append((row_number, "Inconsistency - value not in metadata ValueDomain/CodeList", None))
+            return False
+
+        # "STRING", "LONG", "DOUBLE", "DATE"
+        if self.__meta_value_datatype == "LONG":
+            try:
+                int(value)
+                return True
+            except:
+                self.__data_errors.append((row_number, "Inconsistency - value not of type LONG", None))
+                return False
+        elif self.__meta_value_datatype == "DOUBLE":
+            try:
+                float(value)
+                return True
+            except:
+                self.__data_errors.append((row_number, "Inconsistency - value not of type DOUBLE", None))
+                return False
+        elif self.__meta_value_datatype == "DATE":
+            try:
+                datetime.datetime.strptime(value, "%Y-%m-%d")
+            except:
+                self.__data_errors.append((row_number, "Inconsistency - value not of type DATE (YYYY-MM-DD)", None))
+                return False
+
+        return True
 
 
     # TODO oppdatere temporalCoverageStart og temporaleCoverageLatest
@@ -216,10 +260,19 @@ class SourceDataReader:
     def meta_update_temporale_coverage(self) -> dict:
         None
 
-    # TODO lese json-metadata
-    # Bør flyttes til egen klasse
+
+    # TODO Bør flyttes til egen klasse???
+    """Read dataset metadata from JSON file."""
     def meta_read_dataset_metadata(self):
-        None
+        metadata = None
+        with open(self.__metadata_file) as json_metadata_file: 
+            metadata = json.load(json_metadata_file)
+        for code_list in metadata["measure"]["valueDomain"]["codeList"]["topLevelCodeItems"]:
+            self.__meta_value_domain_codes.append(code_list["code"])
+        self.__meta_value_datatype = metadata["measure"]["dataType"]
+        #print(self.__meta_value_domain_codes)
+        #print(self.__meta_value_datatype)
+
 
     # TODO write sorted file or Sqlite-table to Parquet dataset
     def write_parquet_file(self):
@@ -248,6 +301,7 @@ class SourceDataReader:
 
 
     """Create temporary Sqlite database (file) and data table."""
+    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
     def create_temp_database(self):
         self.delete_temp_database()  # Remove old Sqlite3-file if exists
         self.__db_connection = db.connect(self.__database_temp_file)
@@ -272,7 +326,7 @@ class SourceDataReader:
             if self.sort_and_validate_data_rows():
                 print("OK")
             else:
-                print("ERROR: Event-history validation found data inconsistency i data file!")
+                print("ERROR: Event-history validation found data inconsistency in the data file!")
         else:
             #self.__data_errors.append((0, "ERROR: Validation terminated when reading file. To many errors found!", None))
             print("ERROR: Validation terminated when reading data file. To many errors found!")
@@ -283,10 +337,10 @@ class SourceDataReader:
 ### Test cases ###
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME__1_0.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
-sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
+#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
+sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million_STATUS.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
@@ -294,4 +348,6 @@ sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp
 
 sdr.data_error_limit = 100
 sdr.validate_dataset()
+
+#sdr.meta_read_dataset_metadata()
 
