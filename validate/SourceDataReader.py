@@ -24,6 +24,7 @@ class SourceDataReader:
         self.__metadata_file = self.__file_directory + "/doc_" + str(self.__file_name).split(".")[0] + ".json"
         self.__meta_value_domain_codes = []
         self.__meta_value_datatype = ""
+        self.__meta_temporality_type = ""
 
 
     # TODO: remove
@@ -48,6 +49,7 @@ class SourceDataReader:
             INSERT INTO temp_data(unit_id, value, start, stop) VALUES (?, ?, ?, ?)
             """
         # TODO: support for attributes
+        # TODO: support for startType and stopType?
         #sql_insert = """\
         #    INSERT INTO temp_data(unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?)
         #    """
@@ -110,10 +112,7 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "VALUE (measure) missing or null", value))
             return False
 
-        if start == None or str(start).strip(" ") == "":
-            self.__data_errors.append((row_number, "START-date missing or null", start))
-            return False
-        else:
+        if start not in(None, ""):
             try:
                 datetime.datetime.strptime(start, "%Y-%m-%d")
             except:
@@ -123,8 +122,6 @@ class SourceDataReader:
         if stop not in(None, ""):
             try:
                 datetime.datetime.strptime(stop, "%Y-%m-%d")
-                if start > stop:
-                    self.__data_errors.append((row_number, "START greater than STOP", stop))
             except:
                 self.__data_errors.append((row_number, "STOP-date not valid", stop))
                 return False
@@ -151,13 +148,39 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "2 or more rows with same UNIT_ID and START-date", None))
             return False
 
-        if (unit_id == prev_unit_id) and (not prev_stop or prev_stop == ""):
-            self.__data_errors.append((row_number, "Previous row not ended (missing STOP-date in line/row " + str(row_number-1) + ")", None))
-            return False
-
-        if (unit_id == prev_unit_id) and (start < prev_stop):
-            self.__data_errors.append((row_number, "Previous STOP-date is greater than START-date", None))
-            return False
+        # temporalityType: "FIXED", "STATUS", "ACCUMULATED", "EVENT"
+        if self.__meta_temporality_type in("STATUS", "ACCUMULATED", "EVENT"):
+            if start == None or str(start).strip(" ") == "":
+                self.__data_errors.append((row_number, "Inconsistency - START-date is missing. Expected START-date when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                return False
+            if (stop not in(None, "")) and (start > stop):
+                self.__data_errors.append((row_number, "Inconsistency - START-date greater than STOP-date.", start + " --> " + stop))
+                return False
+            if self.__meta_temporality_type in("STATUS", "ACCUMULATED"):
+                if str(stop).strip in(None, ""):
+                    self.__data_errors.append((row_number, "Inconsistency - STOP-date is missing. Expected STOP-date when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                    return False
+            if self.__meta_temporality_type == "STATUS":
+                if not start == stop:
+                    self.__data_errors.append((row_number, "Inconsistency - expected same (equal) date for START-date and STOP-date when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                    return False
+            if self.__meta_temporality_type == "EVENT":
+                if (unit_id == prev_unit_id) and (not prev_stop or prev_stop == ""):
+                    self.__data_errors.append((row_number, "Inconsistency - previous row not ended (missing STOP-date in line/row " + str(row_number-1) + ")", None))
+                    return False
+                if (unit_id == prev_unit_id) and (start < prev_stop):
+                    self.__data_errors.append((row_number, "Inconsistency - previous STOP-date is greater than START-date", None))
+                    return False
+        elif self.__meta_temporality_type == "FIXED":
+            if unit_id == prev_unit_id:
+                self.__data_errors.append((row_number, "Inconsistency - 2 or more rows with same UNIT_ID (data row duplicate) not legal when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                return False
+            elif start not in(None, ""):
+                self.__data_errors.append((row_number, "Inconsistency - expected no START-date (should be MISSING/NULL) when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                return False
+            elif stop not in(None, ""):
+                self.__data_errors.append((row_number, "Inconsistency - expected no STOP-date (should be MISSING/NULL) when DataSet.temporalityType is " + self.__meta_temporality_type, None))
+                return False
 
         return True
 
@@ -227,7 +250,7 @@ class SourceDataReader:
         #stop = data_row[3]
 
         if value not in self.__meta_value_domain_codes:
-            self.__data_errors.append((row_number, "Inconsistency - value not in metadata ValueDomain/CodeList", None))
+            self.__data_errors.append((row_number, "Inconsistency - value (code) not in metadata ValueDomain/CodeList", None))
             return False
 
         # "STRING", "LONG", "DOUBLE", "DATE"
@@ -264,12 +287,16 @@ class SourceDataReader:
     # TODO Bør flyttes til egen klasse???
     """Read dataset metadata from JSON file."""
     def meta_read_dataset_metadata(self):
+
+        #TODO: validate metadata-json with json-schema!!!!
+
         metadata = None
         with open(self.__metadata_file) as json_metadata_file: 
             metadata = json.load(json_metadata_file)
         for code_list in metadata["measure"]["valueDomain"]["codeList"]["topLevelCodeItems"]:
             self.__meta_value_domain_codes.append(code_list["code"])
         self.__meta_value_datatype = metadata["measure"]["dataType"]
+        self.__meta_temporality_type = metadata["temporalityType"]
         #print(self.__meta_value_domain_codes)
         #print(self.__meta_value_datatype)
 
@@ -320,7 +347,7 @@ class SourceDataReader:
             os.remove(self.__database_temp_file)
 
 
-    """Start validation of dataset (main program)"""
+    """MAIN - Start validation of dataset"""
     def validate_dataset(self):
         if self.read_csv_file():
             if self.sort_and_validate_data_rows():
@@ -329,7 +356,7 @@ class SourceDataReader:
                 print("ERROR: Event-history validation found data inconsistency in the data file!")
         else:
             #self.__data_errors.append((0, "ERROR: Validation terminated when reading file. To many errors found!", None))
-            print("ERROR: Validation terminated when reading data file. To many errors found!")
+            print("ERROR: Validation terminated when reading data file. Too many errors found!")
 
 
 # TODO: Skrive UNIT-tester !!!!!!
