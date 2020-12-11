@@ -255,6 +255,11 @@ class TestSourceDataReader(unittest.TestCase):
         ("12345678901", "BBBBBBBBB", "2020-12-31", "")
     ]
 
+    rows_status_13 = [
+        ("12345678901", "AAAAAAAAA", "2020-01.01", "2020-12.31"),  # Start-date and Stop-date not equal.
+        ("12345678901", "BBBBBBBBB", "2020-01.01", "2020-12.31")
+    ]
+
     def test_status_10(self):
         self.sdr.set_meta_temporality_type("STATUS")
         self.assertFalse(
@@ -281,6 +286,16 @@ class TestSourceDataReader(unittest.TestCase):
             self.sdr.is_data_row_consistent(
                 self.rows_status_12[0], 
                 self.rows_status_12[1], 
+                self.dummy_rownum
+            )
+        )
+
+    def test_status_13(self):
+        self.sdr.set_meta_temporality_type("STATUS")
+        self.assertFalse(
+            self.sdr.is_data_row_consistent(
+                self.rows_status_13[0], 
+                self.rows_status_13[1], 
                 self.dummy_rownum
             )
         )
