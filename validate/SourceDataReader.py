@@ -26,6 +26,10 @@ class SourceDataReader:
         self.__meta_value_datatype = ""
         self.__meta_temporality_type = ""
 
+    """Setter only used by unit test!"""
+    def set_meta_temporality_type(self, meta_temporality_type):
+        self.__meta_temporality_type = meta_temporality_type
+
 
     # TODO: remove
     def test(self, param1, param2) -> bool:
@@ -126,11 +130,15 @@ class SourceDataReader:
                 self.__data_errors.append((row_number, "STOP-date not valid", stop))
                 return False
 
+        if (str(start).strip() in(None, "")) and str(stop).strip(" ")  not in(None, ""):
+            self.__data_errors.append((row_number, "STOP-date exists, but START-date is missing", None))
+            return False
+
         return True
 
 
     """Validate event-history (unit_id * start * stop) and check for row duplicates."""
-    def is_data_row_event_history_valid(self, data_row, previous_data_row, row_number) -> bool:
+    def is_data_row_consistent(self, data_row, previous_data_row, row_number) -> bool:
         unit_id = data_row[0]
         value = data_row[1]
         start = data_row[2]
@@ -141,14 +149,14 @@ class SourceDataReader:
         prev_stop = previous_data_row[3]
 
         if data_row == previous_data_row:
-            self.__data_errors.append((row_number, "Data row duplicate", None))
+            self.__data_errors.append((row_number, "Inconsistency - Data row duplicate", None))
             return False
 
         if (unit_id == prev_unit_id) and (start == prev_start):
-            self.__data_errors.append((row_number, "2 or more rows with same UNIT_ID and START-date", None))
+            self.__data_errors.append((row_number, "Inconsistency - 2 or more rows with same UNIT_ID and START-date", None))
             return False
 
-        # temporalityType: "FIXED", "STATUS", "ACCUMULATED", "EVENT"
+        # Valid temporalityType: "FIXED", "STATUS", "ACCUMULATED", "EVENT"
         if self.__meta_temporality_type in("STATUS", "ACCUMULATED", "EVENT"):
             if start == None or str(start).strip(" ") == "":
                 self.__data_errors.append((row_number, "Inconsistency - START-date is missing. Expected START-date when DataSet.temporalityType is " + self.__meta_temporality_type, None))
@@ -185,63 +193,6 @@ class SourceDataReader:
         return True
 
 
-    """Read and validate sorted data rows from temporary Sqlite database (file)."""
-    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
-    def sort_and_validate_data_rows(self) -> bool:
-        self.meta_read_dataset_metadata()
-        # if not self.__db_connection:
-        #     self.__db_connection = db.connect(self.__database_temp_file)
-        #     self.__db_curs = self.__db_connection.cursor()
-        print("Sorting file " + self.data_file + " - " + str(datetime.datetime.now()))
-        sorted_rows_to_write = []
-        fpsort = open(self.__sorted_temp_file, 'w')
-        previous_row = None
-        rows_with_error = 0
-        i = 0
-        ## Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
-        # while True:
-        #     rows = self.__db_curs.fetchmany(100000)
-        #     for row in rows:
-        #         # some code ...
-        #     if not rows:
-        #         break
-        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
-        for row in self.__db_curs:
-            i += 1
-            if not self.is_data_row_consistent_with_metadata(row, i):
-                rows_with_error += 1
-                if rows_with_error >= self.data_error_limit:
-                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
-                    break  # exit loop if too many errors found
-            if i >= 2 and not self.is_data_row_event_history_valid(row, previous_row, i):
-                rows_with_error += 1
-                if rows_with_error >= self.data_error_limit:
-                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
-                    break  # exit loop if too many errors found
-            previous_row = row
-            sorted_rows_to_write.append(row)
-            if i % 100000 == 0:
-                for sorted_row in sorted_rows_to_write:
-                    fpsort.write(';'.join(sorted_row) + '\n')
-                sorted_rows_to_write = []
-                if i % 1000000 == 0:
-                    print(".. rows written: " + str(i))
-        for sorted_row in sorted_rows_to_write:
-            fpsort.write(';'.join(sorted_row) + '\n')
-            sorted_rows_to_write = []
-        fpsort.close()
-        #self.__db_connection.commit()
-        self.__db_connection.close()
-        if rows_with_error == 0:
-            print("  wrote " + str(i) + " sorted rows/lines")
-            print("Data file sorted. Metadata and Event-History validation done - " + str(datetime.datetime.now()))
-            return True # OK
-        else:
-            self.print_data_errors()
-            return False
-
-
-    # TODO validering av konsistens mellom data og metadata
     """Validate consistency between data and metadata"""
     def is_data_row_consistent_with_metadata(self, data_row, row_number) -> bool:
         #unit_id = data_row[0]
@@ -278,6 +229,63 @@ class SourceDataReader:
         return True
 
 
+    """Read and validate sorted data rows from temporary Sqlite database (file)."""
+    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
+    def sort_and_validate_data_rows(self) -> bool:
+        self.meta_read_dataset_metadata()
+        # if not self.__db_connection:
+        #     self.__db_connection = db.connect(self.__database_temp_file)
+        #     self.__db_curs = self.__db_connection.cursor()
+        print("Sorting file " + self.data_file + " - " + str(datetime.datetime.now()))
+        sorted_rows_to_write = []
+        fpsort = open(self.__sorted_temp_file, 'w')
+        previous_row = None
+        rows_with_error = 0
+        i = 0
+        ## Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
+        # while True:
+        #     rows = self.__db_curs.fetchmany(100000)
+        #     for row in rows:
+        #         # some code ...
+        #     if not rows:
+        #         break
+        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
+        for row in self.__db_curs:
+            i += 1
+            if not self.is_data_row_consistent_with_metadata(row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
+            if i >= 2 and not self.is_data_row_consistent(row, previous_row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
+            previous_row = row
+            sorted_rows_to_write.append(row)
+            if i % 100000 == 0:
+                for sorted_row in sorted_rows_to_write:
+                    fpsort.write(';'.join(sorted_row) + '\n')
+                sorted_rows_to_write = []
+                if i % 1000000 == 0:
+                    print(".. rows written: " + str(i))
+        for sorted_row in sorted_rows_to_write:
+            fpsort.write(';'.join(sorted_row) + '\n')
+            sorted_rows_to_write = []
+        fpsort.close()
+        #self.__db_connection.commit()
+        self.__db_connection.close()
+        if rows_with_error == 0:
+            print("  wrote " + str(i) + " sorted rows/lines")
+            print("Data file sorted. Metadata and Event-History validation done - " + str(datetime.datetime.now()))
+            return True # OK
+        else:
+            self.print_data_errors()
+            return False
+
+
+
     # TODO oppdatere temporalCoverageStart og temporaleCoverageLatest
     # Bør flyttes til egen klasse
     def meta_update_temporale_coverage(self) -> dict:
@@ -297,8 +305,6 @@ class SourceDataReader:
             self.__meta_value_domain_codes.append(code_list["code"])
         self.__meta_value_datatype = metadata["measure"]["dataType"]
         self.__meta_temporality_type = metadata["temporalityType"]
-        #print(self.__meta_value_domain_codes)
-        #print(self.__meta_value_datatype)
 
 
     # TODO write sorted file or Sqlite-table to Parquet dataset
@@ -350,10 +356,13 @@ class SourceDataReader:
     """MAIN - Start validation of dataset"""
     def validate_dataset(self):
         if self.read_csv_file():
-            if self.sort_and_validate_data_rows():
-                print("OK")
+            if self.dry_run:
+                print("Dry Run OK")
             else:
-                print("ERROR: Event-history validation found data inconsistency in the data file!")
+                if self.sort_and_validate_data_rows():
+                    print("OK")
+                else:
+                    print("ERROR: Consitency/event-history validation found data errors in the data file!")
         else:
             #self.__data_errors.append((0, "ERROR: Validation terminated when reading file. To many errors found!", None))
             print("ERROR: Validation terminated when reading data file. Too many errors found!")
@@ -374,7 +383,9 @@ sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
 
 sdr.data_error_limit = 100
+#sdr.dry_run = True
+sdr.set_meta_temporality_type = "FIXED"
 sdr.validate_dataset()
 
-#sdr.meta_read_dataset_metadata()
+
 
