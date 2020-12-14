@@ -1,11 +1,28 @@
+from os import replace
 from os.path import dirname
 import sqlite3 as db
 import os
 import datetime
 import json
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
 
 class SourceDataReader:
     """TODO: Doc """
+
+    # TODO: remove
+    def test(self, param1, param2) -> bool:
+        """TODO: Doc bla, bla, bla, ...
+
+        :param param1: First param bla, bla, bla, ..
+        :type param1: string
+        :param param2: Second param bla, bla, bla, ..
+        :type param2: list
+        :return: Doc bla, bla, bla, ..
+        :rtype: bool
+        """
+        None
 
     def __init__(self, data_file, dry_run=False, field_separator=";", data_error_limit=100) -> None:
         self.data_file = data_file
@@ -21,28 +38,20 @@ class SourceDataReader:
         self.__db_curs = None
         self.__data_errors = []
 
+        self.__json_schema_dataset_file = os.path.dirname(os.path.realpath(__file__)) + "/JsonSchema_DataSet.json"
         self.__metadata_file = self.__file_directory + "/doc_" + str(self.__file_name).split(".")[0] + ".json"
         self.__meta_value_domain_codes = []
         self.__meta_value_datatype = ""
         self.__meta_temporality_type = ""
 
-    """Setter only used by unit test!"""
+        self.__meta_temporal_coverage_start = None
+        self.__meta_temporal_coverage_latest = None
+        self.__meta_temporal_status_dates = set()
+
+    """Setter used by unit test!"""
     def set_meta_temporality_type(self, meta_temporality_type):
         self.__meta_temporality_type = meta_temporality_type
 
-
-    # TODO: remove
-    def test(self, param1, param2) -> bool:
-        """TODO: Doc bla, bla, bla, ...
-
-        :param param1: First param bla, bla, bla, ..
-        :type param1: string
-        :param param2: Second param bla, bla, bla, ..
-        :type param2: list
-        :return: Doc bla, bla, bla, ..
-        :rtype: bool
-        """
-        None
 
 
     """Read and validate the lines/rows in the data file and insert as rows in a temporary Sqlite database (file)."""
@@ -71,6 +80,7 @@ class SourceDataReader:
                         break  # exit loop if too many errors found
                 if rows_with_error == 0:
                     rows.append(row)
+                    #rows.append((row[0], row[1], str(row[2]).replace("-", ""), str(row[3]).replace("-", "")))
                     if i % 100000 == 0:
                         self.__db_curs.executemany(sql_insert, rows)   # Insert rows in batch to speed up writes to db.
                         rows = []
@@ -134,10 +144,72 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "STOP-date exists, but START-date is missing", None))
             return False
 
+        self.meta_set_temporal_objects(start, stop)
+
         return True
 
 
-    """Validate event-history (unit_id * start * stop) and check for row duplicates."""
+    """Read and validate sorted data rows from temporary Sqlite database (file)."""
+    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
+    def sort_and_validate_data_rows(self) -> bool:
+        is_meta_ok = self.meta_read_dataset_metadata()
+        if not is_meta_ok:
+            return False
+
+        # if not self.__db_connection:
+        #     self.__db_connection = db.connect(self.__database_temp_file)
+        #     self.__db_curs = self.__db_connection.cursor()
+
+        print("Sorting file " + self.data_file + " - " + str(datetime.datetime.now()))
+        sorted_rows_to_write = []
+        fpsort = open(self.__sorted_temp_file, 'w')
+        previous_row = None
+        rows_with_error = 0
+        i = 0
+        ## Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
+        # while True:
+        #     rows = self.__db_curs.fetchmany(100000)
+        #     for row in rows:
+        #         # some code ...
+        #     if not rows:
+        #         break
+        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
+        for row in self.__db_curs:
+            i += 1
+            if not self.is_data_row_consistent_with_metadata(row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
+            if i >= 2 and not self.is_data_row_consistent(row, previous_row, i):
+                rows_with_error += 1
+                if rows_with_error >= self.data_error_limit:
+                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
+                    break  # exit loop if too many errors found
+            previous_row = row
+            sorted_rows_to_write.append(row)
+            if i % 100000 == 0:
+                for sorted_row in sorted_rows_to_write:
+                    fpsort.write(';'.join(sorted_row) + '\n')
+                sorted_rows_to_write = []
+                if i % 1000000 == 0:
+                    print(".. rows written: " + str(i))
+        for sorted_row in sorted_rows_to_write:
+            fpsort.write(';'.join(sorted_row) + '\n')
+            sorted_rows_to_write = []
+        fpsort.close()
+        #self.__db_connection.commit()
+        self.__db_connection.close()
+        if rows_with_error == 0:
+            print("  wrote " + str(i) + " sorted rows/lines")
+            print("Data file sorted. Consistency and event-history validation done - " + str(datetime.datetime.now()))
+            return True # OK
+        else:
+            self.print_data_errors()
+            return False
+
+
+    """Validate consistency and event-history (unit_id * start * stop) and check for row duplicates."""
     def is_data_row_consistent(self, data_row, previous_data_row, row_number) -> bool:
         unit_id = data_row[0]
         value = data_row[1]
@@ -229,82 +301,71 @@ class SourceDataReader:
         return True
 
 
-    """Read and validate sorted data rows from temporary Sqlite database (file)."""
-    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
-    def sort_and_validate_data_rows(self) -> bool:
-        self.meta_read_dataset_metadata()
-        # if not self.__db_connection:
-        #     self.__db_connection = db.connect(self.__database_temp_file)
-        #     self.__db_curs = self.__db_connection.cursor()
-        print("Sorting file " + self.data_file + " - " + str(datetime.datetime.now()))
-        sorted_rows_to_write = []
-        fpsort = open(self.__sorted_temp_file, 'w')
-        previous_row = None
-        rows_with_error = 0
-        i = 0
-        ## Alternative code using "cursor.fetchmany(number_of_rows)" reducing round trips to database.
-        # while True:
-        #     rows = self.__db_curs.fetchmany(100000)
-        #     for row in rows:
-        #         # some code ...
-        #     if not rows:
-        #         break
-        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
-        for row in self.__db_curs:
-            i += 1
-            if not self.is_data_row_consistent_with_metadata(row, i):
-                rows_with_error += 1
-                if rows_with_error >= self.data_error_limit:
-                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
-                    break  # exit loop if too many errors found
-            if i >= 2 and not self.is_data_row_consistent(row, previous_row, i):
-                rows_with_error += 1
-                if rows_with_error >= self.data_error_limit:
-                    self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
-                    break  # exit loop if too many errors found
-            previous_row = row
-            sorted_rows_to_write.append(row)
-            if i % 100000 == 0:
-                for sorted_row in sorted_rows_to_write:
-                    fpsort.write(';'.join(sorted_row) + '\n')
-                sorted_rows_to_write = []
-                if i % 1000000 == 0:
-                    print(".. rows written: " + str(i))
-        for sorted_row in sorted_rows_to_write:
-            fpsort.write(';'.join(sorted_row) + '\n')
-            sorted_rows_to_write = []
-        fpsort.close()
-        #self.__db_connection.commit()
-        self.__db_connection.close()
-        if rows_with_error == 0:
-            print("  wrote " + str(i) + " sorted rows/lines")
-            print("Data file sorted. Metadata and Event-History validation done - " + str(datetime.datetime.now()))
-            return True # OK
-        else:
-            self.print_data_errors()
-            return False
 
-
-
-    # TODO oppdatere temporalCoverageStart og temporaleCoverageLatest
+    # TODO oppdatere temporalCoverageStart, temporalCoverageLatest og temporalStatusDates
     # Bør flyttes til egen klasse
-    def meta_update_temporale_coverage(self) -> dict:
-        None
+    def meta_update_temporal_coverage(self) -> dict:
+        print(self.__meta_temporal_coverage_start)
+        print(self.__meta_temporal_coverage_latest)
+        #print(self.__meta_temporal_status_dates)
+        date_list = list(self.__meta_temporal_status_dates)
+        date_list.sort()
+        print(date_list)
+
+
+    """Find oldest start-date and newest (latest) start/stop-date, and a list (set()) with unique dates used in the dataset."""
+    def meta_set_temporal_objects(self, start_date, stop_date):
+        if start_date:
+            if (not self.__meta_temporal_coverage_start) or (start_date < self.__meta_temporal_coverage_start):
+                self.__meta_temporal_coverage_start = start_date
+            if (not self.__meta_temporal_coverage_latest) or (start_date > self.__meta_temporal_coverage_latest):
+                self.__meta_temporal_coverage_latest = start_date
+            self.__meta_temporal_status_dates.add(start_date)  # set() with distinct start/stop-dates
+        if stop_date:
+            if (not self.__meta_temporal_coverage_latest) or (stop_date > self.__meta_temporal_coverage_latest):
+                self.__meta_temporal_coverage_latest = stop_date
+            self.__meta_temporal_status_dates.add(stop_date)  # set() with distinct start/stop-dates
+
+
+    """Validate the metadata file (JSON) using JSON Schema."""
+    def validate_metadata_file(self) -> bool:
+        with open(self.__json_schema_dataset_file, encoding="utf-8") as json_schema_dataset_file: 
+            json_schema_dataset = json.load(json_schema_dataset_file)
+
+        with open(self.__metadata_file, encoding="utf-8") as dataset_metadata_json_file:
+            dataset_metadata_json = json.load(dataset_metadata_json_file)
+        
+        # If no exception is raised by validate(), the instance is valid.
+        try:
+            validate(
+                instance=dataset_metadata_json, 
+                schema=json_schema_dataset
+            )
+            print("Metadata validated OK")
+            return True
+        except ValidationError as err:
+            print()
+            print("ERROR in metadata JSON-file: " + self.__metadata_file)
+            print(err)
+            return False
+            
 
 
     # TODO Bør flyttes til egen klasse???
     """Read dataset metadata from JSON file."""
-    def meta_read_dataset_metadata(self):
-
-        #TODO: validate metadata-json with json-schema!!!!
-
+    def meta_read_dataset_metadata(self) -> bool:
         metadata = None
-        with open(self.__metadata_file) as json_metadata_file: 
-            metadata = json.load(json_metadata_file)
-        for code_list in metadata["measure"]["valueDomain"]["codeList"]["topLevelCodeItems"]:
-            self.__meta_value_domain_codes.append(code_list["code"])
-        self.__meta_value_datatype = metadata["measure"]["dataType"]
-        self.__meta_temporality_type = metadata["temporalityType"]
+        if self.validate_metadata_file():
+            with open(self.__metadata_file, encoding="utf-8") as json_metadata_file: 
+                metadata = json.load(json_metadata_file)
+
+            for code_list in metadata["measure"]["valueDomain"]["codeList"]["topLevelCodeItems"]:
+                self.__meta_value_domain_codes.append(code_list["code"])
+            self.__meta_value_datatype = metadata["measure"]["dataType"]
+            self.__meta_temporality_type = metadata["temporalityType"]
+            return True
+        else:
+            return False
 
 
     # TODO write sorted file or Sqlite-table to Parquet dataset
@@ -340,6 +401,7 @@ class SourceDataReader:
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
         self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
+        #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start INTEGER, stop INTEGER)")
         # TODO 
         #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, attributes TEXT)")
         # Speed up insert operations in Sqlite3
@@ -362,10 +424,12 @@ class SourceDataReader:
                 if self.sort_and_validate_data_rows():
                     print("OK")
                 else:
-                    print("ERROR: Consitency/event-history validation found data errors in the data file!")
+                    print("ERROR: Consitency/event-history/metadata validation found errors in the data file and/or metadata file!")
         else:
             #self.__data_errors.append((0, "ERROR: Validation terminated when reading file. To many errors found!", None))
             print("ERROR: Validation terminated when reading data file. Too many errors found!")
+        #TODO: Oppdatere temporalDates ....
+        self.meta_update_temporal_coverage()
 
 
 # TODO: Skrive UNIT-tester !!!!!!
@@ -384,7 +448,6 @@ sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp
 
 sdr.data_error_limit = 100
 #sdr.dry_run = True
-sdr.set_meta_temporality_type = "FIXED"
 sdr.validate_dataset()
 
 
