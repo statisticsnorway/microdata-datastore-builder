@@ -2,6 +2,7 @@ import os
 import shutil
 import json
 import datetime
+import sqlite3 as db
 import pyarrow as pa
 import pyarrow.csv as pv
 import pyarrow.parquet as pq
@@ -16,7 +17,7 @@ current_directory = os.path.dirname(__file__)
 datastore_directoy_name = str(conf.datastore_main_domain).replace(".", "_") + "_" + datastore_name.lower()  # E.g. no_ssb_test, no_nsd_test or no_kreftregisteret_test
 datastore_root = os.path.join(conf.datastore_path, datastore_directoy_name)
 datastore_metadata = os.path.join(datastore_root, "metadata")
-datastore_data = os.path.join(datastore_root, "data")
+datastore_data = os.path.join(datastore_root, "dataset")
 
 # Generate "datastore.json" file.
 def generate_datastore_file():
@@ -62,7 +63,7 @@ def generate_version_file():
         json.dump(datastore_version, datastore_version_file, indent=4) 
 
 # Generate test data files "TEST_PERSON_PETS__1_0.parquet" and "TEST_PERSON_INCOME__1_0.parquet" in the new datastore.
-def generate_test_data():
+def generate_test_data_parquet():
     fields = [
         ('unit_id', pa.string()),
         ('value', pa.string()),
@@ -95,6 +96,50 @@ def generate_test_data():
         #writer.close()
 
 
+def generate_test_data_sqlite():
+        if include_testdata:
+            # pets dataset
+            datastore_data_pets = os.path.join(datastore_data, "TEST_PERSON_PETS")
+            test_file_pets = "TEST_PERSON_PETS__1_0"
+            os.mkdir(datastore_data_pets)
+            db_connection = db.connect(datastore_data_pets + "/" + test_file_pets + ".db")
+            db_curs = db_connection.cursor()
+            db_curs.execute("CREATE TABLE IF NOT EXISTS " + test_file_pets + " (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
+            #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start INTEGER, stop INTEGER)")
+            #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, attributes TEXT)")
+            # Speed up insert operations in Sqlite3
+            db_curs.execute("PRAGMA synchronous = OFF")
+            db_curs.execute("BEGIN TRANSACTION")
+            sql_insert = "INSERT INTO " + test_file_pets + "(unit_id, value, start, stop) VALUES (?, ?, ?, ?)"
+            with open(current_directory + "/" + test_file_pets+".txt", "r", encoding="utf-8") as fp:
+                for line in fp:
+                    row = line.replace("\n", "").split(";")
+                    db_curs.execute(sql_insert, row)
+            db_connection.commit()
+            db_connection.close()
+
+            # income dataset
+            datastore_data_pets = os.path.join(datastore_data, "TEST_PERSON_INCOME")
+            test_file_pets = "TEST_PERSON_INCOME__1_0"
+            os.mkdir(datastore_data_pets)
+            db_connection = db.connect(datastore_data_pets + "/" + test_file_pets + ".db")
+            db_curs = db_connection.cursor()
+            db_curs.execute("CREATE TABLE IF NOT EXISTS " + test_file_pets + " (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
+            #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start INTEGER, stop INTEGER)")
+            #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, attributes TEXT)")
+            # Speed up insert operations in Sqlite3
+            db_curs.execute("PRAGMA synchronous = OFF")
+            db_curs.execute("BEGIN TRANSACTION")
+            sql_insert = "INSERT INTO " + test_file_pets + "(unit_id, value, start, stop) VALUES (?, ?, ?, ?)"
+            with open(current_directory + "/" + test_file_pets+".txt", "r", encoding="utf-8") as fp:
+                for line in fp:
+                    row = line.replace("\n", "").split(";")
+                    db_curs.execute(sql_insert, row)
+            db_connection.commit()
+            db_connection.close()
+
+
+
 # Generate (copy) test metadata files "TEST_PERSON_PETS__1_0_0.json" and "TEST_PERSON_INCOME__1_0_0.json" to the new datastore.
 def generate_test_metadata():
     if include_testdata:
@@ -116,7 +161,8 @@ def create_new_datastore():
             os.mkdir(datastore_data)
         generate_datastore_file()
         generate_version_file()
-        generate_test_data()
+        #generate_test_data_parquet()
+        generate_test_data_sqlite()
         generate_test_metadata()
         print("OK - DataStore '% s' created" % datastore_root)
     else:
