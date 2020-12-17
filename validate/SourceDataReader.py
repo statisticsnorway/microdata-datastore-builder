@@ -297,20 +297,27 @@ class SourceDataReader:
             except:
                 self.__data_errors.append((row_number, "Inconsistency - value not of type DATE (YYYY-MM-DD)", None))
                 return False
-
+                
         return True
-
 
 
     # TODO oppdatere temporalCoverageStart, temporalCoverageLatest og temporalStatusDates
     # Bør flyttes til egen klasse
     def meta_update_temporal_coverage(self) -> dict:
-        print(self.__meta_temporal_coverage_start)
-        print(self.__meta_temporal_coverage_latest)
-        #print(self.__meta_temporal_status_dates)
-        date_list = list(self.__meta_temporal_status_dates)
-        date_list.sort()
-        print(date_list)
+        metadata = None
+        with open(self.__metadata_file, mode="r", encoding="utf-8") as json_metadata_file: 
+            metadata = json.load(json_metadata_file)
+            metadata["dataRevision"]["temporalCoverageStart"] = self.__meta_temporal_coverage_start
+            metadata["dataRevision"]["temporalCoverageLatest"] = self.__meta_temporal_coverage_latest
+            if "temporalStatusDates" in metadata["dataRevision"]:
+                temporalStatusDatesList = list(self.__meta_temporal_status_dates)
+                temporalStatusDatesList.sort()
+                metadata["dataRevision"]["temporalStatusDates"] = temporalStatusDatesList
+
+        with open(self.__metadata_file, mode="w", encoding="utf-8") as json_metadata_file_out: 
+            json_meta_str = json.dumps(metadata, sort_keys=False, indent=4, separators=(',', ': '), ensure_ascii=False)
+            json_metadata_file_out.write(json_meta_str)
+            #print(json_meta, file=json_metadata_file_out)
 
 
     """Find oldest start-date and newest (latest) start/stop-date, and a list (set()) with unique dates used in the dataset."""
