@@ -1,0 +1,52 @@
+{
+    "versions": [
+        {
+            "version": "1.0.0",
+            "releaseTime": "2020-12-18 13:30:49",
+            "description": [
+                {
+                    "languageCode": "no",
+                    "value": "F\u00f8rste versjon av databasen."
+                },
+                {
+                    "languageCode": "en",
+                    "value": "Datastore initial version."
+                }
+            ],
+            "shortDescription": [
+                {
+                    "languageCode": "no",
+                    "value": "F\u00f8rste versjon."
+                },
+                {
+                    "languageCode": "en",
+                    "value": "Initial version."
+                }
+            ]
+        },
+        {
+            "version": "0.0.0.1",
+            "releaseTime": null,
+            "description": [
+                {
+                    "languageCode": "no",
+                    "value": "DRAFT"
+                },
+                {
+                    "languageCode": "en",
+                    "value": "DRAFT"
+                }
+            ],
+            "shortDescription": [
+                {
+                    "languageCode": "no",
+                    "value": "DRAFT"
+                },
+                {
+                    "languageCode": "en",
+                    "value": "DRAFT"
+                }
+            ]
+        }
+    ]
+}

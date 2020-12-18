@@ -1,0 +1,204 @@
+{
+    "name": "TEST_PERSON_PETS",
+    "title": [
+        {"languageCode": "no", "value": "Kjæledyr"},
+        {"languageCode": "en", "value": "Pets"}
+    ],
+    "description": [
+        {"languageCode": "no", "value": "Mine kjæledyr."},
+        {"languageCode": "en", "value": "My pets."}
+    ],
+    "populationDescription": [
+        {"languageCode": "no", "value": "Alle personer som eier et kjæledyr."},
+        {"languageCode": "en", "value": "All persons who own a pet."}
+    ],
+    "temporalityType": "EVENT",
+    "spatialCoverageDescription": [
+        {"languageCode": "no", "value": "Norge"},
+        {"languageCode": "en", "value": "Norway"}
+    ],    
+    "dataRevision": {
+        "version": "1.0.0",
+        "releaseStatus": "RELEASED",
+        "operationType": "ADD",
+        "releaseDate": "2020-12-31",
+        "description": [
+            {"languageCode": "no", "value": "Første versjon av datasettet."},
+            {"languageCode": "en", "value": "The initial version of this dataset."}
+        ],  
+        "temporalCoverageStart": "1985-01-01",
+        "temporalEndOfSeries": false,
+        "temporalCoverageLatest": "2020-12-01"
+    },
+    "measure": {
+        "name": "TEST_PERSON_PETS",
+        "uriDefinition": [null],
+        "dataType": "STRING",
+        "subjectField": [
+            {
+                "name": "POPULATION",
+                "title": [
+                    {"languageCode": "no", "value": "Befolkning"},
+                    {"languageCode": "en", "value": "Population"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Befolkning"},
+                    {"languageCode": "en", "value": "Population"}
+                ]
+            }
+        ],
+        "valueDomain": {
+            "name": "PET_TYPE",
+            "title": [
+                {"languageCode": "no", "value": "Type kjæledyr"},
+                {"languageCode": "en", "value": "Type of pet"}
+            ],
+            "uriDefinition": [null],
+            "codeList": {
+                "name": "PET_TYPE",
+                "topLevelCodeItems": [
+                    {
+                        "code": "CAT",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Katt"},
+                            {"languageCode": "en", "value": "Cat"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    },
+                    {
+                        "code": "DOG",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Hund"},
+                            {"languageCode": "en", "value": "Dog"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    },
+                    {
+                        "code": "FISH",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Fisk"},
+                            {"languageCode": "en", "value": "Fish"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    },
+                    {
+                        "code": "BIRD",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Fugl"},
+                            {"languageCode": "en", "value": "Bird"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    },
+                    {
+                        "code": "RABBIT",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Kanin"},
+                            {"languageCode": "en", "value": "Rabbit"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    },
+                    {
+                        "code": "HASTER",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Hamster"},
+                            {"languageCode": "en", "value": "Hamster"}
+                        ],
+                        "validityPeriodStart": "1970-01-01"
+                    }
+                ]
+            }
+        }
+    },
+    "identifier": [
+        {
+            "name": "PERSON_ID_1",
+            "title": [
+                {"languageCode": "no", "value": "Personidentifikator"},
+                {"languageCode": "en", "value": "National identity number"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Identifikator for person"},
+                {"languageCode": "en", "value": "Persons national identity number"}
+            ],
+            "format": "RandomUInt48",
+            "unitType": {
+                "name": "PERSON",
+                "title": [
+                    {"languageCode": "no", "value": "Person"},
+                    {"languageCode": "en", "value": "Person"}
+                ],
+                "description": [
+                    {"languageCode": "no", "value": "Statistisk enhet er person (individ, enkeltmenneske)."},
+                    {"languageCode": "en", "value": "Statistical unit is person"}
+                ]
+            },
+            "valueDomain": {
+                "name": "FOEDSELSNUMMER",
+                "title": [
+                    {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
+                    {"languageCode": "en", "value": "Pseudonym for persons national identity number"}
+                ],
+                "uriDefinition": [
+                    "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb", 
+                    "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
+                ],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        }
+    ],
+    "attribute": [
+        {
+            "name": "START",
+            "title": [
+                {"languageCode": "no", "value": "Startdato"},
+                {"languageCode": "en", "value": "Start date"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Startdato/måletidspunktet for hendelsen"},
+                {"languageCode": "en", "value": "Event start date"}
+            ],
+            "dataType": "DATE",
+            "attributeType": "START",
+            "valueDomain": {
+                "name": "START_DATE_EVENT",
+                "title": [
+                    {"languageCode": "no", "value": "Startdato"},
+                    {"languageCode": "en", "value": "Start date"}
+                ],
+                "uriDefinition": [null],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        },
+        {
+            "name": "STOP",
+            "title": [
+                {"languageCode": "no", "value": "Stoppdato"},
+                {"languageCode": "en", "value": "Stop date"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Stoppdato/sluttdato for hendelsen"},
+                {"languageCode": "en", "value": "Event stop/end date"}
+            ],
+            "dataType": "DATE",
+            "attributeType": "STOP",
+            "valueDomain": {
+                "name": "STOP_DATE_EVENT",
+                "title": [
+                    {"languageCode": "no", "value": "Stoppdato/sluttdato"},
+                    {"languageCode": "en", "value": "Stop/end date"}
+                ],
+                "uriDefinition": [null],
+                "measurementUnitDescription": [
+                    {"languageCode": "no", "value": "N/A"},
+                    {"languageCode": "en", "value": "N/A"}
+                ]
+            }
+        }
+    ]
+}
