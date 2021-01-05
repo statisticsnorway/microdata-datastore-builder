@@ -1,14 +1,21 @@
-from os import replace
-from os.path import dirname
-import sqlite3 as db
-import os
 import datetime
 import json
+import os
+import sqlite3 as db
+from os import replace
+from os.path import dirname
+
+#import shutil
+#from os import path
+
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
 
 class SourceDataReader:
+
+    # TODO: Skrive flere UNIT-tester !!!!!!
+
     """TODO: Doc """
 
     # # TODO: remove
@@ -30,23 +37,29 @@ class SourceDataReader:
         self.field_separator = field_separator
         self.data_error_limit = data_error_limit
 
-        # TODO hardcoded version for now, implement support for version bumping later
+        # TODO: hardcoded version for now, implement support for version bumping later
         self.__version_major = "1"
         self.__version_minor = "0"
         self.__version_patch = "0"
         
-        self.__file_directory = os.path.dirname(data_file)
-        self.__file_name = os.path.basename(data_file)
-        self.__sorted_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".sorted"
-        self.__database_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".db"
+        #self.__file_directory = os.path.dirname(data_file)
+        #self.__file_name = os.path.basename(data_file)
+        #self.__sorted_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".sorted"
+        #self.__database_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".db"
+        self.__file_directory = None
+        self.__file_name = None
+        self.__sorted_temp_file = None
+        self.__database_temp_file = None
         self.__db_connection = None
         self.__db_curs = None
         self.__data_errors = []
 
         self.__json_schema_dataset_file = os.path.dirname(os.path.realpath(__file__)) + "/JsonSchema_DataSet.json"
-        #self.__metadata_file = self.__file_directory + "/doc_" + str(self.__file_name).split(".")[0] + self.__version_patch + ".json"
-        self.__metadata_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] \
-            + "_" + self.__version_patch + ".json"
+        #self.__metadata_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + "_" + self.__version_patch + ".json"
+        self.__metadata_file = None
+        self.__metadata_file_directory = None
+        self.__metadata_file_name = None
+        self.__metadata_file_temp = None
         self.__meta_value_domain_codes = None
         self.__meta_value_datatype = ""
         self.__meta_temporality_type = ""
@@ -54,6 +67,10 @@ class SourceDataReader:
         self.__meta_temporal_coverage_start = None
         self.__meta_temporal_coverage_latest = None
         self.__meta_temporal_status_dates = set()
+
+        #self.set_and_validate_parameters()
+
+
 
     """Setter used by unit test!"""
     def set_meta_temporality_type(self, meta_temporality_type):
@@ -63,7 +80,8 @@ class SourceDataReader:
 # TODO: sjekke at datafil og metadata-fil følger navnekonvensjon for csv/sdv-fil og json-fil
 # TODO: Støtte for DRAFT-datasett
 # TODO: Støtte for å flytte (skrive) data fra temp til prod/qa-katalog
-    def is_parameters_ok(self) -> bool:
+    """Check and set constructor parameters."""
+    def set_and_validate_parameters(self) -> bool:
         if self.validate not in ("data", "metadata", "all"):
             print("ERROR in parameter 'validate'. Legal values: data, metadata or all")
             return False
@@ -71,10 +89,30 @@ class SourceDataReader:
             if not os.path.exists(str(self.metadata_file)):
                 print("ERROR in parameter 'metadata_file'. Metadata file missig or wrong file path/name: " + str(self.metadata_file))
                 return False
+            else:
+                self.__metadata_file = self.metadata_file
+                self.__metadata_file_directory = os.path.dirname(self.metadata_file)
+                self.__metadata_file_name = os.path.basename(self.metadata_file)
+                self.__metadata_file_temp = self.metadata_file + "_temp"
+                #self.__metadata_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] \
+                #    + "_" + self.__version_patch + ".json"
         if self.validate in ("data", "all"):
             if not os.path.exists(str(self.data_file)):
                 print("ERROR in parameter 'metadata_file'. Data file missig or wrong file path/name: " + str(self.data_file))
                 return False
+            else:
+                self.__file_directory = os.path.dirname(self.data_file)
+                self.__file_name = os.path.basename(self.data_file)
+                self.__sorted_temp_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + ".sorted"
+                self.__database_temp_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + ".db"
+        if self.validate == "all":
+            # Check that metadata filename (.sdv/.txt) do match data filename (.json), eg. "my_dataset.sdv" and "my_dataset.json"
+            if str(self.__file_name).split(".")[0] != str(self.__metadata_file_name).split(".")[0] :
+                print("ERROR: Data filename do not match metadata filename:")
+                print("    " + str(self.__file_name))
+                print("    " + str(self.__metadata_file_name))
+                return False
+            # TODO: Check if filename isuppercase() ?
         return True
 
 
@@ -168,7 +206,7 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "STOP-date exists, but START-date is missing", None))
             return False
 
-        self.meta_set_temporal_objects(start, stop)
+        self.meta_set_temporal_objects(str(start).strip('"'), str(stop).strip('"'))
 
         return True
 
@@ -226,7 +264,7 @@ class SourceDataReader:
         self.__db_connection.close()
         if rows_with_error == 0:
             print("  wrote " + str(i) + " sorted rows/lines")
-            print("Data file sorted. Consistency and event-history validation done - " + str(datetime.datetime.now()))
+            print("  Data file sorted. Consistency and event-history validation done - " + str(datetime.datetime.now()))
             return True # OK
         else:
             self.print_data_errors()
@@ -252,7 +290,7 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "Inconsistency - 2 or more rows with same UNIT_ID and START-date", None))
             return False
 
-        # Valid temporalityType: "FIXED", "STATUS", "ACCUMULATED", "EVENT"
+        # Valid temporalityTypes: "FIXED", "STATUS", "ACCUMULATED", "EVENT"
         if self.__meta_temporality_type in("STATUS", "ACCUMULATED", "EVENT"):
             if start == None or str(start).strip(" ") == "":
                 self.__data_errors.append((row_number, "Inconsistency - START-date is missing. Expected START-date when DataSet.temporalityType is " + self.__meta_temporality_type, None))
@@ -298,7 +336,7 @@ class SourceDataReader:
 
         if self.__meta_value_domain_codes:
             # Enumerated value-domain for variable - check if value exsists in CodeList
-            if value not in self.__meta_value_domain_codes:
+            if str(value).strip('"') not in self.__meta_value_domain_codes:
                 self.__data_errors.append((row_number, "Inconsistency - value (code) not in metadata ValueDomain/CodeList", value))
                 return False
         #else:
@@ -341,13 +379,13 @@ class SourceDataReader:
                 temporalStatusDatesList.sort()
                 metadata["dataRevision"]["temporalStatusDates"] = temporalStatusDatesList
 
-        with open(self.__metadata_file, mode="w", encoding="utf-8") as json_metadata_file_out: 
+        with open(self.__metadata_file_temp, mode="w", encoding="utf-8") as json_metadata_file_out: 
             json_meta_str = json.dumps(metadata, sort_keys=False, indent=4, separators=(',', ': '), ensure_ascii=False)
             json_metadata_file_out.write(json_meta_str)
             #print(json_meta, file=json_metadata_file_out)
 
 
-    """Find oldest start-date and newest (latest) start/stop-date, and a list (set()) with unique dates used in the dataset."""
+    """Find oldest start-date and newest (latest) start/stop-date, and a list (a set()) with unique dates used in the dataset."""
     def meta_set_temporal_objects(self, start_date, stop_date):
         if start_date:
             if (not self.__meta_temporal_coverage_start) or (start_date < self.__meta_temporal_coverage_start):
@@ -363,10 +401,10 @@ class SourceDataReader:
 
     """Validate the metadata file (JSON) using JSON Schema."""
     def validate_metadata_file(self) -> bool:
-        with open(self.__json_schema_dataset_file, encoding="utf-8") as json_schema_dataset_file: 
+        with open(self.__json_schema_dataset_file, mode="r", encoding="utf-8") as json_schema_dataset_file: 
             json_schema_dataset = json.load(json_schema_dataset_file)
 
-        with open(self.__metadata_file, encoding="utf-8") as dataset_metadata_json_file:
+        with open(self.__metadata_file, mode="r", encoding="utf-8") as dataset_metadata_json_file:
             dataset_metadata_json = json.load(dataset_metadata_json_file)
 
         # If no exception is raised by validate(), the instance is valid.
@@ -388,7 +426,7 @@ class SourceDataReader:
     def meta_read_dataset_metadata(self) -> bool:
         metadata = None
         if self.validate_metadata_file():
-            with open(self.__metadata_file, encoding="utf-8") as json_metadata_file: 
+            with open(self.__metadata_file, mode="r", encoding="utf-8") as json_metadata_file: 
                 metadata = json.load(json_metadata_file)
 
             # Read codeList if enumerated-valueDomain
@@ -402,6 +440,34 @@ class SourceDataReader:
             return True
         else:
             return False
+
+
+    # """Backup metadata JSON-file"""
+    # def backup_metadata_file(self):
+    #     # # make a duplicate of an existing file
+    #     # if path.exists("guru99.txt"):
+    #     # # get the path to the file in the current directory
+    #     # src = path.realpath("guru99.txt");
+            
+    #     # # rename the original file
+    #     # os.rename('guru99.txt','career.guru99.txt')
+    #     None
+
+
+    # """Backup data txt/csv-file"""
+    # def backup_data_file(self):
+    #     # shutil.move('a.txt', 'b.kml')
+    #     None
+
+
+    """Create new dataset in datastore"""
+    def create_dataset_in_datastore(self):
+        # TODO: check if exists
+        # TODO: create new catalog
+        # TODO: move doc_metadata_1_0_0.json
+        # TODO: move data_1_0.db (Sqlite)
+        # TODO: set chmod on files and catalog?
+        None
 
 
     # TODO write sorted file or Sqlite-table to Parquet dataset?
@@ -432,7 +498,7 @@ class SourceDataReader:
     # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
     def create_temp_database(self):
         self.delete_temp_database()  # Remove old Sqlite3-file if exists
-        print(self.__database_temp_file)
+        #print(self.__database_temp_file)
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
         self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
@@ -452,33 +518,68 @@ class SourceDataReader:
 
     """MAIN - Start validation of dataset"""
     def validate_dataset(self):
-        if self.is_parameters_ok():
+        if self.set_and_validate_parameters():
             if self.validate in("data", "all"):
                 if self.read_csv_file():
-                    print("Datafile OK (simple data file validation, no metadata validated)")
+                    print("Datafile OK")
                 else:
                     print("ERROR: Validation terminated when reading data file. Too many errors found!")
                     return
 
             if self.validate == "metadata":
                 if self.validate_metadata_file():
-                    print("Metadata file OK (metadata validation only, no data validated)")
+                    print("Metadata file OK")
                 return
 
             if self.validate == "all":
                 if self.sort_and_validate_data_rows():
-                    #TODO: Oppdatere temporalDates ....
-                    #TODO: self.meta_update_temporal_coverage()
+                    self.meta_update_temporal_coverage()
                     print("OK - data and metadata validated.")
                 else:
                     print("ERROR: Consitency/event-history/metadata validation found errors in the data file and/or metadata JSON-file!")
+                    print("  NB! If errors in data see the temporary sorted datafile for correct data line/row-number:")
+                    print("  ---> " + str(self.__sorted_temp_file))
+
+## END class SourceDataReader ##
 
 
 
-# TODO: Skrive UNIT-tester !!!!!!
+### Usage examples ###
+# Validate all (data file and metadata file and consistency)
+# sdr = SourceDataReader(
+#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
+#     validate="all"
+# )
+# sdr.validate_dataset()
 
-### Test cases ###
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME__1_0.txt")
+# ## Validate metadata file
+# sdr = SourceDataReader(
+#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+#     metadata_file=None,
+#     validate="data"
+# )
+#sdr.validate_dataset()
+
+# ## Validate data file
+# sdr = SourceDataReader(
+#     data_file=None,
+#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
+#     validate="metadata"
+# )
+#sdr.validate_dataset()
+
+
+sdr = SourceDataReader(
+    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
+    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+    validate="all"
+)
+sdr.validate_dataset()
+
+
+### Test run cases ###
+#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
@@ -488,18 +589,18 @@ class SourceDataReader:
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million_STATUS.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
-
 #sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/recources/TEST_PERSON_PETS__1_0.txt")
-sdr = SourceDataReader(
-    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME__1_0.txt",
-    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME__1_0_0.json"
-)
 
-sdr.data_error_limit = 100
+#sdr.data_error_limit = 100
 #sdr.validate = "data"
 #sdr.validate = "metadata"
-sdr.validate = "all"
-sdr.validate_dataset()
+#sdr.validate = "all"
+
+#sdr.validate_dataset()
+
+
+
+
 
 
 
