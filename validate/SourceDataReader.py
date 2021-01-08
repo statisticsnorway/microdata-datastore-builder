@@ -15,8 +15,9 @@ from jsonschema.exceptions import ValidationError
 
 class SourceDataReader:
 
-    # TODO: Pseudonymisering
     # TODO: Skrive flere UNIT-tester
+    # TODO: Støtte attributes i sql-insert og innlesing av datafil?
+    # TODO: Pseudonymisering
     # TODO: Støtte for DRAFT-datasett
     # TODO: Støtte for version bumping
     # TODO: support for attributes i data-fil
@@ -134,12 +135,12 @@ class SourceDataReader:
         print("Reading file " + self.data_file + " - " + str(datetime.datetime.now()))
         self.create_temp_database()
         sql_insert = """\
-            INSERT INTO temp_data(unit_id, value, start, stop, part_num) VALUES (?, ?, ?, ?, ?)
+            INSERT INTO temp_data(part_num, unit_id, value, start, stop) VALUES (?, ?, ?, ?, ?)
             """
         # TODO: support for attributes
         # TODO: support for startType and stopType?
         #sql_insert = """\
-        #    INSERT INTO temp_data(unit_id, value, start, stop, attributes, part_num) VALUES (?, ?, ?, ?, ?)
+        #    INSERT INTO temp_data(part_num, unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?, ?)
         #    """
         rows = []
         i = 0
@@ -148,15 +149,16 @@ class SourceDataReader:
             for line in fp:
                 i += 1
                 row = line.replace("\n", "").replace('"', '').split(self.field_separator)
-                row.append(random.randint(0, 999))  # part_num is a random integer between 0 and 999
+                row.insert(0, random.randint(0, 999))  # part_num is a random integer between 0 and 999
                 if not self.is_data_row_valid(row, i):
                     rows_with_error += 1
                     if rows_with_error >= self.data_error_limit:
                         self.__data_errors.append((0, "ERROR: Validation terminated. To many errors found!", None))
                         break  # exit loop if too many errors found
                 if rows_with_error == 0:
+                    row[3] = row[3].replace("-", "")  # Remove hyphen in start-date (cast to integer in Sqlite)
+                    row[4] = row[4].replace("-", "")  # Remove hyphen in stop-date (cast to integer in Sqlite)
                     rows.append(row)
-                    #rows.append((row[0], row[1], str(row[2]).replace("-", ""), str(row[3]).replace("-", "")))
                     if i % 100000 == 0:
                         self.__db_curs.executemany(sql_insert, rows)   # Insert rows in batch to speed up writes to db.
                         rows = []
@@ -189,10 +191,12 @@ class SourceDataReader:
             self.__data_errors.append((row_number, "Row/line missing elements (expected line with fields UNIT_ID, VALUE, START, STOP, ..)", None))
             return False
 
-        unit_id = data_row[0]
-        value = data_row[1]
-        start = data_row[2]
-        stop = data_row[3]
+        #part_num = data_row[0]
+        unit_id = data_row[1]
+        value = data_row[2]
+        start = data_row[3]
+        stop = data_row[4]
+        # TODO: attributes = data_row[5]
 
         if unit_id == None or str(unit_id).strip(" ") == "":
             self.__data_errors.append((row_number, "UNIT_ID (identifier) missing or null", unit_id))
@@ -268,12 +272,15 @@ class SourceDataReader:
             sorted_rows_to_write.append(row)
             if i % 100000 == 0:
                 for sorted_row in sorted_rows_to_write:
-                    fpsort.write(';'.join(sorted_row) + '\n')
+                    #fpsort.write(';'.join(sorted_row) + '\n')
+                    #fpsort.write(";".join(str(sorted_row[0]), str(sorted_row[1]), str(sorted_row[2]), str(sorted_row[3])))
+                    fpsort.write(";".join( str(element) for element in sorted_row ) + '\n')
                 sorted_rows_to_write = []
                 if i % 1000000 == 0:
                     print(".. rows written: " + str(i))
         for sorted_row in sorted_rows_to_write:
-            fpsort.write(';'.join(sorted_row) + '\n')
+            #fpsort.write(';'.join(sorted_row) + '\n')
+            fpsort.write(";".join( str(element) for element in sorted_row ) + '\n')
             sorted_rows_to_write = []
         fpsort.close()
         #self.__db_connection.commit()
@@ -517,8 +524,15 @@ class SourceDataReader:
         #print(self.__database_temp_file)
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
-        self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, part_num INTEGER)")
-        # TODO: Support attributes?  self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, part_num INTEGER, attributes TEXT)")
+        self.__db_curs.execute( \
+            """CREATE TABLE IF NOT EXISTS temp_data (
+                part_num INTEGER NOT NULL, 
+                unit_id INTEGER NOT NULL, 
+                value TEXT, 
+                start INTEGER NOT NULL, 
+                stop INTEGER NOT NULL, 
+                attributes TEXT) """
+        )
         # Speed up insert operations in Sqlite3
         self.__db_curs.execute("PRAGMA synchronous = OFF")
         self.__db_curs.execute("BEGIN TRANSACTION")
