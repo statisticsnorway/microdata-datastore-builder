@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import random
 import sqlite3 as db
 from os import replace
 from os.path import dirname
@@ -14,23 +15,41 @@ from jsonschema.exceptions import ValidationError
 
 class SourceDataReader:
 
-    # TODO: Skrive flere UNIT-tester !!!!!!
+    # TODO: Pseudonymisering
+    # TODO: Skrive flere UNIT-tester
+    # TODO: Støtte for DRAFT-datasett
+    # TODO: Støtte for version bumping
+    # TODO: support for attributes i data-fil
+    # TODO: support for startType and stopType?
+    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
+    #       - Inkludert støtte for partisjonering av tid (start-dato)
+
 
     """TODO: Doc """
-
     # # TODO: remove
     # # Doc example:
-    # def test(self, param1, param2) -> bool:
-    #     :param param1: First param bla, bla, bla, ..
-    #     :type param1: string
-    #     :param param2: Second param bla, bla, bla, ..
-    #     :type param2: list
-    #     :return: Doc bla, bla, bla, ..
-    #     :rtype: bool
-    #     """
-    #     None
+    def test(self, param1, param2) -> bool:
+        """
+        :param param1: First param bla, bla, bla, ..
+        :type param1: string
+        :param param2: Second param bla, bla, bla, ..
+        :type param2: list
+        :return: Doc bla, bla, bla, ..
+        :rtype: bool
+        """
+        None
+
 
     def __init__(self, data_file=None, metadata_file=None, validate="all", field_separator=";", data_error_limit=100) -> None:
+        """
+        Constructor.
+
+        :param data_file: The character separated data file to read including path and file name, eg. ../my_catalog/my_dataset.sdv
+        :param metadata_file: The metadata file (JSON) including path and name, eg. ../my_catalog/my_dataset.json
+        :param validate: Legal values --> all|data|metadata. Validate data file, metadata file or all. Default is all.
+        :param field_separator: Separator character for the data fields in the data file. Default is ; (semicolon).
+        :param data_error_limit: Terminate the data validation program when reached the number (limit) of errors. Default is 100. 
+        """
         self.data_file = data_file
         self.metadata_file = metadata_file
         self.validate = validate
@@ -42,10 +61,6 @@ class SourceDataReader:
         self.__version_minor = "0"
         self.__version_patch = "0"
         
-        #self.__file_directory = os.path.dirname(data_file)
-        #self.__file_name = os.path.basename(data_file)
-        #self.__sorted_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".sorted"
-        #self.__database_temp_file = self.__file_directory + "/TEMP_" + str(self.__file_name).split(".")[0] + ".db"
         self.__file_directory = None
         self.__file_name = None
         self.__sorted_temp_file = None
@@ -55,7 +70,6 @@ class SourceDataReader:
         self.__data_errors = []
 
         self.__json_schema_dataset_file = os.path.dirname(os.path.realpath(__file__)) + "/JsonSchema_DataSet.json"
-        #self.__metadata_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + "_" + self.__version_patch + ".json"
         self.__metadata_file = None
         self.__metadata_file_directory = None
         self.__metadata_file_name = None
@@ -71,14 +85,13 @@ class SourceDataReader:
         #self.set_and_validate_parameters()
 
 
-
     """Setter used by unit test!"""
     def set_meta_temporality_type(self, meta_temporality_type):
         self.__meta_temporality_type = meta_temporality_type
 
 
-# TODO: sjekke at datafil og metadata-fil følger navnekonvensjon for csv/sdv-fil og json-fil
-# TODO: Støtte for DRAFT-datasett
+
+
 # TODO: Støtte for å flytte (skrive) data fra temp til prod/qa-katalog
     """Check and set constructor parameters."""
     def set_and_validate_parameters(self) -> bool:
@@ -121,12 +134,12 @@ class SourceDataReader:
         print("Reading file " + self.data_file + " - " + str(datetime.datetime.now()))
         self.create_temp_database()
         sql_insert = """\
-            INSERT INTO temp_data(unit_id, value, start, stop) VALUES (?, ?, ?, ?)
+            INSERT INTO temp_data(unit_id, value, start, stop, part_num) VALUES (?, ?, ?, ?, ?)
             """
         # TODO: support for attributes
         # TODO: support for startType and stopType?
         #sql_insert = """\
-        #    INSERT INTO temp_data(unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?)
+        #    INSERT INTO temp_data(unit_id, value, start, stop, attributes, part_num) VALUES (?, ?, ?, ?, ?)
         #    """
         rows = []
         i = 0
@@ -134,7 +147,8 @@ class SourceDataReader:
         with open(self.data_file, "r", encoding="utf-8") as fp:
             for line in fp:
                 i += 1
-                row = line.replace("\n", "").split(self.field_separator)
+                row = line.replace("\n", "").replace('"', '').split(self.field_separator)
+                row.append(random.randint(0, 999))  # part_num is a random integer between 0 and 999
                 if not self.is_data_row_valid(row, i):
                     rows_with_error += 1
                     if rows_with_error >= self.data_error_limit:
@@ -212,8 +226,10 @@ class SourceDataReader:
 
 
     """Read and validate sorted data rows from temporary Sqlite database (file). Write sorted data to file."""
-    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
     def sort_and_validate_data_rows(self) -> bool:
+
+         # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
+
         is_meta_ok = self.meta_read_dataset_metadata()
         if not is_meta_ok:
             return False
@@ -235,7 +251,7 @@ class SourceDataReader:
         #         # some code ...
         #     if not rows:
         #         break
-        self.__db_curs.execute("SELECT * FROM temp_data ORDER BY unit_id, start")
+        self.__db_curs.execute("SELECT unit_id, value, start, stop FROM temp_data ORDER BY unit_id, start")
         for row in self.__db_curs:
             i += 1
             if not self.is_data_row_consistent_with_metadata(row, i):
@@ -501,10 +517,8 @@ class SourceDataReader:
         #print(self.__database_temp_file)
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
-        self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT)")
-        #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start INTEGER, stop INTEGER)")
-        # TODO 
-        #self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, attributes TEXT)")
+        self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, part_num INTEGER)")
+        # TODO: Support attributes?  self.__db_curs.execute("CREATE TABLE IF NOT EXISTS temp_data (unit_id TEXT, value TEXT, start TEXT, stop TEXT, part_num INTEGER, attributes TEXT)")
         # Speed up insert operations in Sqlite3
         self.__db_curs.execute("PRAGMA synchronous = OFF")
         self.__db_curs.execute("BEGIN TRANSACTION")
