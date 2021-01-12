@@ -6,6 +6,9 @@ import sqlite3 as db
 from os import replace
 from os.path import dirname
 
+import datastores_config as ds_conf
+
+
 #import shutil
 #from os import path
 
@@ -66,6 +69,7 @@ class SourceDataReader:
         self.__file_name = None
         self.__sorted_temp_file = None
         self.__database_temp_file = None
+        self.__database_table_name = None
         self.__db_connection = None
         self.__db_curs = None
         self.__data_errors = []
@@ -91,9 +95,6 @@ class SourceDataReader:
         self.__meta_temporality_type = meta_temporality_type
 
 
-
-
-# TODO: Støtte for å flytte (skrive) data fra temp til prod/qa-katalog
     """Check and set constructor parameters."""
     def set_and_validate_parameters(self) -> bool:
         if self.validate not in ("data", "metadata", "all"):
@@ -112,13 +113,15 @@ class SourceDataReader:
                 #    + "_" + self.__version_patch + ".json"
         if self.validate in ("data", "all"):
             if not os.path.exists(str(self.data_file)):
-                print("ERROR in parameter 'metadata_file'. Data file missig or wrong file path/name: " + str(self.data_file))
+                print("ERROR in parameter 'data_file'. Data file missig or wrong file path/name: " + str(self.data_file))
                 return False
             else:
                 self.__file_directory = os.path.dirname(self.data_file)
                 self.__file_name = os.path.basename(self.data_file)
                 self.__sorted_temp_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + ".sorted"
-                self.__database_temp_file = self.__file_directory + "/" + str(self.__file_name).split(".")[0] + ".db"
+                self.__database_table_name = str(self.__file_name).split(".")[0]
+                self.__database_temp_file = self.__file_directory + "/" + self.__database_table_name + ".db"
+                
         if self.validate == "all":
             # Check that metadata filename (.sdv/.txt) do match data filename (.json), eg. "my_dataset.sdv" and "my_dataset.json"
             if str(self.__file_name).split(".")[0] != str(self.__metadata_file_name).split(".")[0] :
@@ -134,14 +137,10 @@ class SourceDataReader:
     def read_csv_file(self) -> bool:
         print("Reading file " + self.data_file + " - " + str(datetime.datetime.now()))
         self.create_temp_database()
-        sql_insert = """\
-            INSERT INTO temp_data(part_num, unit_id, value, start, stop) VALUES (?, ?, ?, ?, ?)
-            """
-        # TODO: support for attributes
+        # sql_insert = "INSERT INTO temp_data(part_num, unit_id, value, start, stop) VALUES (?, ?, ?, ?, ?)"
+        sql_insert = f"INSERT INTO {self.__database_table_name} (part_num, unit_id, value, start, stop) VALUES (?, ?, ?, ?, ?)"
+        # TODO: support for attributes  -->  sql_insert = f"INSERT INTO {self.__database_table_name}(part_num, unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?, ?)"
         # TODO: support for startType and stopType?
-        #sql_insert = """\
-        #    INSERT INTO temp_data(part_num, unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?, ?)
-        #    """
         rows = []
         i = 0
         rows_with_error = 0
@@ -171,7 +170,7 @@ class SourceDataReader:
         if rows_with_error == 0:
             print("  read " + str(i) +" rows/lines")
             return True  # OK - no error found in file
-        else:            
+        else:
             self.print_data_errors()
             self.__db_connection.close()
             self.delete_temp_database()  # Clean up
@@ -255,7 +254,8 @@ class SourceDataReader:
         #         # some code ...
         #     if not rows:
         #         break
-        self.__db_curs.execute("SELECT unit_id, value, start, stop FROM temp_data ORDER BY unit_id, start")
+        #self.__db_curs.execute("SELECT unit_id, value, start, stop FROM temp_data ORDER BY unit_id, start")
+        self.__db_curs.execute( f"SELECT unit_id, value, start, stop FROM {self.__database_table_name} ORDER BY unit_id, start" )
         for row in self.__db_curs:
             i += 1
             if not self.is_data_row_consistent_with_metadata(row, i):
@@ -430,8 +430,8 @@ class SourceDataReader:
         with open(self.__metadata_file, mode="r", encoding="utf-8") as dataset_metadata_json_file:
             dataset_metadata_json = json.load(dataset_metadata_json_file)
 
-        # If no exception is raised by validate(), the instance is valid.
         try:
+            # If no exception is raised by validate(), the instance is valid.
             validate(
                 instance=dataset_metadata_json, 
                 schema=json_schema_dataset
@@ -465,34 +465,6 @@ class SourceDataReader:
             return False
 
 
-    # """Backup metadata JSON-file"""
-    # def backup_metadata_file(self):
-    #     # # make a duplicate of an existing file
-    #     # if path.exists("guru99.txt"):
-    #     # # get the path to the file in the current directory
-    #     # src = path.realpath("guru99.txt");
-            
-    #     # # rename the original file
-    #     # os.rename('guru99.txt','career.guru99.txt')
-    #     None
-
-
-    # """Backup data txt/csv-file"""
-    # def backup_data_file(self):
-    #     # shutil.move('a.txt', 'b.kml')
-    #     None
-
-
-    """Create new dataset in datastore"""
-    def create_dataset_in_datastore(self):
-        # TODO: check if exists
-        # TODO: create new catalog
-        # TODO: move doc_metadata_1_0_0.json
-        # TODO: move data_1_0.db (Sqlite)
-        # TODO: set chmod on files and catalog?
-        None
-
-
     # TODO write sorted file or Sqlite-table to Parquet dataset?
     def write_parquet_file(self):
         # Read from sorted Sqlite???
@@ -524,15 +496,25 @@ class SourceDataReader:
         #print(self.__database_temp_file)
         self.__db_connection = db.connect(self.__database_temp_file)
         self.__db_curs = self.__db_connection.cursor()
-        self.__db_curs.execute( \
-            """CREATE TABLE IF NOT EXISTS temp_data (
+
+        # self.__db_curs.execute( \
+        #     """CREATE TABLE IF NOT EXISTS temp_data (
+        #         part_num INTEGER NOT NULL, 
+        #         unit_id INTEGER NOT NULL, 
+        #         value TEXT, 
+        #         start INTEGER NOT NULL, 
+        #         stop INTEGER NOT NULL, 
+        #         attributes TEXT) """
+        # )
+        sql_create = f"""CREATE TABLE IF NOT EXISTS {self.__database_table_name} (
                 part_num INTEGER NOT NULL, 
                 unit_id INTEGER NOT NULL, 
                 value TEXT, 
                 start INTEGER NOT NULL, 
                 stop INTEGER NOT NULL, 
                 attributes TEXT) """
-        )
+        self.__db_curs.execute(sql_create)
+
         # Speed up insert operations in Sqlite3
         self.__db_curs.execute("PRAGMA synchronous = OFF")
         self.__db_curs.execute("BEGIN TRANSACTION")
@@ -542,6 +524,81 @@ class SourceDataReader:
     def delete_temp_database(self):
         if os.path.exists(self.__database_temp_file):
             os.remove(self.__database_temp_file)
+
+
+    """Rename Sqlite database file and database table name"""
+    def rename_database(self, new_name):
+        self.__db_connection = db.connect(self.__database_temp_file)
+        self.__db_curs = self.__db_connection.cursor()
+        # 1. Rename database table
+        self.__db_curs.execute( f"ALTER TABLE {self.__database_table_name} RENAME TO {new_name}" )
+        # 2. Rename Sqlite database file
+        try:
+            self.__db_connection.close()
+        except:
+            None
+        finally:
+            os.rename(\
+                self.__database_temp_file,
+                self.__file_directory + "/" + new_name + ".db" )
+
+
+    """Create a new dataset with datafile (Sqlite db) and metadatafile (json) in the data store."""
+    def create_new_dataset_in_datastore(self, datastore_name : str):
+        # TODO: support versions and version bumping
+        datastore_path = ds_conf.datastore[datastore_name.upper()]["datastorePath"]
+
+        dataset_name = str(self.__file_name).upper().split(".")[0]
+        data_file_with_version = dataset_name + "__" + self.__version_major + "_" + self.__version_minor
+
+        # TODO: Set access rights (wr-) ?
+        os.mkdir(datastore_path + "dataset" + "/" + dataset_name)
+
+        self.rename_database(data_file_with_version) # rename Sqlite data file and database table
+        data_file_from = self.__file_directory + "/" + data_file_with_version + ".db"
+        data_file_to = datastore_path + "dataset" + "/" + dataset_name + "/" + data_file_with_version + ".db"
+        os.rename(data_file_from, data_file_to)  # move Sqlite data file to DataStore
+
+        metadata_file_with_version = "DOC__" + dataset_name + "__" + self.__version_major + "_" + self.__version_minor + "_" + self.__version_patch + ".json"
+        metadata_file_from = self.__metadata_file_temp
+        metadata_file_to = datastore_path + "dataset" + "/" + dataset_name + "/" + metadata_file_with_version
+        os.rename(metadata_file_from, metadata_file_to)  # move metadata json file to DataStore
+
+
+        # self.__version_major = "1"
+        # self.__version_minor = "0"
+        # self.__version_patch = "0"
+        # TODO: check if exists
+        #if not os.path.exists(str(self.data_file)):
+        # TODO: create new catalog
+        # TODO: move doc_metadata_1_0_0.json
+        # TODO: move data_1_0.db (Sqlite)
+        # TODO: set chmod on files and catalog?
+        # TODO:
+        # Check if dataset already exists?
+        # Read datastore_config.py (or ../metadata/datastore.json) for data store information (path and name)
+        # Create catalog ../dataset/MY_DATASET
+        # Rename and move Sqlite file to MY_DATASET__1_0.db
+        # Rename and move JSON metadata to DOC_MY_DATASET__1_0_0.json
+        # Update ../metadata/version.json
+
+
+    # """Backup metadata JSON-file"""
+    # def backup_metadata_file(self):
+    #     # # make a duplicate of an existing file
+    #     # if path.exists("guru99.txt"):
+    #     # # get the path to the file in the current directory
+    #     # src = path.realpath("guru99.txt");
+            
+    #     # # rename the original file
+    #     # os.rename('guru99.txt','career.guru99.txt')
+    #     None
+
+
+    # """Backup data txt/csv-file"""
+    # def backup_data_file(self):
+    #     # shutil.move('a.txt', 'b.kml')
+    #     None
 
 
     """MAIN - Start validation of dataset"""
@@ -604,6 +661,8 @@ sdr = SourceDataReader(
     validate="all"
 )
 sdr.validate_dataset()
+sdr.create_new_dataset_in_datastore("TEST")
+#sdr.rename_database("TULLE_DATABASE")
 
 
 ### Test run cases ###
