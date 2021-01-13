@@ -655,14 +655,22 @@ class SourceDataReader:
 #sdr.validate_dataset()
 
 
+# sdr = SourceDataReader(
+#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
+#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+#     validate="all"
+# )
+# sdr.validate_dataset()
+# sdr.create_new_dataset_in_datastore("TEST")
+
+
 sdr = SourceDataReader(
-    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
-    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
     validate="all"
 )
 sdr.validate_dataset()
 sdr.create_new_dataset_in_datastore("TEST")
-#sdr.rename_database("TULLE_DATABASE")
 
 
 ### Test run cases ###
