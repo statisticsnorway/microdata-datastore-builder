@@ -23,25 +23,22 @@ class SourceDataReader:
     # TODO: Pseudonymisering
     # TODO: Støtte for DRAFT-datasett
     # TODO: Støtte for version bumping
-    # TODO: support for attributes i data-fil
     # TODO: support for startType and stopType?
     # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
     #       - Inkludert støtte for partisjonering av tid (start-dato)
 
 
     """TODO: Doc """
-    # # TODO: remove
     # # Doc example:
-    def test(self, param1, param2) -> bool:
-        """
-        :param param1: First param bla, bla, bla, ..
-        :type param1: string
-        :param param2: Second param bla, bla, bla, ..
-        :type param2: list
-        :return: Doc bla, bla, bla, ..
-        :rtype: bool
-        """
-        None
+    # def test(self, param1, param2) -> bool:
+    #     """
+    #     :param param1: First param bla, bla, bla, ..
+    #     :type param1: string
+    #     :param param2: Second param bla, bla, bla, ..
+    #     :type param2: list
+    #     :return: Doc bla, bla, bla, ..
+    #     :rtype: bool
+    #     """
 
 
     def __init__(self, data_file=None, metadata_file=None, validate="all", field_separator=";", data_error_limit=100) -> None:
@@ -130,6 +127,8 @@ class SourceDataReader:
                 print("    " + str(self.__metadata_file_name))
                 return False
             # TODO: Check if filename isuppercase() ?
+
+        self.delete_all_temp_files() # Cleanup - remove old temp files if exists.
         return True
 
 
@@ -466,14 +465,14 @@ class SourceDataReader:
 
 
     # TODO write sorted file or Sqlite-table to Parquet dataset?
-    def write_parquet_file(self):
-        # Read from sorted Sqlite???
-        None
+    # def write_parquet_file(self):
+    #     # Read from sorted Sqlite???
+    #     None
 
 
     # TODO - pseudonymisering
-    def identifier_pseudonymization(self):
-        None
+    # def identifier_pseudonymization(self):
+    #     None
 
 
     """Print data errors (if any)"""
@@ -515,15 +514,9 @@ class SourceDataReader:
                 attributes TEXT) """
         self.__db_curs.execute(sql_create)
 
-        # Speed up insert operations in Sqlite3
+        # Set db-parameters to speed up insert operations in Sqlite3
         self.__db_curs.execute("PRAGMA synchronous = OFF")
         self.__db_curs.execute("BEGIN TRANSACTION")
-
-
-    """Clean up - delete temporary Sqlite database file when done."""
-    def delete_temp_database(self):
-        if os.path.exists(self.__database_temp_file):
-            os.remove(self.__database_temp_file)
 
 
     """Rename Sqlite database file and database table name"""
@@ -543,6 +536,31 @@ class SourceDataReader:
                 self.__file_directory + "/" + new_name + ".db" )
 
 
+    """Cleanup - delete temporary Sqlite.db file if exists."""
+    def delete_temp_database(self):
+        if os.path.exists(self.__database_temp_file):
+            os.remove(self.__database_temp_file)
+
+
+    """Cleanup - remove temporary DATA files if exists."""
+    def delete_temp_data_files(self):
+        if os.path.exists(self.__sorted_temp_file):
+            os.remove(self.__sorted_temp_file)   # E.g, ../MY_DATA.sorted
+
+
+    """Cleanup - remove temporary METADATA files if exists."""
+    def delete_temp_metadata_files(self):
+        if os.path.exists(self.__metadata_file_temp):
+            os.remove(self.__metadata_file_temp)   # E.g, ../MY_DATA.json_temp
+
+
+    """Cleanup - remove all temporary files."""
+    def delete_all_temp_files(self):
+        self.delete_temp_database()
+        self.delete_temp_data_files()
+        self.delete_temp_metadata_files()
+
+
     """Create a new dataset with datafile (Sqlite db) and metadatafile (json) in the data store."""
     def create_new_dataset_in_datastore(self, datastore_name : str):
         # TODO: support versions and version bumping
@@ -551,7 +569,7 @@ class SourceDataReader:
         dataset_name = str(self.__file_name).upper().split(".")[0]
         data_file_with_version = dataset_name + "__" + self.__version_major + "_" + self.__version_minor
 
-        # TODO: Set access rights (wr-) ?
+        # TODO: Set access rights (chmod wr-r----) ?
         os.mkdir(datastore_path + "dataset" + "/" + dataset_name)
 
         self.rename_database(data_file_with_version) # rename Sqlite data file and database table
@@ -564,41 +582,6 @@ class SourceDataReader:
         metadata_file_to = datastore_path + "dataset" + "/" + dataset_name + "/" + metadata_file_with_version
         os.rename(metadata_file_from, metadata_file_to)  # move metadata json file to DataStore
 
-
-        # self.__version_major = "1"
-        # self.__version_minor = "0"
-        # self.__version_patch = "0"
-        # TODO: check if exists
-        #if not os.path.exists(str(self.data_file)):
-        # TODO: create new catalog
-        # TODO: move doc_metadata_1_0_0.json
-        # TODO: move data_1_0.db (Sqlite)
-        # TODO: set chmod on files and catalog?
-        # TODO:
-        # Check if dataset already exists?
-        # Read datastore_config.py (or ../metadata/datastore.json) for data store information (path and name)
-        # Create catalog ../dataset/MY_DATASET
-        # Rename and move Sqlite file to MY_DATASET__1_0.db
-        # Rename and move JSON metadata to DOC_MY_DATASET__1_0_0.json
-        # Update ../metadata/version.json
-
-
-    # """Backup metadata JSON-file"""
-    # def backup_metadata_file(self):
-    #     # # make a duplicate of an existing file
-    #     # if path.exists("guru99.txt"):
-    #     # # get the path to the file in the current directory
-    #     # src = path.realpath("guru99.txt");
-            
-    #     # # rename the original file
-    #     # os.rename('guru99.txt','career.guru99.txt')
-    #     None
-
-
-    # """Backup data txt/csv-file"""
-    # def backup_data_file(self):
-    #     # shutil.move('a.txt', 'b.kml')
-    #     None
 
 
     """MAIN - Start validation of dataset"""
@@ -619,13 +602,14 @@ class SourceDataReader:
             if self.validate == "all":
                 if self.sort_and_validate_data_rows():
                     self.meta_update_temporal_coverage()
+                    self.delete_temp_data_files()
                     print("OK - data and metadata validated.")
                 else:
                     print("ERROR: Consitency/event-history/metadata validation found errors in the data file and/or metadata JSON-file!")
                     print("  NB! If errors in data see the temporary sorted datafile for correct data line/row-number:")
                     print("  ---> " + str(self.__sorted_temp_file))
 
-## END class SourceDataReader ##
+### END class SourceDataReader ###
 
 
 
@@ -654,23 +638,25 @@ class SourceDataReader:
 # )
 #sdr.validate_dataset()
 
+# Validate the datafile and the metadatafile
+sdr = SourceDataReader(
+    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
+    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+    validate="all"
+)
+sdr.validate_dataset()
+
+# Create the new dataset in the TEST-datastore (move the data and metadata to a new catalog in the TEST-datastore).
+sdr.create_new_dataset_in_datastore(datastore_name="TEST") 
+
 
 # sdr = SourceDataReader(
-#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
-#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
 #     validate="all"
 # )
 # sdr.validate_dataset()
 # sdr.create_new_dataset_in_datastore("TEST")
-
-
-sdr = SourceDataReader(
-    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
-    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
-    validate="all"
-)
-sdr.validate_dataset()
-sdr.create_new_dataset_in_datastore("TEST")
 
 
 ### Test run cases ###
