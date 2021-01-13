@@ -98,7 +98,7 @@
                         "validityPeriodStart": "1970-01-01"
                     },
                     {
-                        "code": "HASTER",
+                        "code": "HAMSTER",
                         "categoryTitle": [
                             {"languageCode": "no", "value": "Hamster"},
                             {"languageCode": "en", "value": "Hamster"}
