@@ -16,8 +16,9 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
 
-class SourceDataReader:
+class DatasetReader:
 
+    # TODO: Skrive loggfil (til loggtjeneset)
     # TODO: Skrive flere UNIT-tester
     # TODO: Støtte attributes i sql-insert og innlesing av datafil?
     # TODO: Pseudonymisering
@@ -609,75 +610,75 @@ class SourceDataReader:
                     print("  NB! If errors in data see the temporary sorted datafile for correct data line/row-number:")
                     print("  ---> " + str(self.__sorted_temp_file))
 
-### END class SourceDataReader ###
+### END class DatasetReader ###
 
 
 
 ### Usage examples ###
 # Validate all (data file and metadata file and consistency)
-# sdr = SourceDataReader(
+# dsr = DatasetReader(
 #     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
 #     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
 #     validate="all"
 # )
-# sdr.validate_dataset()
+# dsr.validate_dataset()
 
 # ## Validate metadata file
-# sdr = SourceDataReader(
+# dsr = DatasetReader(
 #     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
 #     metadata_file=None,
 #     validate="data"
 # )
-#sdr.validate_dataset()
+#dsr.validate_dataset()
 
 # ## Validate data file
-# sdr = SourceDataReader(
+# dsr = DatasetReader(
 #     data_file=None,
 #     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
 #     validate="metadata"
 # )
-#sdr.validate_dataset()
+#dsr.validate_dataset()
 
 # Validate the datafile and the metadatafile
-sdr = SourceDataReader(
+dsr = DatasetReader(
     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
     validate="all"
 )
-sdr.validate_dataset()
+dsr.validate_dataset()
 
 # Create the new dataset in the TEST-datastore (move the data and metadata to a new catalog in the TEST-datastore).
-sdr.create_new_dataset_in_datastore(datastore_name="TEST") 
+dsr.create_new_dataset_in_datastore(datastore_name="TEST") 
 
 
-# sdr = SourceDataReader(
+# dsr = DatasetReader(
 #     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
 #     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
 #     validate="all"
 # )
-# sdr.validate_dataset()
-# sdr.create_new_dataset_in_datastore("TEST")
+# dsr.validate_dataset()
+# dsr.create_new_dataset_in_datastore("TEST")
 
 
 ### Test run cases ###
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million_STATUS.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
-#sdr = SourceDataReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/recources/TEST_PERSON_PETS__1_0.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million_STATUS.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
+#dsr = DatasetReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/recources/TEST_PERSON_PETS__1_0.txt")
 
-#sdr.data_error_limit = 100
-#sdr.validate = "data"
-#sdr.validate = "metadata"
-#sdr.validate = "all"
+#dsr.data_error_limit = 100
+#dsr.validate = "data"
+#dsr.validate = "metadata"
+#dsr.validate = "all"
 
-#sdr.validate_dataset()
+#dsr.validate_dataset()
 
 
 
