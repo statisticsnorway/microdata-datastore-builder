@@ -563,9 +563,9 @@ class DatasetReader:
 
 
     """Create a new dataset with datafile (Sqlite db) and metadatafile (json) in the data store."""
-    def create_new_dataset_in_datastore(self, datastore_name : str):
+    def create_new_dataset_in_datastore(self, datastore_short_name : str):
         # TODO: support versions and version bumping
-        datastore_path = ds_conf.datastore[datastore_name.upper()]["datastorePath"]
+        datastore_path = ds_conf.datastore[datastore_short_name.upper()]["datastorePath"]
 
         dataset_name = str(self.__file_name).upper().split(".")[0]
         data_file_with_version = dataset_name + "__" + self.__version_major + "_" + self.__version_minor
@@ -640,15 +640,15 @@ class DatasetReader:
 #dsr.validate_dataset()
 
 # Validate the datafile and the metadatafile
-dsr = DatasetReader(
-    data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
-    metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
-    validate="all"
-)
-dsr.validate_dataset()
+# dsr = DatasetReader(
+#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
+#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
+#     validate="all"
+# )
+# dsr.validate_dataset()
 
-# Create the new dataset in the TEST-datastore (move the data and metadata to a new catalog in the TEST-datastore).
-dsr.create_new_dataset_in_datastore(datastore_name="TEST") 
+# # Create the new dataset in the TEST-datastore (move the data and metadata to a new catalog in the TEST-datastore).
+# dsr.create_new_dataset_in_datastore(datastore_short_name="TEST") 
 
 
 # dsr = DatasetReader(
