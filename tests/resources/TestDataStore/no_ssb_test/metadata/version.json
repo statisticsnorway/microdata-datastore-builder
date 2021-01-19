@@ -2,11 +2,11 @@
     "versions": [
         {
             "version": "1.0.0",
-            "releaseTime": "2020-12-18 13:30:49",
+            "releaseTime": "2021-01-19 21:43:36",
             "description": [
                 {
                     "languageCode": "no",
-                    "value": "F\u00f8rste versjon av databasen."
+                    "value": "Første versjon av databasen."
                 },
                 {
                     "languageCode": "en",
@@ -16,7 +16,7 @@
             "shortDescription": [
                 {
                     "languageCode": "no",
-                    "value": "F\u00f8rste versjon."
+                    "value": "Første versjon."
                 },
                 {
                     "languageCode": "en",
