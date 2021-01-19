@@ -1,7 +1,7 @@
 import unittest
 
 
-class TestDatasetConverter(unittest.TestCase):
+class TestTransformer(unittest.TestCase):
 
     def test_something(self):
         self.assertEqual(True, True)
