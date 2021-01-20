@@ -1,4 +1,4 @@
-unit_type = {
+name_title_description = {
     "name": "PERSON",
     "title": [
         {
@@ -22,7 +22,7 @@ unit_type = {
     ]
 }
 
-expected_unit_type = {
+expected_name_title_description = {
     'name': 'PERSON',
     'label': 'Menneske',
     'description': 'Statistisk enhet er person (individ, enkeltmenneske).'

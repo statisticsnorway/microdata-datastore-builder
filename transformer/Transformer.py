@@ -4,14 +4,14 @@ class Transformer:
     def __init__(self):
         pass
 
-    def transform_unit_type(self, unit_type) -> dict:
-        if unit_type is None:
+    def transform_name_title_description(self, input: dict) -> dict:
+        if input is None:
             return {}
 
         return {
-            'name': unit_type['name'],
-            'label': self.get_norwegian_text(unit_type['title']),
-            'description': self.get_norwegian_text(unit_type['description'])
+            'name': input['name'],
+            'label': self.get_norwegian_text(input['title']),
+            'description': self.get_norwegian_text(input['description'])
         }
 
     @staticmethod
