@@ -3,7 +3,7 @@ unit_type = {
     "title": [
         {
             "languageCode": "no",
-            "value": "Person"
+            "value": "Menneske"
         },
         {
             "languageCode": "en",
@@ -24,6 +24,6 @@ unit_type = {
 
 expected_unit_type = {
     'name': 'PERSON',
-    'label': 'Person',
+    'label': 'Menneske',
     'description': 'Statistisk enhet er person (individ, enkeltmenneske).'
 }
