@@ -5,12 +5,15 @@ from tests.unit.transformer import TransformerFixtures as fixtures
 
 class TestTransformer(unittest.TestCase):
 
+    t = transformer.Transformer()
+
     def test_transform(self):
-        self.assertEqual(4, transformer.Transformer.transform(2))
+        self.assertEqual(4, self.t.transform(2))
 
     def test_unit_type(self):
-        actual = transformer.Transformer.transform_unit_type(fixtures.unit_type)
+        actual = self.t.transform_unit_type(fixtures.unit_type)
         self.assertEqual(fixtures.expected_unit_type, actual)
+
 
 if __name__ == '__main__':
     unittest.main()
