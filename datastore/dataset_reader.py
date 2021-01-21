@@ -206,7 +206,7 @@ class DatasetReader:
             self.__data_errors.append((row_number, "Empty data line (Null/missing)", None))
             return False
 
-        if len(data_row) < 4:
+        if len(data_row) < 5:
             self.__data_errors.append((row_number, "Row/line missing elements (expected line with fields UNIT_ID, VALUE, START, STOP, ..)", None))
             return False
 
