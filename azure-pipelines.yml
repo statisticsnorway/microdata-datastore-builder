@@ -1,0 +1,45 @@
+name: $(Build.SourceBranch)-$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - '*'
+  tags:
+    include:
+      - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+  - job: 'Test'
+    displayName: "Run tests"
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.9'
+        displayName: 'Use Python 3.9'
+
+      - script: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install pytest-cov
+        displayName: 'Install dependencies'
+
+      - script: |
+          pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+        displayName: 'Test with pytest'
+
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: '**/test-*.xml'
+          testRunTitle: 'Publish test results for Python $(python.version)'
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
