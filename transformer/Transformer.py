@@ -41,11 +41,7 @@ class Transformer:
                         'start': self.days_since_epoch(dataset['dataRevision']['temporalCoverageStart']),
                         'stop': self.days_since_epoch(dataset['dataRevision']['temporalCoverageLatest'])
                     },
-                    'valueDomain': {
-                        'description': self.get_norwegian_text(identifier['valueDomain']['measurementUnitDescription']),
-                        'unitOfMeasure': self.get_norwegian_text(
-                            identifier['valueDomain']['measurementUnitDescription'])
-                    },
+                    'valueDomain': self.transform_valuedomain(identifier['valueDomain']),
                     'description': self.get_norwegian_text(identifier['description'])
                 }
             ],
@@ -62,3 +58,21 @@ class Transformer:
             'label': self.get_norwegian_text(input['title']),
             'description': self.get_norwegian_text(input['description'])
         }
+
+    def transform_valuedomain(self, valuedomain: dict) -> dict:
+        transformed = {}
+
+        if 'description' in valuedomain.keys():
+            transformed['description'] = self.get_norwegian_text(valuedomain['description'])
+        elif 'measurementUnitDescription' in valuedomain.keys():
+            transformed['description'] = self.get_norwegian_text(valuedomain['measurementUnitDescription'])
+
+        if 'measurementUnitDescription' in valuedomain.keys():
+            transformed['unitOfMeasure'] = self.get_norwegian_text(valuedomain['measurementUnitDescription'])
+
+        if 'codeList' in valuedomain.keys():
+            print ('ok')
+        else:
+            print('not ok')
+
+        return transformed

@@ -206,3 +206,7 @@ expected_identifier = {
     "variableRole": "Identifier"
 }
 
+expected_valuedomain_without_codelist = {
+    'description': 'N/A',
+    'unitOfMeasure': 'N/A'
+}
