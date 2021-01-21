@@ -5,13 +5,13 @@ import pathlib
 # See https://stackoverflow.com/questions/11393492/python-package-import-from-parent-directory
 # Example: sys.path.insert(1, "/home/myprojects/GitHub/statisticsnorway/microdata-datastore-builder/datastore")
 path_project_root = pathlib.Path(__file__).parent.parent.parent
-path_validate = str(path_project_root) + "/datastore"
-sys.path.insert(1, path_validate)
+path_datastore = str(path_project_root) + "/datastore"
+sys.path.insert(1, path_datastore)
 #print(sys.path)
 
-import unittest
-
 import dataset_reader
+
+import unittest
 
 
 class TestDatasetReader(unittest.TestCase):
