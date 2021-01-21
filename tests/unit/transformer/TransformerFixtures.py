@@ -28,88 +28,6 @@ expected_name_title_description = {
     "description": "Statistisk enhet er person (individ, enkeltmenneske)."
 }
 
-### Mulig vi må fjerne dette og ta hele datasettet som input
-# identifier = {
-#
-#     [
-#         {
-#             "name": "PERSON_ID_1",
-#             "title": [
-#                 {
-#                     "languageCode": "no",
-#                     "value": "Personidentifikator"
-#                 },
-#                 {
-#                     "languageCode": "en",
-#                     "value": "National identity number"
-#                 }
-#             ],
-#             "description": [
-#                 {
-#                     "languageCode": "no",
-#                     "value": "Identifikator for person"
-#                 },
-#                 {
-#                     "languageCode": "en",
-#                     "value": "Persons national identity number"
-#                 }
-#             ],
-#             "format": "RandomUInt48",
-#             "unitType": {
-#                 "name": "PERSON",
-#                 "title": [
-#                     {
-#                         "languageCode": "no",
-#                         "value": "Person"
-#                     },
-#                     {
-#                         "languageCode": "en",
-#                         "value": "Person"
-#                     }
-#                 ],
-#                 "description": [
-#                     {
-#                         "languageCode": "no",
-#                         "value": "Statistisk enhet er person (individ, enkeltmenneske)."
-#                     },
-#                     {
-#                         "languageCode": "en",
-#                         "value": "Statistical unit is person"
-#                     }
-#                 ]
-#             },
-#             "valueDomain": {
-#                 "name": "FOEDSELSNUMMER",
-#                 "title": [
-#                     {
-#                         "languageCode": "no",
-#                         "value": "Pseudonymisert fødselsnummer"
-#                     },
-#                     {
-#                         "languageCode": "en",
-#                         "value": "Pseudonym for persons national identity number"
-#                     }
-#                 ],
-#                 "uriDefinition": [
-#                     "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb",
-#                     "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
-#                 ],
-#                 "measurementUnitDescription": [
-#                     {
-#                         "languageCode": "no",
-#                         "value": "N/A"
-#                     },
-#                     {
-#                         "languageCode": "en",
-#                         "value": "N/A"
-#                     }
-#                 ]
-#             }
-#         }
-#     ]
-#
-# }
-
 dataset = {
     "name": "TEST_PERSON_INCOME",
     "title": [
@@ -269,14 +187,14 @@ expected_identifier = {
     "representedVariables": [
         {
             "validPeriod": {
-                "start": 10957, # dataRevision.temporalCoverageStart, days since epoch på 2016-01-01
-                "stop": 10957 # dataRevision.temporalCoverageLatest, days since epoch på 2019-12-31
+                "start": 16801,
+                "stop": 18261
             },
             "valueDomain": {
-                "description": "Statistisk enhet er person (individ, enkeltmenneske).",
+                "description": "N/A",
                 "unitOfMeasure": "N/A"
             },
-            "description": "Statistisk enhet er person (individ, enkeltmenneske)."
+            "description": "Identifikator for person"
         }
     ],
     "keyType": {

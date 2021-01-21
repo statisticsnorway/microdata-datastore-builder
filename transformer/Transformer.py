@@ -1,32 +1,64 @@
+import datetime
+
 
 class Transformer:
 
     def __init__(self):
         pass
 
-    def transform_name_title_description(self, input: dict) -> dict:
-        if input is None:
-            return {}
+    @staticmethod
+    def get_norwegian_text(texts: list) -> str:
+        return [element for element in texts if element['languageCode'] == 'no'][0]['value']
 
-        return {
-            'name': input['name'],
-            'label': self.get_norwegian_text(input['title']),
-            'description': self.get_norwegian_text(input['description'])
-        }
+    @staticmethod
+    def days_since_epoch(date: str) -> int:
+        epoch = datetime.datetime.utcfromtimestamp(0)
+        date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+        return (date_obj - epoch).days
+
+    """ 
+    We need to refactor valuedomain transformation, make new method transform_value_domain.
+    This must transform value domains with or without code lists.
+    
+    Code example for description (Elvis operator in python?)
+        self.get_norwegian_text(identifier['valueDomain']['measurementUnitDescription']),
+        if (identifier['valueDomain']['description'] is not None)
+        else self.get_norwegian_text(identifier['valueDomain']['measurementUnitDescription'])
+    
+    """
 
     def transform_identifier(self, dataset: dict) -> dict:
         if input is None:
             return {}
-
         identifier = dataset['identifier'][0]
         return {
             'name': identifier['name'],
             'label': self.get_norwegian_text(identifier['title']),
             'dataType': 'Long',
-            'format': identifier['format']
+            'representedVariables': [
+                {
+                    'validPeriod': {
+                        'start': self.days_since_epoch(dataset['dataRevision']['temporalCoverageStart']),
+                        'stop': self.days_since_epoch(dataset['dataRevision']['temporalCoverageLatest'])
+                    },
+                    'valueDomain': {
+                        'description': self.get_norwegian_text(identifier['valueDomain']['measurementUnitDescription']),
+                        'unitOfMeasure': self.get_norwegian_text(
+                            identifier['valueDomain']['measurementUnitDescription'])
+                    },
+                    'description': self.get_norwegian_text(identifier['description'])
+                }
+            ],
+            'keyType': self.transform_name_title_description(identifier['unitType']),
+            'format': identifier['format'],
+            'variableRole': 'Identifier'
         }
 
-    @staticmethod
-    def get_norwegian_text(texts: list) -> str:
-        return [element for element in texts if element['languageCode'] == 'no'][0]['value']
-
+    def transform_name_title_description(self, input: dict) -> dict:
+        if input is None:
+            return {}
+        return {
+            'name': input['name'],
+            'label': self.get_norwegian_text(input['title']),
+            'description': self.get_norwegian_text(input['description'])
+        }
