@@ -1,14 +1,15 @@
 import os.path
 import sys
 import unittest
-from tests.unit.transformer import TransformerFixtures as fixture
-from transformer import Transformer
 
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
     # the paths already
     print("test_transformer.py __main__ called")
     sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir)))
+
+from tests.unit.transformer import TransformerFixtures as fixture
+from transformer import Transformer
 
 
 class TestTransformer(unittest.TestCase):
