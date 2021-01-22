@@ -37,7 +37,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for Python $PYTHON_VERSION'
+          testRunTitle: 'Publish test results'
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: Cobertura
