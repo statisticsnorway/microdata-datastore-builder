@@ -30,7 +30,7 @@ jobs:
         displayName: 'Install dependencies'
 
       - script: |
-          pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+          pytest tests --ignore=tests/resources --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
         displayName: 'Test with pytest'
 
       - task: PublishTestResults@2
