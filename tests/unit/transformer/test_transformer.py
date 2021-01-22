@@ -45,8 +45,15 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(fixture.expected_identifier, actual)
 
     def test_valuedomain_without_codelist(self):
-        actual = self.t.transform_valuedomain(fixture.dataset['identifier'][0]['valueDomain'])
+        actual = self.t.transform_valuedomain(fixture.valuedomain_without_codelist)
         expected = fixture.expected_valuedomain_without_codelist
+        self.assertEqual(expected['description'], actual['description'])
+        self.assertEqual(expected['unitOfMeasure'], actual['unitOfMeasure'])
+
+    def test_valuedomain_with_codelist(self):
+        actual = self.t.transform_valuedomain(fixture.valuedomain_with_codelist_same_start_date)
+        expected = fixture.expected_valuedomain_with_codelist  # Finn frem en variabel fra QA med få koder
+        # Dataset : REGSYS_ARBTID, REGSYS_YRKSTAT (har validityPeriodStop
         self.assertEqual(expected['description'], actual['description'])
         self.assertEqual(expected['unitOfMeasure'], actual['unitOfMeasure'])
 
