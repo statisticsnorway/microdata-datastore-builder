@@ -51,13 +51,6 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(expected['description'], actual['description'])
         self.assertEqual(expected['unitOfMeasure'], actual['unitOfMeasure'])
 
-    def test_valuedomain_with_codelist(self):
-        actual = self.t.transform_valuedomain(fixture.valuedomain_with_codelist_same_start_date)
-        expected = fixture.expected_valuedomain_with_codelist  # Finn frem en variabel fra QA med få koder
-        # Dataset : REGSYS_ARBTID, REGSYS_YRKSTAT (har validityPeriodStop
-        self.assertEqual(expected['description'], actual['description'])
-        self.assertEqual(expected['unitOfMeasure'], actual['unitOfMeasure'])
-
     def test_days_since_epoch(self):
         actual = self.t.days_since_epoch('2000-01-01')
         expected = 10957
@@ -71,6 +64,34 @@ class TestTransformer(unittest.TestCase):
             [self.t.to_date("2009-01-01"), self.t.to_date("2011-12-31")],
             [self.t.to_date("2012-01-01"), None]
         ]
+        self.assertEqual(expected, actual)
+
+    def test_represented_variables_different_start_dates(self):
+        actual = self.t.transform_represented_variables(fixture.valuedomain_with_codelist_different_start_dates)
+        expected = fixture.expected_valuedomain_with_codelist_different_start_dates
+
+        self.assertEqual(expected[0]['description'], actual[0]['description'])
+        self.assertFalse('unitOfMeasure' in expected[0].keys())
+        self.assertEqual(expected[0]['validPeriod'], actual[0]['validPeriod'])  # Fix this, it fails!
+
+    def test_calculate_description_from_value_domain(self):
+        actual = self.t.calculate_description_from_value_domain(fixture.valuedomain_with_codelist_different_start_dates)
+        expected = 'Type kjæledyr vi selger i butikken'
+        self.assertEqual(expected, actual)
+
+    def test_calculate_valid_period_start_stop(self):
+        actual = self.t.calculate_valid_period([self.t.to_date('2008-10-01'), self.t.to_date('2009-12-31')])
+        expected = {
+            "start": self.t.to_date('2008-10-01'),
+            "stop": self.t.to_date('2009-12-31')
+        }
+        self.assertEqual(expected, actual)
+
+    def test_calculate_valid_period_start_only(self):
+        actual = self.t.calculate_valid_period([self.t.to_date('2008-10-01')])
+        expected = {
+            "start": self.t.to_date('2008-10-01')
+        }
         self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
