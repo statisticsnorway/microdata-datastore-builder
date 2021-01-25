@@ -1,14 +1,15 @@
 import os.path
 import sys
 import unittest
-from tests.unit.transformer import TransformerFixtures as fixture
-from transformer import Transformer
 
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
     # the paths already
     print("test_transformer.py __main__ called")
     sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir)))
+
+from tests.unit.transformer import TransformerFixtures as fixture
+from transformer import Transformer
 
 
 class TestTransformer(unittest.TestCase):
@@ -62,6 +63,15 @@ class TestTransformer(unittest.TestCase):
         expected = 10957
         self.assertEqual(expected, actual)
 
+    def test_time_periods(self):
+        actual = self.t.calculate_time_periods(["2009-01-01", "2000-01-01", "2012-01-01", "2003-01-01"])
+        expected = [
+            [self.t.to_date("2000-01-01"), self.t.to_date("2002-12-31")],
+            [self.t.to_date("2003-01-01"), self.t.to_date("2008-12-31")],
+            [self.t.to_date("2009-01-01"), self.t.to_date("2011-12-31")],
+            [self.t.to_date("2012-01-01"), None]
+        ]
+        self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
     print("Paths used:")

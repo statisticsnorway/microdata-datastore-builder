@@ -14,8 +14,6 @@ pool:
 jobs:
   - job: 'Test'
     displayName: "Run tests"
-    pool:
-      vmImage: 'ubuntu-latest'
 
     steps:
       - task: UsePythonVersion@0
@@ -30,14 +28,15 @@ jobs:
         displayName: 'Install dependencies'
 
       - script: |
-          pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+          pytest tests --ignore=tests/resources --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
         displayName: 'Test with pytest'
 
       - task: PublishTestResults@2
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for Python $(python.version)'
+          testRunTitle: 'Publish test results'
+
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: Cobertura
