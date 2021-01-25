@@ -56,6 +56,15 @@ class TestTransformer(unittest.TestCase):
         expected = 10957
         self.assertEqual(expected, actual)
 
+    def test_time_periods(self):
+        actual = self.t.calculate_time_periods(["2009-01-01", "2000-01-01", "2012-01-01", "2003-01-01"])
+        expected = [
+            [self.t.to_date("2000-01-01"), self.t.to_date("2002-12-31")],
+            [self.t.to_date("2003-01-01"), self.t.to_date("2008-12-31")],
+            [self.t.to_date("2009-01-01"), self.t.to_date("2011-12-31")],
+            [self.t.to_date("2012-01-01"), None]
+        ]
+        self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
     print("Paths used:")

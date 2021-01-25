@@ -1,5 +1,4 @@
-import datetime
-
+from datetime import datetime, timedelta
 
 class Transformer:
 
@@ -11,10 +10,14 @@ class Transformer:
         return [element for element in texts if element['languageCode'] == 'no'][0]['value']
 
     @staticmethod
-    def days_since_epoch(date: str) -> int:
-        epoch = datetime.datetime.utcfromtimestamp(0)
-        date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+    def days_since_epoch(self, date_string: str) -> int:
+        epoch = datetime.utcfromtimestamp(0)
+        date_obj = self.to_date(date_string)
         return (date_obj - epoch).days
+
+    @staticmethod
+    def to_date(date_string):
+        return datetime.strptime(date_string, '%Y-%m-%d')
 
     """ 
     We need to refactor valuedomain transformation, make new method transform_value_domain.
@@ -76,3 +79,19 @@ class Transformer:
             print('not ok')
 
         return transformed
+
+    def calculate_time_periods(self, dates: list) -> list:
+        unique_dates = set(dates)
+        string_list = list(unique_dates)
+        string_list.sort()
+        date_list = [self.to_date(date_string) for date_string in string_list]
+
+        one_day: timedelta = timedelta(days=1)
+        time_periods = []
+        for i, date in enumerate(date_list):
+            if i+1 < len(date_list):
+                time_periods.append([date_list[i], date_list[i+1] - one_day])
+            else:
+                time_periods.append([date_list[i], None])
+
+        return time_periods
