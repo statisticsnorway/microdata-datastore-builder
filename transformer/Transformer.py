@@ -10,9 +10,9 @@ class Transformer:
         return [element for element in texts if element['languageCode'] == 'no'][0]['value']
 
     @staticmethod
-    def days_since_epoch(self, date_string: str) -> int:
+    def days_since_epoch(date_string: str) -> int:
         epoch = datetime.utcfromtimestamp(0)
-        date_obj = self.to_date(date_string)
+        date_obj = Transformer.to_date(date_string)
         return (date_obj - epoch).days
 
     @staticmethod
