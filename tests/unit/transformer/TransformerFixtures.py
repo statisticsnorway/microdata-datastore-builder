@@ -207,7 +207,6 @@ expected_identifier = {
 }
 
 valuedomain_without_codelist = {
-    {
         "name": "FOEDSELSNUMMER",
         "title": [
             {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
@@ -221,7 +220,6 @@ valuedomain_without_codelist = {
             {"languageCode": "no", "value": "N/A"},
             {"languageCode": "en", "value": "N/A"}
         ]
-    }
 }
 
 expected_valuedomain_without_codelist = {
@@ -230,7 +228,6 @@ expected_valuedomain_without_codelist = {
 }
 
 valuedomain_with_codelist_same_start_date = {
-    {
         "name": "PET_TYPE",
         "title": [
             {"languageCode": "no", "value": "Type kjæledyr"},
@@ -270,10 +267,8 @@ valuedomain_with_codelist_same_start_date = {
             ]
         }
     }
-}
 
 expected_valuedomain_with_codelist_same_start_date = {
-    {
         "description": "Type kjæledyr vi selger i butikken",
         "validPeriod": {
             "start": "2010-01-01"
@@ -297,10 +292,8 @@ expected_valuedomain_with_codelist_same_start_date = {
             ]
         }
     }
-}
 
 valuedomain_with_codelist_different_start_dates = {
-    {
         "name": "PET_TYPE",
         "title": [
             {"languageCode": "no", "value": "Type kjæledyr"},
@@ -356,4 +349,109 @@ valuedomain_with_codelist_different_start_dates = {
             ]
         }
     }
-}
+
+expected_valuedomain_with_codelist_different_start_dates = [
+        {
+            "description": "Type kjæledyr vi selger i butikken",
+            "validPeriod": {
+                "start": "2008-10-01",
+                "stop": "2009-12-31"
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": "Type kjæledyr vi selger i butikken",
+            "validPeriod": {
+                "start": "2010-01-01",
+                "stop": "2011-05-31"
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": "Type kjæledyr vi selger i butikken",
+            "validPeriod": {
+                "start": "2011-06-01",
+                "stop": "2011-12-31"
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    },
+                    {
+                        "category": "Kanin",
+                        "code": "RABBIT"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": "Type kjæledyr vi selger i butikken",
+            "validPeriod": {
+                "start": "2012-01-01"
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    },
+                    {
+                        "category": "Kanin",
+                        "code": "RABBIT"
+                    },
+                    {
+                        "category": "Hund",
+                        "code": "DOG"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        }
+]
