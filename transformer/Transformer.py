@@ -93,10 +93,10 @@ class Transformer:
 
         for time_period in time_periods:
             represented_variable = {}
-            if self.calculate_description_from_value_domain(valuedomain) is not None:
-                represented_variable["description"] = self.calculate_description_from_value_domain(valuedomain)
-            if self.calculate_mesurement_unit_description_from_value_domain(valuedomain) is not None:
-                represented_variable["unitOfMeasure"] = self.calculate_mesurement_unit_description_from_value_domain(valuedomain)
+            if self.create_description_from_value_domain(valuedomain) is not None:
+                represented_variable["description"] = self.create_description_from_value_domain(valuedomain)
+            if self.create_mesurement_unit_description_from_value_domain(valuedomain) is not None:
+                represented_variable["unitOfMeasure"] = self.create_mesurement_unit_description_from_value_domain(valuedomain)
             represented_variable["validPeriod"] = self.calculate_valid_period(time_period)
 
             if 'codeList' in valuedomain.keys():
@@ -138,7 +138,7 @@ class Transformer:
             "code": code_item['code']
         })
 
-    def calculate_description_from_value_domain(self, valuedomain: dict) -> str:
+    def create_description_from_value_domain(self, valuedomain: dict) -> str:
         if 'description' in valuedomain.keys():
             return self.get_norwegian_text(valuedomain['description'])
         elif 'measurementUnitDescription' in valuedomain.keys():
@@ -146,7 +146,7 @@ class Transformer:
         else:
             return None
 
-    def calculate_mesurement_unit_description_from_value_domain(self, valuedomain: dict) -> str:
+    def create_mesurement_unit_description_from_value_domain(self, valuedomain: dict) -> str:
         if 'measurementUnitDescription' in valuedomain.keys():
             return self.get_norwegian_text(valuedomain['measurementUnitDescription'])
         else:
