@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+
 class Transformer:
 
     def __init__(self):
@@ -18,6 +19,34 @@ class Transformer:
     @staticmethod
     def to_date(date_string):
         return datetime.strptime(date_string, '%Y-%m-%d')
+
+    @staticmethod
+    def transform_dataset(dataset: dict) -> dict:
+        return {
+            "attributeVariables": "[TODO]",
+            "identifierVariables": "[TODO]",
+            "measureVariable": "TODO",
+            'name': dataset['name'],
+            "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
+            "temporality":  dataset['temporalityType'],
+            "temporalCoverage": Transformer.get_temporal_coverage(dataset['dataRevision']),
+            "subjectFields": Transformer.get_subject_fields(dataset['measure']['subjectField']),
+            "languageCode": "no"
+        }
+
+    @staticmethod
+    def get_temporal_coverage(data_revision: dict) -> dict:
+        period = {
+            "start": Transformer.days_since_epoch(data_revision['temporalCoverageStart'])
+        }
+        if data_revision['temporalCoverageLatest'] is not None:
+            period["stop"] = Transformer.days_since_epoch(data_revision['temporalCoverageLatest'])
+
+        return period
+
+    @staticmethod
+    def get_subject_fields(subject_fields: dict) -> list:
+        return [Transformer.get_norwegian_text(subject_field['title']) for subject_field in subject_fields]
 
     """ 
     We need to refactor valuedomain transformation, make new method transform_value_domain.
@@ -95,3 +124,4 @@ class Transformer:
                 time_periods.append([date_list[i], None])
 
         return time_periods
+

@@ -180,6 +180,21 @@ dataset = {
     ]
 }
 
+expected_dataset = {
+    "attributeVariables": "[TODO]",
+    "identifierVariables": "[TODO]",
+    "measureVariable": "TODO",
+    "name": "TEST_PERSON_INCOME",
+    "populationDescription": "Alle personer med inntekt.",
+    "temporality": "ACCUMULATED",
+    "temporalCoverage": {
+        "start": 16801,  # 2016-01-01
+        "stop": 18261  # 2019-12-31
+    },
+    "subjectFields": ["Inntekt"],
+    "languageCode": "no"
+}
+
 expected_identifier = {
     "name": "PERSON_ID_1",
     "label": "Personidentifikator",
