@@ -25,13 +25,25 @@ class Transformer:
         return {
             "attributeVariables": Transformer.get_attribute_variables(dataset['attribute']),
             "identifierVariables": "[TODO]",
-            "measureVariable": "TODO",
+            "measureVariable": Transformer.transform_measure(dataset['measure']),
             'name': dataset['name'],
             "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
             "temporality": dataset['temporalityType'],
             "temporalCoverage": Transformer.get_temporal_coverage(dataset['dataRevision']),
             "subjectFields": Transformer.get_subject_fields(dataset['measure']['subjectField']),
             "languageCode": "no"
+        }
+
+    @staticmethod
+    def transform_measure(measure: dict) -> dict:
+        return {
+            'name': measure['name'],
+            'label': Transformer.get_norwegian_text(measure['title']),
+            'dataType': Transformer.transform_data_type(measure['dataType']),
+            'representedVariables': "TODO",
+            'keyType': Transformer.transform_unit_type(measure["unitType"]),
+            'format': measure['format'],
+            'variableRole': "Measure"
         }
 
     @staticmethod
@@ -82,8 +94,8 @@ class Transformer:
 
         return {
             'name': unit_type["name"],
-            'label': unit_type["title"],
-            'description': unit_type["description"]
+            'label': Transformer.get_norwegian_text(unit_type["title"]),
+            'description': Transformer.get_norwegian_text(unit_type["description"])
         }
 
     @staticmethod
