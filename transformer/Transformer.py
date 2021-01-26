@@ -23,7 +23,7 @@ class Transformer:
     @staticmethod
     def calculate_valid_period(time_period: list) -> dict:
         valid_period = {"start": time_period[0]}
-        if 2 == len(time_period):
+        if 2 == len(time_period) and time_period[1] is not None:
             valid_period["stop"] = time_period[1]
         return valid_period
 
@@ -98,9 +98,45 @@ class Transformer:
             if self.calculate_mesurement_unit_description_from_value_domain(valuedomain) is not None:
                 represented_variable["unitOfMeasure"] = self.calculate_mesurement_unit_description_from_value_domain(valuedomain)
             represented_variable["validPeriod"] = self.calculate_valid_period(time_period)
-            transformed.append(represented_variable)
 
+            if 'codeList' in valuedomain.keys():
+                code_list_out = []
+                for code_item in valuedomain['codeList']['topLevelCodeItems']:
+                    self.select_code_item(code_item, code_list_out, time_period)
+
+                value_domain_out = {
+                    "codeList": code_list_out,
+                    "missingValues": []
+                }
+                represented_variable["valueDomain"] = value_domain_out
+            transformed.append(represented_variable)
         return transformed
+
+    def select_code_item(self, code_item, code_list_out, time_period):
+
+        time_period_start = time_period[0]
+        time_period_stop = None if time_period[1] is None else time_period[1]
+
+        validity_period_start = datetime.strptime(code_item['validityPeriodStart'], '%Y-%m-%d')
+        validity_period_stop = datetime.strptime(code_item['validityPeriodStop'], '%Y-%m-%d') \
+            if 'validityPeriodStop' in code_item.keys() else None
+
+        if time_period_stop is None:
+            if validity_period_start <= time_period_start:
+                self.append_code_item_to_list(code_item, code_list_out)
+        else:
+            if validity_period_stop is None:
+                if validity_period_start <= time_period_start:
+                    self.append_code_item_to_list(code_item, code_list_out)
+            else:
+                if validity_period_start <= time_period_start and validity_period_stop > time_period_stop:
+                    self.append_code_item_to_list(code_item, code_list_out)
+
+    def append_code_item_to_list(self, code_item:dict, code_list:list):
+        code_list.append({
+            "category": self.get_norwegian_text(code_item['categoryTitle']),
+            "code": code_item['code']
+        })
 
     def calculate_description_from_value_domain(self, valuedomain: dict) -> str:
         if 'description' in valuedomain.keys():

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 name_title_description = {
     "name": "PERSON",
     "title": [
@@ -354,8 +356,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": "Type kjæledyr vi selger i butikken",
             "validPeriod": {
-                "start": "2008-10-01",
-                "stop": "2009-12-31"
+                "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
             },
             "valueDomain": {
                 "codeList": [
@@ -371,8 +373,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": "Type kjæledyr vi selger i butikken",
             "validPeriod": {
-                "start": "2010-01-01",
-                "stop": "2011-05-31"
+                "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
             },
             "valueDomain": {
                 "codeList": [
@@ -396,8 +398,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": "Type kjæledyr vi selger i butikken",
             "validPeriod": {
-                "start": "2011-06-01",
-                "stop": "2011-12-31"
+                "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
             },
             "valueDomain": {
                 "codeList": [
@@ -425,7 +427,7 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": "Type kjæledyr vi selger i butikken",
             "validPeriod": {
-                "start": "2012-01-01"
+                "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
             },
             "valueDomain": {
                 "codeList": [

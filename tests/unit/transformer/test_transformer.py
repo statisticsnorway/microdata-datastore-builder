@@ -1,6 +1,7 @@
 import os.path
 import sys
 import unittest
+from datetime import datetime
 
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
@@ -70,9 +71,109 @@ class TestTransformer(unittest.TestCase):
         actual = self.t.transform_represented_variables(fixture.valuedomain_with_codelist_different_start_dates)
         expected = fixture.expected_valuedomain_with_codelist_different_start_dates
 
-        self.assertEqual(expected[0]['description'], actual[0]['description'])
-        self.assertFalse('unitOfMeasure' in expected[0].keys())
-        self.assertEqual(expected[0]['validPeriod'], actual[0]['validPeriod'])  # Fix this, it fails!
+        self.assert_values_from_value_domain(expected, actual, 0)
+        self.assert_values_from_value_domain(expected, actual, 1)
+        self.assert_values_from_value_domain(expected, actual, 2)
+        self.assert_values_from_value_domain(expected, actual, 3)
+
+    def assert_values_from_value_domain(self, expected: dict, actual: dict, indeks: int):
+        self.assertEqual(expected[indeks]['description'], actual[indeks]['description'])
+        self.assertFalse('unitOfMeasure' in expected[indeks].keys())
+        self.assertEqual(expected[indeks]['validPeriod'], actual[indeks]['validPeriod'])
+
+    def test_select_code_item_on_start(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2007-01-01"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
+
+    def test_do_not_select_code_item_on_start(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2008-12-01"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(len(code_list_out), 0)
+
+    def test_select_code_item_on_start_and_stop(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2008-01-01",
+            "validityPeriodStop": "2010-12-31"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
+
+    def test_do_not_select_code_item_on_stop(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2007-01-01",
+            "validityPeriodStop": "2009-01-01"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(len(code_list_out), 0)
+
+    def test_select_code_item_when_time_period_has_start_only(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2008-01-01",
+            "validityPeriodStop": "2010-12-31"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), None]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
+
+    def test_do_not_select_code_item_when_time_period_has_start_only(self):
+        code_item = {
+            "code": "CAT",
+            "categoryTitle": [
+                {"languageCode": "no", "value": "Katt"},
+                {"languageCode": "en", "value": "Cat"}
+            ],
+            "validityPeriodStart": "2009-01-01",
+            "validityPeriodStop": "2010-12-31"
+        }
+        code_list_out = []
+        time_period = [datetime(2008, 10, 1, 0, 0), None]
+
+        self.t.select_code_item(code_item, code_list_out, time_period)
+        self.assertEqual(len(code_list_out), 0)
 
     def test_calculate_description_from_value_domain(self):
         actual = self.t.calculate_description_from_value_domain(fixture.valuedomain_with_codelist_different_start_dates)
