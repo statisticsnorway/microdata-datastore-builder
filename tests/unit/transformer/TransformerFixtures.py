@@ -181,7 +181,22 @@ dataset = {
 }
 
 expected_dataset = {
-    "attributeVariables": "[TODO]",
+    "attributeVariables": [
+        {
+            "label": "Startdato",
+            "dataType": "Instant",
+            "representedVariables": "TODO",
+            "name": "START",
+            "variableRole": "Start"
+        },
+        {
+            "label": "Stoppdato",
+            "dataType": "Instant",
+            "representedVariables": "TODO",
+            "name": "STOP",
+            "variableRole": "Stop"
+        }
+    ],
     "identifierVariables": "[TODO]",
     "measureVariable": "TODO",
     "name": "TEST_PERSON_INCOME",

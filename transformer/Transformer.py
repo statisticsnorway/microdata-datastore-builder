@@ -23,15 +23,67 @@ class Transformer:
     @staticmethod
     def transform_dataset(dataset: dict) -> dict:
         return {
-            "attributeVariables": "[TODO]",
+            "attributeVariables": Transformer.get_attribute_variables(dataset['attribute']),
             "identifierVariables": "[TODO]",
             "measureVariable": "TODO",
             'name': dataset['name'],
             "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
-            "temporality":  dataset['temporalityType'],
+            "temporality": dataset['temporalityType'],
             "temporalCoverage": Transformer.get_temporal_coverage(dataset['dataRevision']),
             "subjectFields": Transformer.get_subject_fields(dataset['measure']['subjectField']),
             "languageCode": "no"
+        }
+
+    @staticmethod
+    def get_attribute_variables(attributes: list) -> list:
+        result = []
+        for attribute in attributes:
+            attr = {
+                "name": attribute["name"],
+                "label": Transformer.get_norwegian_text(attribute["title"]),
+                "representedVariables": "TODO",
+                "dataType": Transformer.transform_data_type(attribute['dataType']),
+                "variableRole": Transformer.get_variable_role(attribute['attributeType'])
+            }
+            if "unitType" in attribute:
+                attr['keyType'] = Transformer.transform_unit_type(attribute["unitType"])
+            if "format" in attribute:
+                attr['format'] = attribute["format"]
+
+            result.append(attr)
+
+        return result
+
+    @staticmethod
+    def get_variable_role(attribute_type: str) -> str:
+        variable_roles_mapping = {
+            "stop": "Stop",
+            "start": "Start",
+            "source": "Source"
+        }
+
+        return variable_roles_mapping.get(attribute_type.lower(), attribute_type)
+
+    @staticmethod
+    def transform_data_type(data_type: str) -> str:
+        data_types_mapping = {
+            "STRING": "String",
+            "LONG": "Long",
+            "DOUBLE": "Double",
+            "DATE": "Instant"
+        }
+
+        return data_types_mapping.get(data_type, data_type)
+
+    @staticmethod
+    def transform_unit_type(unit_type: dict) -> dict:
+        if not unit_type:
+            return {}
+
+        return {
+            'name': unit_type["name"],
+            'label': unit_type["title"],
+            'description': unit_type["description"]
         }
 
     @staticmethod
@@ -39,7 +91,7 @@ class Transformer:
         period = {
             "start": Transformer.days_since_epoch(data_revision['temporalCoverageStart'])
         }
-        if data_revision['temporalCoverageLatest'] is not None:
+        if data_revision['temporalCoverageLatest']:
             period["stop"] = Transformer.days_since_epoch(data_revision['temporalCoverageLatest'])
 
         return period
@@ -83,7 +135,7 @@ class Transformer:
         }
 
     def transform_name_title_description(self, input: dict) -> dict:
-        if input is None:
+        if not input:
             return {}
         return {
             'name': input['name'],
@@ -103,7 +155,7 @@ class Transformer:
             transformed['unitOfMeasure'] = self.get_norwegian_text(valuedomain['measurementUnitDescription'])
 
         if 'codeList' in valuedomain.keys():
-            print ('ok')
+            print('ok')
         else:
             print('not ok')
 
@@ -118,10 +170,9 @@ class Transformer:
         one_day: timedelta = timedelta(days=1)
         time_periods = []
         for i, date in enumerate(date_list):
-            if i+1 < len(date_list):
-                time_periods.append([date_list[i], date_list[i+1] - one_day])
+            if i + 1 < len(date_list):
+                time_periods.append([date_list[i], date_list[i + 1] - one_day])
             else:
                 time_periods.append([date_list[i], None])
 
         return time_periods
-
