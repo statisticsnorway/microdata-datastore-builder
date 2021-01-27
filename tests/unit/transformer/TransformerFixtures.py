@@ -1,5 +1,7 @@
 from datetime import datetime
 
+description = 'Dette er description fra entiteten som eier valuedomain'
+
 name_title_description = {
     "name": "PERSON",
     "title": [
@@ -189,8 +191,8 @@ expected_identifier = {
     "representedVariables": [
         {
             "validPeriod": {
-                "start": 16801,
-                "stop": 18261
+                "start": datetime.strptime('2016-01-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2019-12-31', '%Y-%m-%d')
             },
             "valueDomain": {
                 "description": "N/A",
@@ -222,11 +224,6 @@ valuedomain_without_codelist = {
             {"languageCode": "no", "value": "N/A"},
             {"languageCode": "en", "value": "N/A"}
         ]
-}
-
-expected_valuedomain_without_codelist = {
-    'description': 'N/A',
-    'unitOfMeasure': 'N/A'
 }
 
 valuedomain_with_codelist_same_start_date = {
@@ -272,7 +269,7 @@ valuedomain_with_codelist_same_start_date = {
 
 expected_valuedomain_with_codelist_same_start_date = [
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2010-01-01', '%Y-%m-%d')
         },
@@ -356,7 +353,7 @@ valuedomain_with_codelist_different_start_dates = {
 
 expected_valuedomain_with_codelist_different_start_dates = [
         {
-            "description": "Type kjæledyr vi selger i butikken",
+            "description": description,
             "validPeriod": {
                 "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
                 "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
@@ -373,7 +370,7 @@ expected_valuedomain_with_codelist_different_start_dates = [
             }
         },
         {
-            "description": "Type kjæledyr vi selger i butikken",
+            "description": description,
             "validPeriod": {
                 "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
                 "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
@@ -398,7 +395,7 @@ expected_valuedomain_with_codelist_different_start_dates = [
             }
         },
         {
-            "description": "Type kjæledyr vi selger i butikken",
+            "description": description,
             "validPeriod": {
                 "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
                 "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
@@ -427,7 +424,7 @@ expected_valuedomain_with_codelist_different_start_dates = [
             }
         },
         {
-            "description": "Type kjæledyr vi selger i butikken",
+            "description": description,
             "validPeriod": {
                 "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
             },
@@ -520,7 +517,7 @@ valuedomain_with_codelist_different_start_and_stop_dates = {
 
 expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
             "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
@@ -537,7 +534,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
         }
     },
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
             "stop": datetime.strptime('2010-12-31', '%Y-%m-%d')
@@ -562,7 +559,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
         }
     },
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2011-01-01', '%Y-%m-%d'),
             "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
@@ -583,7 +580,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
         }
     },
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
             "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
@@ -608,7 +605,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
         }
     },
     {
-        "description": "Type kjæledyr vi selger i butikken",
+        "description": description,
         "validPeriod": {
             "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
         },

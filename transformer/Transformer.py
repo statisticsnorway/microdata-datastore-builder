@@ -31,24 +31,18 @@ class Transformer:
         if input is None:
             return {}
         identifier = dataset['identifier'][0]
-        return {
+        start = dataset['dataRevision']['temporalCoverageStart']
+        stop = dataset['dataRevision']['temporalCoverageLatest']
+        transformed = {
             'name': identifier['name'],
             'label': self.get_norwegian_text(identifier['title']),
             'dataType': 'Long',
-            'representedVariables': [
-                {
-                    'validPeriod': {
-                        'start': self.days_since_epoch(dataset['dataRevision']['temporalCoverageStart']),
-                        'stop': self.days_since_epoch(dataset['dataRevision']['temporalCoverageLatest'])
-                    },
-                    'valueDomain': self.transform_valuedomain(identifier['valueDomain']),
-                    'description': self.get_norwegian_text(identifier['description'])
-                }
-            ],
+            'representedVariables': self.transform_represented_variables(identifier, start, stop),
             'keyType': self.transform_name_title_description(identifier['unitType']),
             'format': identifier['format'],
             'variableRole': 'Identifier'
         }
+        return transformed
 
     def transform_name_title_description(self, input: dict) -> dict:
         if input is None:
@@ -59,31 +53,34 @@ class Transformer:
             'description': self.get_norwegian_text(input['description'])
         }
 
-    def transform_valuedomain(self, valuedomain: dict) -> dict:
-        transformed = {}
-
-        # Dette må kalles for å plassere disse feltene til datoointaerval elementene i listen
-
-        if 'description' in valuedomain.keys():
-            transformed['description'] = self.get_norwegian_text(valuedomain['description'])
-        elif 'measurementUnitDescription' in valuedomain.keys():
-            transformed['description'] = self.get_norwegian_text(valuedomain['measurementUnitDescription'])
-
-        if 'measurementUnitDescription' in valuedomain.keys():
-            transformed['unitOfMeasure'] = self.get_norwegian_text(valuedomain['measurementUnitDescription'])
-
-        if 'codeList' in valuedomain.keys():
-            print('ok')
+    def transform_represented_variables(self, entity: dict, start: str, stop: str) -> list:
+        value_domain = entity['valueDomain']
+        description = self.get_norwegian_text(entity['description'])
+        if 'codeList' in value_domain.keys():
+            return self.transform_value_domain_with_codelist(value_domain, description)
         else:
-            print('not ok')
+            return self.transform_value_domain_without_codelist(value_domain, description, start, stop)
 
+    def transform_value_domain_without_codelist(self, value_domain: dict, description: str, start: str, stop: str) -> list:
+        transformed = []
+        represented_variable = {}
+        time_period = [ self.to_date(start), self.to_date(stop)]
+        represented_variable["validPeriod"] = self.calculate_valid_period(time_period)
+        represented_variable["description"] = description
+        value_domain_out = {}
+        if self.create_description_from_value_domain(value_domain) is not None:
+            value_domain_out["description"] = self.create_description_from_value_domain(value_domain)
+        if self.create_mesurement_unit_description_from_value_domain(value_domain) is not None:
+            value_domain_out["unitOfMeasure"] = self.create_mesurement_unit_description_from_value_domain(value_domain)
+        represented_variable["valueDomain"] = value_domain_out
+        transformed.append(represented_variable)
         return transformed
 
-    def transform_represented_variables(self, valuedomain: dict) -> list:
+    def transform_value_domain_with_codelist(self, value_domain: dict, description: str) -> list:
         transformed = []
 
         dates_from_all_code_items = []
-        for code_item in valuedomain['codeList']['topLevelCodeItems']:
+        for code_item in value_domain['codeList']['topLevelCodeItems']:
             if 'validityPeriodStart' in code_item:
                 dates_from_all_code_items.append(code_item['validityPeriodStart'])
             if 'validityPeriodStop' in code_item:
@@ -92,16 +89,12 @@ class Transformer:
         time_periods = self.calculate_time_periods(dates_from_all_code_items)
 
         for time_period in time_periods:
-            represented_variable = {}
-            if self.create_description_from_value_domain(valuedomain) is not None:
-                represented_variable["description"] = self.create_description_from_value_domain(valuedomain)
-            if self.create_mesurement_unit_description_from_value_domain(valuedomain) is not None:
-                represented_variable["unitOfMeasure"] = self.create_mesurement_unit_description_from_value_domain(valuedomain)
-            represented_variable["validPeriod"] = self.calculate_valid_period(time_period)
+            represented_variable = {"description": description,
+                                    "validPeriod": self.calculate_valid_period(time_period)}
 
-            if 'codeList' in valuedomain.keys():
+            if 'codeList' in value_domain.keys():
                 code_list_out = []
-                for code_item in valuedomain['codeList']['topLevelCodeItems']:
+                for code_item in value_domain['codeList']['topLevelCodeItems']:
                     self.select_code_item(code_item, code_list_out, time_period)
 
                 value_domain_out = {

@@ -24,6 +24,8 @@ def create_list_of_codes(code_list: list) -> list:
 class TestTransformer(unittest.TestCase):
     t = Transformer()
 
+    description = 'Dette er description fra entiteten som eier valuedomain'
+
     def test_name_title_description(self):
         """ Common test for UnitType and SubjectField """
         actual = self.t.transform_name_title_description(fixture.name_title_description)
@@ -36,29 +38,19 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(expected['name'], actual['name'])
         self.assertEqual(expected['label'], actual['label'])
         self.assertEqual(expected['dataType'], actual['dataType'])
-
-        self.assertEqual(expected['representedVariables'][0]['validPeriod']['start'],
-                         actual['representedVariables'][0]['validPeriod']['start'])
-        self.assertEqual(expected['representedVariables'][0]['validPeriod']['stop'],
-                         actual['representedVariables'][0]['validPeriod']['stop'])
+        self.assertEqual(expected['representedVariables'][0]['validPeriod'],
+                         actual['representedVariables'][0]['validPeriod'])
         self.assertEqual(expected['representedVariables'][0]['description'],
                          actual['representedVariables'][0]['description'])
         self.assertEqual(expected['representedVariables'][0]['valueDomain']['description'],
                          actual['representedVariables'][0]['valueDomain']['description'])
         self.assertEqual(expected['representedVariables'][0]['valueDomain']['unitOfMeasure'],
                          actual['representedVariables'][0]['valueDomain']['unitOfMeasure'])
-
         self.assertEqual(expected['keyType'], actual['keyType'])
         self.assertEqual(expected['format'], actual['format'])
         self.assertEqual(expected['variableRole'], actual['variableRole'])
 
         self.assertEqual(fixture.expected_identifier, actual)
-
-    def test_valuedomain_without_codelist(self):
-        actual = self.t.transform_valuedomain(fixture.valuedomain_without_codelist)
-        expected = fixture.expected_valuedomain_without_codelist
-        self.assertEqual(expected['description'], actual['description'])
-        self.assertEqual(expected['unitOfMeasure'], actual['unitOfMeasure'])
 
     def test_days_since_epoch(self):
         self.assertEqual(10957, self.t.days_since_epoch('2000-01-01'))
@@ -73,8 +65,9 @@ class TestTransformer(unittest.TestCase):
         ]
         self.assertEqual(expected, actual)
 
-    def test_represented_variables_same_start_date(self):
-        actual = self.t.transform_represented_variables(fixture.valuedomain_with_codelist_same_start_date)
+    def test_value_domain_with_codelist_same_start_date(self):
+        actual = self.t.transform_value_domain_with_codelist(fixture.valuedomain_with_codelist_same_start_date,
+                                                             self.description)
         expected = fixture.expected_valuedomain_with_codelist_same_start_date
 
         self.assert_values_from_value_domain(expected, actual, 0)
@@ -82,8 +75,9 @@ class TestTransformer(unittest.TestCase):
         self.assertFalse('stop' in actual[0]['validPeriod'].keys())
         self.assertEqual(create_list_of_codes(actual[0]['valueDomain']['codeList']), ['CAT', 'DOG', 'FISH'])
 
-    def test_represented_variables_different_start_dates(self):
-        actual = self.t.transform_represented_variables(fixture.valuedomain_with_codelist_different_start_dates)
+    def test_value_domain_with_codelist_different_start_dates(self):
+        actual = self.t.transform_value_domain_with_codelist(fixture.valuedomain_with_codelist_different_start_dates,
+                                                             self.description)
         expected = fixture.expected_valuedomain_with_codelist_different_start_dates
 
         self.assert_values_from_value_domain(expected, actual, 0)
@@ -106,9 +100,9 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(create_list_of_codes(actual[3]['valueDomain']['codeList']),
                          ['BIRD', 'CAT', 'DOG', 'FISH', 'RABBIT'])
 
-    def test_represented_variables_different_start_and_stop_dates(self):
-        actual = self.t.transform_represented_variables(
-            fixture.valuedomain_with_codelist_different_start_and_stop_dates)
+    def test_value_domain_with_codelist_different_start_and_stop_dates(self):
+        actual = self.t.transform_value_domain_with_codelist(
+            fixture.valuedomain_with_codelist_different_start_and_stop_dates, self.description)
         expected = fixture.expected_valuedomain_with_codelist_different_start_and_stop_dates
 
         self.assert_values_from_value_domain(expected, actual, 0)
@@ -207,8 +201,7 @@ class TestTransformer(unittest.TestCase):
                 {"languageCode": "no", "value": "Katt"},
                 {"languageCode": "en", "value": "Cat"}
             ],
-            "validityPeriodStart": "2008-01-01",
-            "validityPeriodStop": "2010-12-31"
+            "validityPeriodStart": "2008-01-01"
         }
         code_list_out = []
         time_period = [datetime(2008, 10, 1, 0, 0), None]
