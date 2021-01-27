@@ -113,7 +113,6 @@ class Transformer:
         return transformed
 
     def select_code_item(self, code_item, code_list_out, time_period):
-
         time_period_start = time_period[0]
         time_period_stop = None if time_period[1] is None else time_period[1]
 
@@ -122,7 +121,7 @@ class Transformer:
             if 'validityPeriodStop' in code_item.keys() else None
 
         if time_period_stop is None:
-            if validity_period_start <= time_period_start:
+            if validity_period_start <= time_period_start and validity_period_stop is None:
                 self.append_code_item_to_list(code_item, code_list_out)
         else:
             if validity_period_stop is None:

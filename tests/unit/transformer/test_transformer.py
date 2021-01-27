@@ -129,10 +129,8 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(len(actual[3]['valueDomain']['codeList']), 3)
         self.assertEqual(create_list_of_codes(actual[3]['valueDomain']['codeList']), ['CAT', 'FISH', 'RABBIT'])
 
-        # Denne feiler, BIRD er stoppet, skal ikke være med. Må fikses!
-        # self.assertEqual(len(actual[4]['valueDomain']['codeList']), 4)
-        # self.assertEqual(create_list_of_codes(actual[4]['valueDomain']['codeList']),
-        #                  ['CAT', 'DOG', 'FISH', 'RABBIT'])
+        self.assertEqual(len(actual[4]['valueDomain']['codeList']), 4)
+        self.assertEqual(create_list_of_codes(actual[4]['valueDomain']['codeList']), ['CAT', 'DOG', 'FISH', 'RABBIT'])
 
     def assert_values_from_value_domain(self, expected: dict, actual: dict, indeks: int):
         self.assertEqual(expected[indeks]['description'], actual[indeks]['description'])
