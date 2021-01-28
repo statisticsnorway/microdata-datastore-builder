@@ -1,0 +1,10 @@
+{
+    "dataStore": {
+        "description": "Registerdata som inngår i SSBs statistikkproduksjon",
+        "label": "Data fra SSB",
+        "languageCode": "no",
+        "name": "no.ssb.fdb"
+    },
+    "dataStructures": [
+    ]
+}
