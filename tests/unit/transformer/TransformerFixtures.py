@@ -1,3 +1,7 @@
+from datetime import datetime
+
+description = 'Dette er description fra entiteten som eier valuedomain'
+
 name_title_description = {
     "name": "PERSON",
     "title": [
@@ -245,8 +249,8 @@ expected_identifier = {
     "representedVariables": [
         {
             "validPeriod": {
-                "start": 16801,
-                "stop": 18261
+                "start": datetime.strptime('2016-01-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2019-12-31', '%Y-%m-%d')
             },
             "valueDomain": {
                 "description": "N/A",
@@ -264,7 +268,426 @@ expected_identifier = {
     "variableRole": "Identifier"
 }
 
-expected_valuedomain_without_codelist = {
-    'description': 'N/A',
-    'unitOfMeasure': 'N/A'
+valuedomain_without_codelist = {
+        "name": "FOEDSELSNUMMER",
+        "title": [
+            {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
+            {"languageCode": "en", "value": "Pseudonym for persons national identity number"}
+        ],
+        "uriDefinition": [
+            "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb",
+            "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
+        ],
+        "measurementUnitDescription": [
+            {"languageCode": "no", "value": "N/A"},
+            {"languageCode": "en", "value": "N/A"}
+        ]
 }
+
+valuedomain_with_codelist_same_start_date = {
+        "name": "PET_TYPE",
+        "title": [
+            {"languageCode": "no", "value": "Type kjæledyr"},
+            {"languageCode": "en", "value": "Type of pet"}
+        ],
+        "description": [
+            {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
+            {"languageCode": "en", "value": "Type of pet in our petshop"}
+        ],
+        "codeList": {
+            "name": "PET_TYPE",
+            "topLevelCodeItems": [
+                {
+                    "code": "CAT",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Katt"},
+                        {"languageCode": "en", "value": "Cat"}
+                    ],
+                    "validityPeriodStart": "2010-01-01"
+                },
+                {
+                    "code": "DOG",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Hund"},
+                        {"languageCode": "en", "value": "Dog"}
+                    ],
+                    "validityPeriodStart": "2010-01-01"
+                },
+                {
+                    "code": "FISH",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Fisk"},
+                        {"languageCode": "en", "value": "Fish"}
+                    ],
+                    "validityPeriodStart": "2010-01-01"
+                }
+            ]
+        }
+    }
+
+expected_valuedomain_with_codelist_same_start_date = [
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2010-01-01', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Hund",
+                    "code": "DOG"
+                },
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    }
+]
+
+valuedomain_with_codelist_different_start_dates = {
+        "name": "PET_TYPE",
+        "title": [
+            {"languageCode": "no", "value": "Type kjæledyr"},
+            {"languageCode": "en", "value": "Type of pet"}
+        ],
+        "description": [
+            {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
+            {"languageCode": "en", "value": "Type of pet in our petshop"}
+        ],
+        "codeList": {
+            "name": "PET_TYPE",
+            "topLevelCodeItems": [
+                {
+                    "code": "CAT",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Katt"},
+                        {"languageCode": "en", "value": "Cat"}
+                    ],
+                    "validityPeriodStart": "2010-01-01"
+                },
+                {
+                    "code": "DOG",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Hund"},
+                        {"languageCode": "en", "value": "Dog"}
+                    ],
+                    "validityPeriodStart": "2012-01-01"
+                },
+                {
+                    "code": "FISH",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Fisk"},
+                        {"languageCode": "en", "value": "Fish"}
+                    ],
+                    "validityPeriodStart": "2008-10-01"
+                },
+                {
+                    "code": "BIRD",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Fugl"},
+                        {"languageCode": "en", "value": "Bird"}
+                    ],
+                    "validityPeriodStart": "2010-01-01"
+                },
+                {
+                    "code": "RABBIT",
+                    "categoryTitle": [
+                        {"languageCode": "no", "value": "Kanin"},
+                        {"languageCode": "en", "value": "Rabbit"}
+                    ],
+                    "validityPeriodStart": "2011-06-01"
+                }
+            ]
+        }
+    }
+
+expected_valuedomain_with_codelist_different_start_dates = [
+        {
+            "description": description,
+            "validPeriod": {
+                "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": description,
+            "validPeriod": {
+                "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": description,
+            "validPeriod": {
+                "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
+                "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    },
+                    {
+                        "category": "Kanin",
+                        "code": "RABBIT"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        },
+        {
+            "description": description,
+            "validPeriod": {
+                "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
+            },
+            "valueDomain": {
+                "codeList": [
+                    {
+                        "category": "Fisk",
+                        "code": "FISH"
+                    },
+                    {
+                        "category": "Katt",
+                        "code": "CAT"
+                    },
+                    {
+                        "category": "Fugl",
+                        "code": "BIRD"
+                    },
+                    {
+                        "category": "Kanin",
+                        "code": "RABBIT"
+                    },
+                    {
+                        "category": "Hund",
+                        "code": "DOG"
+                    }
+                ],
+                "missingValues": [
+                ]
+            }
+        }
+]
+
+valuedomain_with_codelist_different_start_and_stop_dates = {
+    "name": "PET_TYPE",
+    "title": [
+        {"languageCode": "no", "value": "Type kjæledyr"},
+        {"languageCode": "en", "value": "Type of pet"}
+    ],
+    "description": [
+        {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
+        {"languageCode": "en", "value": "Type of pet in our petshop"}
+    ],
+    "codeList": {
+        "name": "PET_TYPE",
+        "topLevelCodeItems": [
+            {
+                "code": "CAT",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Katt"},
+                    {"languageCode": "en", "value": "Cat"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            },
+            {
+                "code": "DOG",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Hund"},
+                    {"languageCode": "en", "value": "Dog"}
+                ],
+                "validityPeriodStart": "2012-01-01"
+            },
+            {
+                "code": "FISH",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Fisk"},
+                    {"languageCode": "en", "value": "Fish"}
+                ],
+                "validityPeriodStart": "2008-10-01"
+            },
+            {
+                "code": "BIRD",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Fugl"},
+                    {"languageCode": "en", "value": "Bird"}
+                ],
+                "validityPeriodStart": "2010-01-01",
+                "validityPeriodStop": "2011-01-01"
+            },
+            {
+                "code": "RABBIT",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Kanin"},
+                    {"languageCode": "en", "value": "Rabbit"}
+                ],
+                "validityPeriodStart": "2011-06-01"
+            }
+        ]
+    }
+}
+
+expected_valuedomain_with_codelist_different_start_and_stop_dates = [
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
+            "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
+            "stop": datetime.strptime('2010-12-31', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Fugl",
+                    "code": "BIRD"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2011-01-01', '%Y-%m-%d'),
+            "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
+            "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Kanin",
+                    "code": "RABBIT"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Kanin",
+                    "code": "RABBIT"
+                },
+                {
+                    "category": "Hund",
+                    "code": "DOG"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    }
+]
