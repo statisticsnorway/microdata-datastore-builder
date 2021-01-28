@@ -1,4 +1,5 @@
 from datetime import datetime
+from transformer import Transformer as Tr
 
 description = 'Dette er description fra entiteten som eier valuedomain'
 
@@ -235,8 +236,8 @@ expected_dataset = {
     "populationDescription": "Alle personer med inntekt.",
     "temporality": "ACCUMULATED",
     "temporalCoverage": {
-        "start": 16801,  # 2016-01-01
-        "stop": 18261  # 2019-12-31
+        "start": Tr.days_since_epoch('2016-01-01'),
+        "stop": Tr.days_since_epoch('2019-12-31')
     },
     "subjectFields": ["Inntekt"],
     "languageCode": "no"
@@ -249,8 +250,8 @@ expected_identifier = {
     "representedVariables": [
         {
             "validPeriod": {
-                "start": datetime.strptime('2016-01-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2019-12-31', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2016-01-01'),
+                "stop": Tr.days_since_epoch('2019-12-31')
             },
             "valueDomain": {
                 "description": "N/A",
@@ -329,7 +330,7 @@ expected_valuedomain_with_codelist_same_start_date = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2010-01-01', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2010-01-01')
         },
         "valueDomain": {
             "codeList": [
@@ -413,8 +414,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": description,
             "validPeriod": {
-                "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2008-10-01'),
+                "stop": Tr.days_since_epoch('2009-12-31')
             },
             "valueDomain": {
                 "codeList": [
@@ -430,8 +431,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": description,
             "validPeriod": {
-                "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2010-01-01'),
+                "stop": Tr.days_since_epoch('2011-05-31')
             },
             "valueDomain": {
                 "codeList": [
@@ -455,8 +456,8 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": description,
             "validPeriod": {
-                "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2011-06-01'),
+                "stop": Tr.days_since_epoch('2011-12-31')
             },
             "valueDomain": {
                 "codeList": [
@@ -484,7 +485,7 @@ expected_valuedomain_with_codelist_different_start_dates = [
         {
             "description": description,
             "validPeriod": {
-                "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2012-01-01')
             },
             "valueDomain": {
                 "codeList": [
@@ -577,8 +578,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2008-10-01'),
+            "stop": Tr.days_since_epoch('2009-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -594,8 +595,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2010-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2010-01-01'),
+            "stop": Tr.days_since_epoch('2010-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -619,8 +620,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2011-01-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2011-01-01'),
+            "stop": Tr.days_since_epoch('2011-05-31')
         },
         "valueDomain": {
             "codeList": [
@@ -640,8 +641,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2011-06-01'),
+            "stop": Tr.days_since_epoch('2011-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -665,7 +666,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2012-01-01')
         },
         "valueDomain": {
             "codeList": [
