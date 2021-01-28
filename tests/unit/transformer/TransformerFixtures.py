@@ -66,8 +66,24 @@ dataset = {
     },
     "measure": {
         "name": "TEST_PERSON_INCOME",
+        "title": [
+            {"languageCode": "no", "value": "Personidentifikator"},
+            {"languageCode": "en", "value": "National identity number"}
+        ],
         "uriDefinition": ["https://data.skatteetaten.no/begrep/personinntekt%20fra%20l%C3%B8nnsinntekt"],
         "dataType": "LONG",
+        "format": "RandomUInt64",
+        "unitType": {
+            "name": "PERSON",
+            "title": [
+                {"languageCode": "no", "value": "Person"},
+                {"languageCode": "en", "value": "Person"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Statistisk enhet er person (individ, enkeltmenneske)."},
+                {"languageCode": "en", "value": "Statistical unit is person"}
+            ]
+        },
         "subjectField": [
             {
                 "name": "INCOME_PROPERTY_TAX",
@@ -182,6 +198,48 @@ dataset = {
             }
         }
     ]
+}
+
+expected_dataset = {
+    "attributeVariables": [
+        {
+            "label": "Startdato",
+            "dataType": "Instant",
+            "representedVariables": "TODO",
+            "name": "START",
+            "variableRole": "Start"
+        },
+        {
+            "label": "Stoppdato",
+            "dataType": "Instant",
+            "representedVariables": "TODO",
+            "name": "STOP",
+            "variableRole": "Stop"
+        }
+    ],
+    "identifierVariables": "[TODO]",
+    "measureVariable": {
+        "label": "Personidentifikator",
+        "name": "TEST_PERSON_INCOME",
+        "dataType": "Long",
+        "representedVariables": "TODO",
+        "format": "RandomUInt64",
+        "keyType": {
+            "name": "PERSON",
+            "label": "Person",
+            "description": "Statistisk enhet er person (individ, enkeltmenneske)."
+        },
+        "variableRole": "Measure"
+    },
+    "name": "TEST_PERSON_INCOME",
+    "populationDescription": "Alle personer med inntekt.",
+    "temporality": "ACCUMULATED",
+    "temporalCoverage": {
+        "start": 16801,  # 2016-01-01
+        "stop": 18261  # 2019-12-31
+    },
+    "subjectFields": ["Inntekt"],
+    "languageCode": "no"
 }
 
 expected_identifier = {

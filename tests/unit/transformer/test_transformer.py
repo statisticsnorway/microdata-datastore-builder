@@ -31,6 +31,12 @@ class TestTransformer(unittest.TestCase):
         actual = self.t.transform_name_title_description(fixture.name_title_description)
         self.assertEqual(fixture.expected_name_title_description, actual)
 
+    def test_dataset(self):
+        actual = self.t.transform_dataset(fixture.dataset)
+        expected = fixture.expected_dataset
+
+        self.assertEqual(expected, actual)
+
     def test_identifier(self):
         actual = self.t.transform_identifier(fixture.dataset)
         expected = fixture.expected_identifier

@@ -21,6 +21,98 @@ class Transformer:
         return datetime.strptime(date_string, '%Y-%m-%d')
 
     @staticmethod
+    def transform_dataset(dataset: dict) -> dict:
+        return {
+            "attributeVariables": Transformer.get_attribute_variables(dataset['attribute']),
+            "identifierVariables": "[TODO]",
+            "measureVariable": Transformer.transform_measure(dataset['measure']),
+            'name': dataset['name'],
+            "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
+            "temporality": dataset['temporalityType'],
+            "temporalCoverage": Transformer.get_temporal_coverage(dataset['dataRevision']),
+            "subjectFields": Transformer.get_subject_fields(dataset['measure']['subjectField']),
+            "languageCode": "no"
+        }
+
+    @staticmethod
+    def transform_measure(measure: dict) -> dict:
+        return {
+            'name': measure['name'],
+            'label': Transformer.get_norwegian_text(measure['title']),
+            'dataType': Transformer.transform_data_type(measure['dataType']),
+            'representedVariables': "TODO",
+            'keyType': Transformer.transform_unit_type(measure["unitType"]),
+            'format': measure['format'],
+            'variableRole': "Measure"
+        }
+
+    @staticmethod
+    def get_attribute_variables(attributes: list) -> list:
+        result = []
+        for attribute in attributes:
+            attr = {
+                "name": attribute["name"],
+                "label": Transformer.get_norwegian_text(attribute["title"]),
+                "representedVariables": "TODO",
+                "dataType": Transformer.transform_data_type(attribute['dataType']),
+                "variableRole": Transformer.get_variable_role(attribute['attributeType'])
+            }
+            if "unitType" in attribute:
+                attr['keyType'] = Transformer.transform_unit_type(attribute["unitType"])
+            if "format" in attribute:
+                attr['format'] = attribute["format"]
+
+            result.append(attr)
+
+        return result
+
+    @staticmethod
+    def get_variable_role(attribute_type: str) -> str:
+        variable_roles_mapping = {
+            "stop": "Stop",
+            "start": "Start",
+            "source": "Source"
+        }
+
+        return variable_roles_mapping.get(attribute_type.lower(), attribute_type)
+
+    @staticmethod
+    def transform_data_type(data_type: str) -> str:
+        data_types_mapping = {
+            "STRING": "String",
+            "LONG": "Long",
+            "DOUBLE": "Double",
+            "DATE": "Instant"
+        }
+
+        return data_types_mapping.get(data_type, data_type)
+
+    @staticmethod
+    def transform_unit_type(unit_type: dict) -> dict:
+        if not unit_type:
+            return {}
+
+        return {
+            'name': unit_type["name"],
+            'label': Transformer.get_norwegian_text(unit_type["title"]),
+            'description': Transformer.get_norwegian_text(unit_type["description"])
+        }
+
+    @staticmethod
+    def get_temporal_coverage(data_revision: dict) -> dict:
+        period = {
+            "start": Transformer.days_since_epoch(data_revision['temporalCoverageStart'])
+        }
+        if data_revision['temporalCoverageLatest']:
+            period["stop"] = Transformer.days_since_epoch(data_revision['temporalCoverageLatest'])
+
+        return period
+
+    @staticmethod
+    def get_subject_fields(subject_fields: dict) -> list:
+        return [Transformer.get_norwegian_text(subject_field['title']) for subject_field in subject_fields]
+
+    @staticmethod
     def calculate_valid_period(time_period: list) -> dict:
         valid_period = {"start": time_period[0]}
         if 2 == len(time_period) and time_period[1] is not None:
@@ -45,7 +137,7 @@ class Transformer:
         return transformed
 
     def transform_name_title_description(self, input: dict) -> dict:
-        if input is None:
+        if not input:
             return {}
         return {
             'name': input['name'],
