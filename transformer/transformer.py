@@ -27,7 +27,7 @@ class Transformer:
         return {
             "attributeVariables": Transformer.get_attribute_variables(dataset['attribute'], start, stop),
             "identifierVariables": Transformer.transform_identifier(dataset['identifier'], start, stop),
-            "measureVariable": Transformer.transform_measure(dataset['measure'], start, stop),
+            "measureVariable": Transformer.transform_measure(dataset['measure'], dataset['title'], start, stop),
             'name': dataset['name'],
             "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
             "temporality": dataset['temporalityType'],
@@ -37,16 +37,18 @@ class Transformer:
         }
 
     @staticmethod
-    def transform_measure(measure: dict, start: str, stop: str) -> dict:
-        return {
-            'name': measure['name'],
-            'label': Transformer.get_norwegian_text(measure['title']),
-            'dataType': Transformer.transform_data_type(measure['dataType']),
-            'representedVariables': Transformer.transform_represented_variables(measure, start, stop),
-            'keyType': Transformer.transform_unit_type(measure["unitType"]),
-            'format': measure['format'],
-            'variableRole': "Measure"
-        }
+    def transform_measure(measure: dict, dataset_title: str, start: str, stop: str) -> dict:
+        result = {}
+        result['name'] = measure['name']
+        result['label'] = Transformer.get_norwegian_text(measure['title']) if 'title' in measure.keys() else dataset_title
+        result['dataType'] = Transformer.transform_data_type(measure['dataType'])
+        result['representedVariables'] = Transformer.transform_represented_variables(measure, start, stop)
+        if 'unitType' in measure.keys():
+            result['keyType'] = Transformer.transform_unit_type(measure["unitType"])
+        if 'format' in measure.keys():
+            result['format'] = measure['format']
+        result['variableRole'] = "Measure"
+        return result
 
     @staticmethod
     def get_attribute_variables(attributes: list, start: str, stop: str) -> list:
