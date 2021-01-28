@@ -1,11 +1,19 @@
 import json
 from pathlib import Path
 
-from .Transformer import Transformer
+from .transformer import Transformer
+
+"""
+Read a json file, transform and write to another file
+"""
 
 
-def transform_to_file():
-    pass
+def transform_to_file(read_from: str, write_to:str):
+    with open(read_from) as json_file:
+        dataset = json.load(json_file)
+    transformed_dataset = Transformer.transform_dataset(dataset)
+    with open(write_to, 'w') as outfile:
+        json.dump(transformed_dataset, outfile, indent=4)
 
 
 def update_metadata_all_file(source_path: Path, dataset: dict) -> None:
