@@ -9,7 +9,7 @@ if __name__ == '__main__':
     print("test_transformer.py __main__ called")
     sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir)))
 
-from tests.unit.transformer import TransformerFixtures as fixture
+from tests.unit.transformer import transformer_fixtures as fixture
 from transformer import Transformer
 
 
