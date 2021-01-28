@@ -38,7 +38,7 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_identifier(self):
-        actual = self.t.transform_identifier(fixture.dataset)
+        actual = self.t.transform_identifier(fixture.dataset['identifier'], '2016-01-01', '2019-12-31')[0]
         expected = fixture.expected_identifier
 
         self.assertEqual(expected['name'], actual['name'])
