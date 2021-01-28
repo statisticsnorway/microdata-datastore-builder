@@ -1,4 +1,5 @@
 from datetime import datetime
+from transformer import Transformer as Tr
 
 description = 'Dette er description fra entiteten som eier valuedomain'
 
@@ -69,6 +70,10 @@ dataset = {
         "title": [
             {"languageCode": "no", "value": "Personidentifikator"},
             {"languageCode": "en", "value": "National identity number"}
+        ],
+        "description": [
+            {"languageCode": "no", "value": "Identifikator for person"},
+            {"languageCode": "en", "value": "Persons national identity number"}
         ],
         "uriDefinition": ["https://data.skatteetaten.no/begrep/personinntekt%20fra%20l%C3%B8nnsinntekt"],
         "dataType": "LONG",
@@ -205,24 +210,83 @@ expected_dataset = {
         {
             "label": "Startdato",
             "dataType": "Instant",
-            "representedVariables": "TODO",
+            'representedVariables': [
+                {
+                    'description': 'Startdato/måletidspunktet for hendelsen',
+                    'validPeriod': {
+                        'start': 16801,
+                        'stop': 18261
+                    },
+                    'valueDomain': {
+                        'description': 'N/A',
+                        'unitOfMeasure': 'N/A'
+                    }
+                }
+            ],
             "name": "START",
             "variableRole": "Start"
         },
         {
             "label": "Stoppdato",
             "dataType": "Instant",
-            "representedVariables": "TODO",
+            'representedVariables': [
+                {
+                    'description': 'Stoppdato/sluttdato for hendelsen',
+                    'validPeriod': {
+                        'start': 16801,
+                        'stop': 18261
+                    },
+                    'valueDomain': {
+                        'description': 'N/A',
+                        'unitOfMeasure': 'N/A'
+                    }
+                }
+            ],
             "name": "STOP",
             "variableRole": "Stop"
         }
     ],
-    "identifierVariables": "[TODO]",
+    "identifierVariables": [
+        {
+            "name": "PERSON_ID_1",
+            "label": "Personidentifikator",
+            "dataType": "Long",
+            "representedVariables": [
+                {
+                    "validPeriod": {
+                        "start": Tr.days_since_epoch('2016-01-01'),
+                        "stop": Tr.days_since_epoch('2019-12-31')
+                    },
+                    "valueDomain": {
+                        "description": "N/A",
+                        "unitOfMeasure": "N/A"
+                    },
+                    "description": "Identifikator for person"
+                }
+            ],
+            "keyType": {
+                "name": "PERSON",
+                "label": "Person",
+                "description": "Statistisk enhet er person (individ, enkeltmenneske)."
+            },
+            "format": "RandomUInt48",
+            "variableRole": "Identifier"
+        }
+    ],
     "measureVariable": {
         "label": "Personidentifikator",
         "name": "TEST_PERSON_INCOME",
         "dataType": "Long",
-        "representedVariables": "TODO",
+        "representedVariables": [
+            {
+                'description': 'Identifikator for person',
+                'validPeriod':
+                    {
+                        'start': 16801,
+                        'stop': 18261
+                    }
+            }
+        ],
         "format": "RandomUInt64",
         "keyType": {
             "name": "PERSON",
@@ -235,8 +299,8 @@ expected_dataset = {
     "populationDescription": "Alle personer med inntekt.",
     "temporality": "ACCUMULATED",
     "temporalCoverage": {
-        "start": 16801,  # 2016-01-01
-        "stop": 18261  # 2019-12-31
+        "start": Tr.days_since_epoch('2016-01-01'),
+        "stop": Tr.days_since_epoch('2019-12-31')
     },
     "subjectFields": ["Inntekt"],
     "languageCode": "no"
@@ -249,8 +313,8 @@ expected_identifier = {
     "representedVariables": [
         {
             "validPeriod": {
-                "start": datetime.strptime('2016-01-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2019-12-31', '%Y-%m-%d')
+                "start": Tr.days_since_epoch('2016-01-01'),
+                "stop": Tr.days_since_epoch('2019-12-31')
             },
             "valueDomain": {
                 "description": "N/A",
@@ -269,67 +333,67 @@ expected_identifier = {
 }
 
 valuedomain_without_codelist = {
-        "name": "FOEDSELSNUMMER",
-        "title": [
-            {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
-            {"languageCode": "en", "value": "Pseudonym for persons national identity number"}
-        ],
-        "uriDefinition": [
-            "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb",
-            "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
-        ],
-        "measurementUnitDescription": [
-            {"languageCode": "no", "value": "N/A"},
-            {"languageCode": "en", "value": "N/A"}
-        ]
+    "name": "FOEDSELSNUMMER",
+    "title": [
+        {"languageCode": "no", "value": "Pseudonymisert fødselsnummer"},
+        {"languageCode": "en", "value": "Pseudonym for persons national identity number"}
+    ],
+    "uriDefinition": [
+        "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb",
+        "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
+    ],
+    "measurementUnitDescription": [
+        {"languageCode": "no", "value": "N/A"},
+        {"languageCode": "en", "value": "N/A"}
+    ]
 }
 
 valuedomain_with_codelist_same_start_date = {
+    "name": "PET_TYPE",
+    "title": [
+        {"languageCode": "no", "value": "Type kjæledyr"},
+        {"languageCode": "en", "value": "Type of pet"}
+    ],
+    "description": [
+        {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
+        {"languageCode": "en", "value": "Type of pet in our petshop"}
+    ],
+    "codeList": {
         "name": "PET_TYPE",
-        "title": [
-            {"languageCode": "no", "value": "Type kjæledyr"},
-            {"languageCode": "en", "value": "Type of pet"}
-        ],
-        "description": [
-            {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
-            {"languageCode": "en", "value": "Type of pet in our petshop"}
-        ],
-        "codeList": {
-            "name": "PET_TYPE",
-            "topLevelCodeItems": [
-                {
-                    "code": "CAT",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Katt"},
-                        {"languageCode": "en", "value": "Cat"}
-                    ],
-                    "validityPeriodStart": "2010-01-01"
-                },
-                {
-                    "code": "DOG",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Hund"},
-                        {"languageCode": "en", "value": "Dog"}
-                    ],
-                    "validityPeriodStart": "2010-01-01"
-                },
-                {
-                    "code": "FISH",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Fisk"},
-                        {"languageCode": "en", "value": "Fish"}
-                    ],
-                    "validityPeriodStart": "2010-01-01"
-                }
-            ]
-        }
+        "topLevelCodeItems": [
+            {
+                "code": "CAT",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Katt"},
+                    {"languageCode": "en", "value": "Cat"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            },
+            {
+                "code": "DOG",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Hund"},
+                    {"languageCode": "en", "value": "Dog"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            },
+            {
+                "code": "FISH",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Fisk"},
+                    {"languageCode": "en", "value": "Fish"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            }
+        ]
     }
+}
 
 expected_valuedomain_with_codelist_same_start_date = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2010-01-01', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2010-01-01')
         },
         "valueDomain": {
             "codeList": [
@@ -353,166 +417,166 @@ expected_valuedomain_with_codelist_same_start_date = [
 ]
 
 valuedomain_with_codelist_different_start_dates = {
+    "name": "PET_TYPE",
+    "title": [
+        {"languageCode": "no", "value": "Type kjæledyr"},
+        {"languageCode": "en", "value": "Type of pet"}
+    ],
+    "description": [
+        {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
+        {"languageCode": "en", "value": "Type of pet in our petshop"}
+    ],
+    "codeList": {
         "name": "PET_TYPE",
-        "title": [
-            {"languageCode": "no", "value": "Type kjæledyr"},
-            {"languageCode": "en", "value": "Type of pet"}
-        ],
-        "description": [
-            {"languageCode": "no", "value": "Type kjæledyr vi selger i butikken"},
-            {"languageCode": "en", "value": "Type of pet in our petshop"}
-        ],
-        "codeList": {
-            "name": "PET_TYPE",
-            "topLevelCodeItems": [
+        "topLevelCodeItems": [
+            {
+                "code": "CAT",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Katt"},
+                    {"languageCode": "en", "value": "Cat"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            },
+            {
+                "code": "DOG",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Hund"},
+                    {"languageCode": "en", "value": "Dog"}
+                ],
+                "validityPeriodStart": "2012-01-01"
+            },
+            {
+                "code": "FISH",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Fisk"},
+                    {"languageCode": "en", "value": "Fish"}
+                ],
+                "validityPeriodStart": "2008-10-01"
+            },
+            {
+                "code": "BIRD",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Fugl"},
+                    {"languageCode": "en", "value": "Bird"}
+                ],
+                "validityPeriodStart": "2010-01-01"
+            },
+            {
+                "code": "RABBIT",
+                "categoryTitle": [
+                    {"languageCode": "no", "value": "Kanin"},
+                    {"languageCode": "en", "value": "Rabbit"}
+                ],
+                "validityPeriodStart": "2011-06-01"
+            }
+        ]
+    }
+}
+
+expected_valuedomain_with_codelist_different_start_dates = [
+    {
+        "description": description,
+        "validPeriod": {
+            "start": Tr.days_since_epoch('2008-10-01'),
+            "stop": Tr.days_since_epoch('2009-12-31')
+        },
+        "valueDomain": {
+            "codeList": [
                 {
-                    "code": "CAT",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Katt"},
-                        {"languageCode": "en", "value": "Cat"}
-                    ],
-                    "validityPeriodStart": "2010-01-01"
-                },
-                {
-                    "code": "DOG",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Hund"},
-                        {"languageCode": "en", "value": "Dog"}
-                    ],
-                    "validityPeriodStart": "2012-01-01"
-                },
-                {
-                    "code": "FISH",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Fisk"},
-                        {"languageCode": "en", "value": "Fish"}
-                    ],
-                    "validityPeriodStart": "2008-10-01"
-                },
-                {
-                    "code": "BIRD",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Fugl"},
-                        {"languageCode": "en", "value": "Bird"}
-                    ],
-                    "validityPeriodStart": "2010-01-01"
-                },
-                {
-                    "code": "RABBIT",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Kanin"},
-                        {"languageCode": "en", "value": "Rabbit"}
-                    ],
-                    "validityPeriodStart": "2011-06-01"
+                    "category": "Fisk",
+                    "code": "FISH"
                 }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": Tr.days_since_epoch('2010-01-01'),
+            "stop": Tr.days_since_epoch('2011-05-31')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Fugl",
+                    "code": "BIRD"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": Tr.days_since_epoch('2011-06-01'),
+            "stop": Tr.days_since_epoch('2011-12-31')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Fugl",
+                    "code": "BIRD"
+                },
+                {
+                    "category": "Kanin",
+                    "code": "RABBIT"
+                }
+            ],
+            "missingValues": [
+            ]
+        }
+    },
+    {
+        "description": description,
+        "validPeriod": {
+            "start": Tr.days_since_epoch('2012-01-01')
+        },
+        "valueDomain": {
+            "codeList": [
+                {
+                    "category": "Fisk",
+                    "code": "FISH"
+                },
+                {
+                    "category": "Katt",
+                    "code": "CAT"
+                },
+                {
+                    "category": "Fugl",
+                    "code": "BIRD"
+                },
+                {
+                    "category": "Kanin",
+                    "code": "RABBIT"
+                },
+                {
+                    "category": "Hund",
+                    "code": "DOG"
+                }
+            ],
+            "missingValues": [
             ]
         }
     }
-
-expected_valuedomain_with_codelist_different_start_dates = [
-        {
-            "description": description,
-            "validPeriod": {
-                "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
-            },
-            "valueDomain": {
-                "codeList": [
-                    {
-                        "category": "Fisk",
-                        "code": "FISH"
-                    }
-                ],
-                "missingValues": [
-                ]
-            }
-        },
-        {
-            "description": description,
-            "validPeriod": {
-                "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
-            },
-            "valueDomain": {
-                "codeList": [
-                    {
-                        "category": "Fisk",
-                        "code": "FISH"
-                    },
-                    {
-                        "category": "Katt",
-                        "code": "CAT"
-                    },
-                    {
-                        "category": "Fugl",
-                        "code": "BIRD"
-                    }
-                ],
-                "missingValues": [
-                ]
-            }
-        },
-        {
-            "description": description,
-            "validPeriod": {
-                "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
-                "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
-            },
-            "valueDomain": {
-                "codeList": [
-                    {
-                        "category": "Fisk",
-                        "code": "FISH"
-                    },
-                    {
-                        "category": "Katt",
-                        "code": "CAT"
-                    },
-                    {
-                        "category": "Fugl",
-                        "code": "BIRD"
-                    },
-                    {
-                        "category": "Kanin",
-                        "code": "RABBIT"
-                    }
-                ],
-                "missingValues": [
-                ]
-            }
-        },
-        {
-            "description": description,
-            "validPeriod": {
-                "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
-            },
-            "valueDomain": {
-                "codeList": [
-                    {
-                        "category": "Fisk",
-                        "code": "FISH"
-                    },
-                    {
-                        "category": "Katt",
-                        "code": "CAT"
-                    },
-                    {
-                        "category": "Fugl",
-                        "code": "BIRD"
-                    },
-                    {
-                        "category": "Kanin",
-                        "code": "RABBIT"
-                    },
-                    {
-                        "category": "Hund",
-                        "code": "DOG"
-                    }
-                ],
-                "missingValues": [
-                ]
-            }
-        }
 ]
 
 valuedomain_with_codelist_different_start_and_stop_dates = {
@@ -577,8 +641,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2008-10-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2009-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2008-10-01'),
+            "stop": Tr.days_since_epoch('2009-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -594,8 +658,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2010-01-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2010-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2010-01-01'),
+            "stop": Tr.days_since_epoch('2010-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -619,8 +683,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2011-01-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2011-05-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2011-01-01'),
+            "stop": Tr.days_since_epoch('2011-05-31')
         },
         "valueDomain": {
             "codeList": [
@@ -640,8 +704,8 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2011-06-01', '%Y-%m-%d'),
-            "stop": datetime.strptime('2011-12-31', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2011-06-01'),
+            "stop": Tr.days_since_epoch('2011-12-31')
         },
         "valueDomain": {
             "codeList": [
@@ -665,7 +729,7 @@ expected_valuedomain_with_codelist_different_start_and_stop_dates = [
     {
         "description": description,
         "validPeriod": {
-            "start": datetime.strptime('2012-01-01', '%Y-%m-%d')
+            "start": Tr.days_since_epoch('2012-01-01')
         },
         "valueDomain": {
             "codeList": [
