@@ -27,7 +27,7 @@ class Transformer:
         return {
             "attributeVariables": Transformer.get_attribute_variables(dataset['attribute'], start, stop),
             "identifierVariables": Transformer.transform_identifier(dataset['identifier'], start, stop),
-            "measureVariable": Transformer.transform_measure(dataset['measure']),
+            "measureVariable": Transformer.transform_measure(dataset['measure'], start, stop),
             'name': dataset['name'],
             "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
             "temporality": dataset['temporalityType'],
@@ -37,12 +37,12 @@ class Transformer:
         }
 
     @staticmethod
-    def transform_measure(measure: dict) -> dict:
+    def transform_measure(measure: dict, start: str, stop: str) -> dict:
         return {
             'name': measure['name'],
             'label': Transformer.get_norwegian_text(measure['title']),
             'dataType': Transformer.transform_data_type(measure['dataType']),
-            'representedVariables': "TODO",
+            'representedVariables': Transformer.transform_represented_variables(measure, start, stop),
             'keyType': Transformer.transform_unit_type(measure["unitType"]),
             'format': measure['format'],
             'variableRole': "Measure"
@@ -150,7 +150,7 @@ class Transformer:
     @staticmethod
     def transform_represented_variables(entity: dict, start: str, stop: str) -> list:
         value_domain = entity['valueDomain']
-        description = Transformer.get_norwegian_text(entity['description'])
+        description = Transformer.get_norwegian_text(entity['description']) if 'description' in entity else None
         if 'codeList' in value_domain.keys():
             return Transformer.transform_value_domain_with_codelist(value_domain, description)
         else:
@@ -169,7 +169,9 @@ class Transformer:
             value_domain_out["description"] = Transformer.create_description_from_value_domain(value_domain)
         if Transformer.create_mesurement_unit_description_from_value_domain(value_domain) is not None:
             value_domain_out["unitOfMeasure"] = Transformer.create_mesurement_unit_description_from_value_domain(value_domain)
-        represented_variable["valueDomain"] = value_domain_out
+
+        if value_domain_out:
+            represented_variable["valueDomain"] = value_domain_out
         transformed.append(represented_variable)
         return transformed
 
@@ -249,16 +251,15 @@ class Transformer:
     @staticmethod
     def calculate_time_periods(dates: list) -> list:
         unique_dates = set(dates)
-        string_list = list(unique_dates)
-        string_list.sort()
-        date_list = [Transformer.days_since_epoch(date_string) for date_string in string_list]
+        days_since_epoch_list = list(unique_dates)
+        days_since_epoch_list.sort()
 
         one_day = 1
         time_periods = []
-        for i, date in enumerate(date_list):
-            if i + 1 < len(date_list):
-                time_periods.append([date_list[i], date_list[i + 1] - one_day])
+        for i, date in enumerate(days_since_epoch_list):
+            if i + 1 < len(days_since_epoch_list):
+                time_periods.append([days_since_epoch_list[i], days_since_epoch_list[i + 1] - one_day])
             else:
-                time_periods.append([date_list[i], None])
+                time_periods.append([days_since_epoch_list[i], None])
 
         return time_periods

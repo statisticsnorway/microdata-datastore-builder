@@ -68,12 +68,15 @@ class TestTransformer(unittest.TestCase):
             print(day, ' --> ', self.t.days_since_epoch(day))
 
     def test_time_periods(self):
-        actual = self.t.calculate_time_periods(["2009-01-01", "2000-01-01", "2012-01-01", "2003-01-01"])
+        actual = self.t.calculate_time_periods([
+            self.t.days_since_epoch("2009-01-01"), self.t.days_since_epoch("2000-01-01"),
+            self.t.days_since_epoch("2012-01-01"), self.t.days_since_epoch("2003-01-01")])
+
         expected = [
-            [self.t.to_date("2000-01-01"), self.t.to_date("2002-12-31")],
-            [self.t.to_date("2003-01-01"), self.t.to_date("2008-12-31")],
-            [self.t.to_date("2009-01-01"), self.t.to_date("2011-12-31")],
-            [self.t.to_date("2012-01-01"), None]
+            [self.t.days_since_epoch("2000-01-01"), self.t.days_since_epoch("2002-12-31")],
+            [self.t.days_since_epoch("2003-01-01"), self.t.days_since_epoch("2008-12-31")],
+            [self.t.days_since_epoch("2009-01-01"), self.t.days_since_epoch("2011-12-31")],
+            [self.t.days_since_epoch("2012-01-01"), None]
         ]
         self.assertEqual(expected, actual)
 
@@ -154,7 +157,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStart": "2007-01-01"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+        time_period = [self.t.days_since_epoch('2008-10-01'), self.t.days_since_epoch('2009-12-31')]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
@@ -169,7 +172,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStart": "2008-12-01"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+        time_period = [self.t.days_since_epoch('2008-10-01'), self.t.days_since_epoch('2009-12-31')]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(len(code_list_out), 0)
@@ -185,7 +188,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStop": "2010-12-31"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+        time_period = [self.t.days_since_epoch('2008-10-01'), self.t.days_since_epoch('2009-12-31')]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
@@ -201,7 +204,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStop": "2009-01-01"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), datetime(2009, 12, 31, 0, 0)]
+        time_period = [self.t.days_since_epoch('2008-10-01'), self.t.days_since_epoch('2009-12-31')]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(len(code_list_out), 0)
@@ -216,7 +219,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStart": "2008-01-01"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), None]
+        time_period = [self.t.days_since_epoch('2008-10-01'), None]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(code_list_out[0], {'category': 'Katt', 'code': 'CAT'})
@@ -232,7 +235,7 @@ class TestTransformer(unittest.TestCase):
             "validityPeriodStop": "2010-12-31"
         }
         code_list_out = []
-        time_period = [datetime(2008, 10, 1, 0, 0), None]
+        time_period = [self.t.days_since_epoch('2008-10-01'), None]
 
         self.t.select_code_item(code_item, code_list_out, time_period)
         self.assertEqual(len(code_list_out), 0)
@@ -243,10 +246,10 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_calculate_valid_period_start_stop(self):
-        actual = self.t.calculate_valid_period([self.t.to_date('2008-10-01'), self.t.to_date('2009-12-31')])
+        actual = self.t.calculate_valid_period(["dummyStart", "dummyStop"])
         expected = {
-            "start": self.t.to_date('2008-10-01'),
-            "stop": self.t.to_date('2009-12-31')
+            "start": "dummyStart",
+            "stop": "dummyStop"
         }
         self.assertEqual(expected, actual)
 
