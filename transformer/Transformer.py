@@ -161,7 +161,7 @@ class Transformer:
                                                 stop: str) -> list:
         transformed = []
         represented_variable = {}
-        time_period = [Transformer.to_date(start), Transformer.to_date(stop)]
+        time_period = [Transformer.days_since_epoch(start), Transformer.days_since_epoch(stop)]
         represented_variable["validPeriod"] = Transformer.calculate_valid_period(time_period)
         represented_variable["description"] = description
         value_domain_out = {}
@@ -180,9 +180,9 @@ class Transformer:
         dates_from_all_code_items = []
         for code_item in value_domain['codeList']['topLevelCodeItems']:
             if 'validityPeriodStart' in code_item:
-                dates_from_all_code_items.append(code_item['validityPeriodStart'])
+                dates_from_all_code_items.append(Transformer.days_since_epoch(code_item['validityPeriodStart']))
             if 'validityPeriodStop' in code_item:
-                dates_from_all_code_items.append(code_item['validityPeriodStop'])
+                dates_from_all_code_items.append(Transformer.days_since_epoch(code_item['validityPeriodStop']))
 
         time_periods = Transformer.calculate_time_periods(dates_from_all_code_items)
 
@@ -208,8 +208,8 @@ class Transformer:
         time_period_start = time_period[0]
         time_period_stop = None if time_period[1] is None else time_period[1]
 
-        validity_period_start = datetime.strptime(code_item['validityPeriodStart'], '%Y-%m-%d')
-        validity_period_stop = datetime.strptime(code_item['validityPeriodStop'], '%Y-%m-%d') \
+        validity_period_start = Transformer.days_since_epoch(code_item['validityPeriodStart'])
+        validity_period_stop = Transformer.days_since_epoch(code_item['validityPeriodStop']) \
             if 'validityPeriodStop' in code_item.keys() else None
 
         if time_period_stop is None:
@@ -251,9 +251,9 @@ class Transformer:
         unique_dates = set(dates)
         string_list = list(unique_dates)
         string_list.sort()
-        date_list = [Transformer.to_date(date_string) for date_string in string_list]
+        date_list = [Transformer.days_since_epoch(date_string) for date_string in string_list]
 
-        one_day: timedelta = timedelta(days=1)
+        one_day = 1
         time_periods = []
         for i, date in enumerate(date_list):
             if i + 1 < len(date_list):
