@@ -6,14 +6,10 @@ import sqlite3 as db
 from os import replace
 from os.path import dirname
 
-import datastores_config as ds_conf
-
-
-#import shutil
-#from os import path
-
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
+
+import datastores_config as ds_conf
 
 
 class DatasetReader:
@@ -29,29 +25,53 @@ class DatasetReader:
     #       - Inkludert støtte for partisjonering av tid (start-dato)
 
 
-    """TODO: Doc """
-    # # Doc example:
-    # def test(self, param1, param2) -> bool:
-    #     """
-    #     :param param1: First param bla, bla, bla, ..
-    #     :type param1: string
-    #     :param param2: Second param bla, bla, bla, ..
-    #     :type param2: list
-    #     :return: Doc bla, bla, bla, ..
-    #     :rtype: bool
-    #     """
-
-
     def __init__(self, data_file=None, metadata_file=None, validate="all", field_separator=";", data_error_limit=100) -> None:
         """
         Constructor.
 
-        :param data_file: The character separated data file to read including path and file name, eg. ../my_catalog/my_dataset.sdv
+        :param data_file: The character separated data file to read including path and file name, eg. ../my_catalog/my_dataset.csv
         :param metadata_file: The metadata file (JSON) including path and name, eg. ../my_catalog/my_dataset.json
         :param validate: Legal values --> all|data|metadata. Validate data file, metadata file or all. Default is all.
         :param field_separator: Separator character for the data fields in the data file. Default is ; (semicolon).
-        :param data_error_limit: Terminate the data validation program when reached the number (limit) of errors. Default is 100. 
+        :param data_error_limit: Terminate the data validation program when reached the number (limit) of errors. Default is 100.
+
+
+        ######################
+        ### Usage examples ###
+        ######################
+
+        ## Example: Validate all (data file, metadata file and consistency between data and metadata)
+        dsr = DatasetReader(
+            data_file="/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+            metadata_file="/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
+            validate="all"
+        )
+        is_validate_ok = dsr.validate_dataset()
+        if is_validate_ok:
+            # Create a new dataset in "TEST"-datastore if validated OK
+            dsr.create_new_dataset_in_datastore("TEST")
+        else:
+            print("ERROR in data/metadata! No dataset created in datastore.")
+
+
+        ## Example: Validate metadata file
+        dsr = DatasetReader(
+            data_file="/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
+            metadata_file=None,
+            validate="data"
+        )
+        dsr.validate_dataset()
+
+
+        ## Example: Validate data file
+        dsr = DatasetReader(
+            data_file=None,
+            metadata_file="/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
+            validate="metadata"
+        )
+        dsr.validate_dataset()
         """
+
         self.data_file = data_file
         self.metadata_file = metadata_file
         self.validate = validate
@@ -186,7 +206,7 @@ class DatasetReader:
             self.__data_errors.append((row_number, "Empty data line (Null/missing)", None))
             return False
 
-        if len(data_row) < 4:
+        if len(data_row) < 5:
             self.__data_errors.append((row_number, "Row/line missing elements (expected line with fields UNIT_ID, VALUE, START, STOP, ..)", None))
             return False
 
@@ -539,19 +559,19 @@ class DatasetReader:
 
     """Cleanup - delete temporary Sqlite.db file if exists."""
     def delete_temp_database(self):
-        if os.path.exists(self.__database_temp_file):
+        if self.__database_temp_file and os.path.exists(self.__database_temp_file):
             os.remove(self.__database_temp_file)
 
 
     """Cleanup - remove temporary DATA files if exists."""
     def delete_temp_data_files(self):
-        if os.path.exists(self.__sorted_temp_file):
+        if self.__sorted_temp_file and os.path.exists(self.__sorted_temp_file):
             os.remove(self.__sorted_temp_file)   # E.g, ../MY_DATA.sorted
 
 
     """Cleanup - remove temporary METADATA files if exists."""
     def delete_temp_metadata_files(self):
-        if os.path.exists(self.__metadata_file_temp):
+        if self.__metadata_file and os.path.exists(self.__metadata_file_temp):
             os.remove(self.__metadata_file_temp)   # E.g, ../MY_DATA.json_temp
 
 
@@ -582,23 +602,24 @@ class DatasetReader:
         metadata_file_from = self.__metadata_file_temp
         metadata_file_to = datastore_path + "dataset" + "/" + dataset_name + "/" + metadata_file_with_version
         os.rename(metadata_file_from, metadata_file_to)  # move metadata json file to DataStore
-
+        print('OK - Dataset ' + dataset_name + ' created in datastore ' + datastore_short_name.upper())
 
 
     """MAIN - Start validation of dataset"""
-    def validate_dataset(self):
+    def validate_dataset(self) -> bool:
         if self.set_and_validate_parameters():
             if self.validate in("data", "all"):
                 if self.read_csv_file():
                     print("Datafile OK")
                 else:
                     print("ERROR: Validation terminated when reading data file. Too many errors found!")
-                    return
+                    return False
 
             if self.validate == "metadata":
                 if self.validate_metadata_file():
                     print("Metadata file OK")
-                return
+                else:
+                    return False
 
             if self.validate == "all":
                 if self.sort_and_validate_data_rows():
@@ -609,80 +630,9 @@ class DatasetReader:
                     print("ERROR: Consitency/event-history/metadata validation found errors in the data file and/or metadata JSON-file!")
                     print("  NB! If errors in data see the temporary sorted datafile for correct data line/row-number:")
                     print("  ---> " + str(self.__sorted_temp_file))
+                    return False
+            return True
+        else:
+            return False
 
 ### END class DatasetReader ###
-
-
-
-### Usage examples ###
-# Validate all (data file and metadata file and consistency)
-# dsr = DatasetReader(
-#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
-#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
-#     validate="all"
-# )
-# dsr.validate_dataset()
-
-# ## Validate metadata file
-# dsr = DatasetReader(
-#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
-#     metadata_file=None,
-#     validate="data"
-# )
-#dsr.validate_dataset()
-
-# ## Validate data file
-# dsr = DatasetReader(
-#     data_file=None,
-#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
-#     validate="metadata"
-# )
-#dsr.validate_dataset()
-
-# Validate the datafile and the metadatafile
-# dsr = DatasetReader(
-#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.txt",
-#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_PETS.json",
-#     validate="all"
-# )
-# dsr.validate_dataset()
-
-# # Create the new dataset in the TEST-datastore (move the data and metadata to a new catalog in the TEST-datastore).
-# dsr.create_new_dataset_in_datastore(datastore_short_name="TEST") 
-
-
-# dsr = DatasetReader(
-#     data_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt",
-#     metadata_file="C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.json",
-#     validate="all"
-# )
-# dsr.validate_dataset()
-# dsr.create_new_dataset_in_datastore("TEST")
-
-
-### Test run cases ###
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/resources/TEST_PERSON_INCOME.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000_with_ERRORS_EVENT.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1000.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_1_million_STATUS.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_10_million_STATUS.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/Python/micordata-datastore/temp/testdata_50_million_STATUS.txt")
-#dsr = DatasetReader("C:/BNJ/prosjektutvikling/GitHub/statisticsnorway/microdata-datastore-builder/tests/recources/TEST_PERSON_PETS__1_0.txt")
-
-#dsr.data_error_limit = 100
-#dsr.validate = "data"
-#dsr.validate = "metadata"
-#dsr.validate = "all"
-
-#dsr.validate_dataset()
-
-
-
-
-
-
-

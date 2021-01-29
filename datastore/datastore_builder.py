@@ -5,12 +5,32 @@ import json
 import datetime
 
 import datastores_config as ds_conf
-import DatasetReader as dsr
+import dataset_reader as dsr
 
 
 class DatastoreBuilder:
     """
-    Generate a new datastore. Set parameter include_testdata=True to create test datasets.
+    Generate a new datastore.
+
+
+    ##############################################
+    ### Usage - how to create a new datastore. ###
+    ##############################################
+
+    1. Manually create a new empty directory on the server for your datastore (e.g. mkdir /my_path/test_datastore)
+
+    2. Manually insert a new element in the file datastores_config.py (e.g. a new datastore with short-name "TEST")
+       - Remember to set the correct "datastorePath" (the directory created in step 1).
+
+    3. Example "create_new_datastore.py"
+        # Creates a new empty datastore (directories, datastore.json, version.json and test-datasets)
+        # - Set parameter include_testdata=True to create test datasets.
+
+        dsb = DatastoreBuilder(
+            datastore_short_name="TEST",
+            include_testdata=True
+        )
+        
     """
 
     def __init__(self, datastore_short_name, include_testdata=True) -> None:
@@ -23,19 +43,28 @@ class DatastoreBuilder:
         self.__datastore_default_language = ds_conf.datastore[self.datastore_short_name]["defaultLanguage"]
         
         self.__datastore_metadata_path = self.__datastore_path + "metadata/"
+        self.__datastore_dataset_path = self.__datastore_path + "dataset/"
 
         self.__test_data_source_path = str(pathlib.Path(__file__).parent.parent) + "/tests/resources/"
 
-        self.generate_datastore_file()
-        self.generate_version_file()
+        self.__create_datastore_directories()
+        self.__generate_datastore_file()
+        self.__generate_version_file()
         if include_testdata:
-            self.create_test_data()
+            self.__create_test_data()
+        print(f'OK - datastore "{self.datastore_short_name}" created in {self.__datastore_path}')
+
+
+    """Create datastore directories (sub folders)"""
+    def __create_datastore_directories(self):
+        os.mkdir(self.__datastore_metadata_path)
+        os.mkdir(self.__datastore_dataset_path)
 
 
     """Generate "datastore.json" file."""
-    def generate_datastore_file(self):
+    def __generate_datastore_file(self):
         datastore_config = {
-            "datastoreDomainName": self.__datastore_domain_name,  # E.g. no_ssb_test, no_nsd_test or no_kreftregisteret_test  
+            "datastoreDomainName": self.__datastore_domain_name,
             "datastoreName": self.__data_store_name,
             "defaultLanguage": self.__datastore_default_language
         }  
@@ -44,7 +73,7 @@ class DatastoreBuilder:
 
 
     """Generate datastore "version.json" file"""
-    def generate_version_file(self):
+    def __generate_version_file(self):
         datastore_version ={
             "versions": [ 
                 {  
@@ -78,7 +107,7 @@ class DatastoreBuilder:
 
 
     """Create test-Dataset (data and metadata) for PETS and INCOME"""
-    def create_test_data(self):
+    def __create_test_data(self):
         ds_pets = dsr.DatasetReader(
             data_file = self.__test_data_source_path + "TEST_PERSON_PETS.txt",
             metadata_file = self.__test_data_source_path + "TEST_PERSON_PETS.json",
@@ -95,6 +124,4 @@ class DatastoreBuilder:
         ds_income.validate_dataset()
         ds_income.create_new_dataset_in_datastore(datastore_short_name = self.datastore_short_name)
 
-
-### Usage example:
-# dsb = DatastoreBuilder(datastore_short_name="TEST", include_testdata=True)
+### End class DataStoreBulder
