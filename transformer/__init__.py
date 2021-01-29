@@ -8,15 +8,14 @@ Read a json file, transform and write to another file
 """
 
 
-def transform_to_file(read_from: str, write_to:str):
-    with open(read_from) as json_file:
-        dataset = json.load(json_file)
+def transform_to_file(read_from: Path, write_to: Path):
+    dataset = json.loads(read_from.read_text())
     transformed_dataset = Transformer.transform_dataset(dataset)
-    with open(write_to, 'w') as outfile:
-        json.dump(transformed_dataset, outfile, indent=4)
+    write_to.write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
 
 
-def update_metadata_all_file(dataset: dict, source_path: Path) -> None:
+def update_metadata_all_file(transformed_dataset_path: Path, source_path: Path) -> None:
+    dataset = json.loads(transformed_dataset_path.read_text())
     metadata_all_json = json.loads(source_path.read_text())
 
     found_existing = False
@@ -29,4 +28,3 @@ def update_metadata_all_file(dataset: dict, source_path: Path) -> None:
         metadata_all_json['dataStructures'].append(dataset)
 
     source_path.write_text(json.dumps(metadata_all_json, sort_keys=False, indent=4, ensure_ascii=False))
-
