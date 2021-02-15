@@ -133,3 +133,6 @@ dmypy.json
 
 # Microdata temp for test data (test datastore)
 /temp
+
+# VSCode editor config
+.vscode
