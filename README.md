@@ -11,7 +11,7 @@ A **lightweight datastore and backend data service** for microdata.no used for t
 ## Functionality **not included** in this lightweight datastore:
 * No support for data versioning, patching and version bumping (use version 1.0.0 for all data/metadata)
 * No support for data service security (Rest API) and JWT authentication
-  * **NB! DO NOT USE THIS LIGHTWEIGHT DATASTORE FOR SENSITIVE DATA!**
+  * **WARNING! DO NOT USE THIS LIGHTWEIGHT DATASTORE FOR SENSITIVE DATA!**
 
 
 # Getting started
