@@ -38,11 +38,11 @@ Use UTF8 character separated value files (csv).
 
 *Column order in the datafile:*
 ```
-"unit_id";"start-date";"stop-date";"value"
+"unit-id";"value";"start-date";"stop-date"
 ```
 *Example data rows:*
 ```
-111111111;1998-01-01;2020-12-31;AAA
-222222222;2002-05-25;2021-02-10;BBB
-333333333;1980-10-05;2015-07-18;CCC
+111111111;TOYOTA;1998-01-01;2020-12-31
+222222222;FORD;2002-05-25;2021-02-10
+333333333;TESLA;1980-10-05;2015-07-18
 ```
