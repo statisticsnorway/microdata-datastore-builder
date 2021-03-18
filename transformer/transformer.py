@@ -240,8 +240,10 @@ class Transformer:
             return Transformer.get_norwegian_text(valuedomain['description'])
         elif 'measurementUnitDescription' in valuedomain.keys():
             return Transformer.get_norwegian_text(valuedomain['measurementUnitDescription'])
+        elif 'title' in valuedomain.keys():
+            return Transformer.get_norwegian_text(valuedomain['title'])
         else:
-            return None
+            raise Exception('Cannot create description from value domain ' + valuedomain['name'])
 
     @staticmethod
     def create_mesurement_unit_description_from_value_domain(valuedomain: dict) -> str:

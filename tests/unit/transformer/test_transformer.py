@@ -61,9 +61,9 @@ class TestTransformer(unittest.TestCase):
     def test_days_since_epoch(self):
         self.assertEqual(10957, self.t.days_since_epoch('2000-01-01'))
 
-    def calculate_days_since_epoch(self):
+    def test_calculate_days_since_epoch(self):
         days = ['2016-01-01', '2019-12-31', '2010-01-01', '2008-10-01', '2009-12-31', '2011-05-31',
-                '2011-06-01', '2011-12-31']
+                '2011-06-01', '2011-12-31', '1900-01-01']
         for day in days:
             print(day, ' --> ', self.t.days_since_epoch(day))
 

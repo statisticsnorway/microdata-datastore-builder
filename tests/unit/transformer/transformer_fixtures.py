@@ -284,7 +284,8 @@ expected_dataset = {
                     {
                         'start': 16801,
                         'stop': 18261
-                    }
+                    },
+                'valueDomain': {'description': 'Personinntekt i norske kroner (NOK).'}
             }
         ],
         "format": "RandomUInt64",
