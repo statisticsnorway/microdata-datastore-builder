@@ -37,10 +37,13 @@ class Transformer:
         }
 
     @staticmethod
-    def transform_measure(measure: dict, dataset_title: str, start: str, stop: str) -> dict:
+    def transform_measure(measure: dict, dataset_title: list, start: str, stop: str) -> dict:
         result = {}
         result['name'] = measure['name']
-        result['label'] = Transformer.get_norwegian_text(measure['title']) if 'title' in measure.keys() else dataset_title
+        if 'title' in measure.keys():
+            result['label'] = Transformer.get_norwegian_text(measure['title'])
+        else:
+            result['label'] = Transformer.get_norwegian_text(dataset_title)
         result['dataType'] = Transformer.transform_data_type(measure['dataType'])
         result['representedVariables'] = Transformer.transform_represented_variables(measure, start, stop)
         if 'unitType' in measure.keys():
