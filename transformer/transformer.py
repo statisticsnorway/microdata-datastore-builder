@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class Transformer:
@@ -27,7 +27,7 @@ class Transformer:
         return {
             "attributeVariables": Transformer.get_attribute_variables(dataset['attribute'], start, stop),
             "identifierVariables": Transformer.transform_identifier(dataset['identifier'], start, stop),
-            "measureVariable": Transformer.transform_measure(dataset['measure'], dataset['title'], start, stop),
+            "measureVariable": Transformer.transform_measure(dataset['measure'], dataset, start, stop),
             'name': dataset['name'],
             "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
             "temporality": dataset['temporalityType'],
@@ -37,15 +37,20 @@ class Transformer:
         }
 
     @staticmethod
-    def transform_measure(measure: dict, dataset_title: list, start: str, stop: str) -> dict:
+    def transform_measure(measure: dict, dataset: dict, start: str, stop: str) -> dict:
         result = {}
         result['name'] = measure['name']
         if 'title' in measure.keys():
             result['label'] = Transformer.get_norwegian_text(measure['title'])
         else:
-            result['label'] = Transformer.get_norwegian_text(dataset_title)
+            result['label'] = Transformer.get_norwegian_text(dataset['title'])
         result['dataType'] = Transformer.transform_data_type(measure['dataType'])
+
         result['representedVariables'] = Transformer.transform_represented_variables(measure, start, stop)
+        for representedVariable in result['representedVariables']:
+            if representedVariable['description'] is None:
+                representedVariable['description'] = Transformer.get_norwegian_text(dataset['description'])
+
         if 'unitType' in measure.keys():
             result['keyType'] = Transformer.transform_unit_type(measure["unitType"])
         if 'format' in measure.keys():
