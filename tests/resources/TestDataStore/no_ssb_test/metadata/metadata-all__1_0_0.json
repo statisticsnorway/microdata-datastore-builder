@@ -5,6 +5,12 @@
         "languageCode": "no",
         "name": "no.ssb.fdb"
     },
+    "languages": [
+        {
+            "code": "no",
+            "label": "Norsk"
+        }
+    ],
     "dataStructures": [
     ]
 }
