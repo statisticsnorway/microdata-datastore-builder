@@ -1,0 +1,55 @@
+{
+    "shortName": "INNTEKT_YRKINNT",
+    "temporalityType": "ACCUMULATED",
+    "unitType": {
+        "$ref": "UnitType/PERSON.json"
+    },
+    "spatialCoverageDescription": [
+        {"languageCode": "no", "value": "Norge"}
+    ],    
+    "dataRevision": {
+        "description": [
+            {"languageCode": "no", "value": "Første publisering."}
+        ],
+        "$comment_1": "TODO: temporalCoverageStart",
+        "$comment_2": "TODO: temporalCoverageLatest",
+        "$comment_3": "TODO: temporaStatusDates (liste med datoer)",
+        "temporalEndOfSeries": false
+    },
+    "variables" : [
+        {
+            "variableRole": "IDENTIFIER",
+            "$ref": "Identifier/PERSONID_1.json"
+        },
+        {
+            "variableRole": "MEASURE",
+            "shortName": "INNTEKT_YRKINNT",
+            "name": [
+                {"languageCode": "no", "value": "Yrkesinntekter"}
+            ],
+            "description": [
+                {"languageCode": "no", "value": "Yrkesinntekter er summen av lønnsinntekter og netto næringsinntekter i løpet av kalenderåret. Fra og med inntektsåret 2006 trekkes sykepenger og fødselspenger fra og legges til skattepliktige overføringer i den offisielle statistikken. Variabelen omfatter renteutgifter i løpet av kalenderåret."}
+            ],
+            "populationDescription": [
+                {"languageCode": "no", "value": "Variabelen omfatter alle registrert bosatte per 31.12.ÅÅÅÅ. Observasjoner med verdiene 0 og uoppgitt (missing) er utelatt."}
+            ],
+            "subjectFields": [
+                {"$ref": "SubjectField/INNTEKT.json"}
+            ],
+            "dataType": "LONG",
+            "$comment": "TODO: OBS! Ved pseudonymisering av measures (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
+            "uriDefinition": [null],
+            "valueDomain": {
+                "$ref": "ValueDomain/BELOEP_NOK.json"
+            }
+        },
+        {
+            "variableRole": "START_TIME",
+            "$ref": "Attribute/START.json"
+        },
+        {
+            "variableRole": "STOP_TIME",
+            "$ref": "Attribute/STOP.json"
+        }
+    ]
+}
