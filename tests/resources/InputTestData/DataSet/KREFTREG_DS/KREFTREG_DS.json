@@ -57,7 +57,7 @@
         },
         {
             "variableRole": "STOP_TIME",
-            "$ref": "/Attribute/STOP.json"
+            "$ref": "Attribute/STOP.json"
         }
     ]
 }
