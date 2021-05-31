@@ -41,16 +41,16 @@
             "$comment": "TODO: OBS! Ved pseudonymisering av measures (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
             "uriDefinition": ["https://metadata.kreftregisteret.no/variables/detail/8"],
             "valueDomain": {
-                "$ref": "ValueDomain/KREFTREG_DS.json"
-            },
-            "sentinelAndMissingValues" : [
-                {
-                    "code": "999",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
-                    ]
-                }
-            ]
+                "$ref": "ValueDomain/KREFTREG_DS.json",
+                "sentinelAndMissingValues" : [
+                    {
+                        "code": "999",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
+                        ]
+                    }
+                ]
+            }
         },
         {
             "variableRole": "START_TIME",
