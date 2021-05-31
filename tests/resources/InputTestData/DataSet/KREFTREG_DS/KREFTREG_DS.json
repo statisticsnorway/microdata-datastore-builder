@@ -13,6 +13,7 @@
         ],
         "$comment_1": "TODO: temporalCoverageStart",
         "$comment_2": "TODO: temporalCoverageLatest",
+        "$comment_3": "TODO: temporaStatusDates (liste med datoer)",
         "temporalEndOfSeries": false
     },
     "variables" : [
