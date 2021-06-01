@@ -39,8 +39,6 @@ class TestTransformer(unittest.TestCase):
     def test_dataset(self):
         actual = self.transformer.transform_dataset(self.dataset)
         print(json.dumps(actual,indent=1))
-#        expected = fixture.expected_dataset
-
         self.assertEqual(self.expected_dataset, actual)
 
     def test_identifier(self):

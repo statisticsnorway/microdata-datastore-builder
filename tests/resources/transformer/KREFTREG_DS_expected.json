@@ -1,6 +1,32 @@
 {
   "name": "KREFTREG_DS",
+  "populationDescription": "Alle personer som har f\u00e5tt kreft.",
+  "temporalCoverage": {
+    "start": 16436,
+    "stop": 18627
+  },
   "temporality": "STATUS",
+  "identifierVariables": [
+    {
+      "variableRole": "Identifier",
+      "name": "SYKDOMSTILFELLENUMMER",
+      "label": "Sykdomstilfelle-nummer",
+      "dataType": "STRING",
+      "format": "RandomUInt48",
+      "representedVariables": [
+        {
+          "validPeriod": {
+            "start": 16436,
+            "stop": 18627
+          },
+          "description": "Identifikator for sykdomstilfelle",
+          "valueDomain": {
+            "description": "Pseudonymisert sykdomstilfellenummer"
+          }
+        }
+      ]
+    }
+  ],
   "measureVariable": {
     "name": "KREFTREG_DS",
     "label": "Diagnosens sikkerhet",
@@ -47,7 +73,10 @@
               "code": "7"
             }
           ],
-          "missingValues": ["999", "888"]
+          "missingValues": [
+            "999",
+            "888"
+          ]
         }
       },
       {
@@ -86,7 +115,10 @@
               "code": "7"
             }
           ],
-          "missingValues": ["999", "888"]
+          "missingValues": [
+            "999",
+            "888"
+          ]
         }
       }
     ],
@@ -95,5 +127,24 @@
       "label": "Sykdomstilfelle",
       "description": "Sykdomstilfelle(r) for personer."
     }
-  }
+  },
+  "attributeVariables": [
+    {
+      "name": "START",
+      "label": "Startdato",
+      "dataType": "Instant",
+      "variableRole": "START_TIME"
+    },
+    {
+      "name": "STOP",
+      "label": "Stoppdato",
+      "dataType": "Instant",
+      "variableRole": "STOP_TIME"
+    }
+  ],
+  "subjectFields": [
+    "Helse",
+    "Helsetjenester"
+  ],
+  "languageCode": "no"
 }

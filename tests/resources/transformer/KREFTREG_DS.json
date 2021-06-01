@@ -1,6 +1,11 @@
 {
   "shortName": "KREFTREG_DS",
   "temporalityType": "STATUS",
+  "$comment": "populationDescription has been added by vak",
+  "populationDescription": [
+    {"languageCode": "no", "value": "Alle personer som har fått kreft."},
+    {"languageCode": "en", "value": "All persons who are suffering from cancer."}
+  ],
   "unitType": {
     "shortName": "SYKDOMSTILFELLE",
     "title": [
@@ -17,6 +22,7 @@
     "description": [
       {"languageCode": "no", "value": "Første publisering."}
     ],
+    "$comment": "temporalCoverageStart, temporalCoverageLatest, temporalStatusDates have been added by vak",
     "temporalCoverageStart": "2015-01-01",
     "temporalCoverageLatest": "2020-12-31",
     "temporalStatusDates": ["2015-01-01", "2016-01-01", "2017-01-01", "2018-01-01", "2019-01-01"],
@@ -33,6 +39,7 @@
         {"languageCode": "no", "value": "Identifikator for sykdomstilfelle"}
       ],
       "dataType": "STRING",
+      "format": "RandomUInt48",
       "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
       "valueDomain": {
         "shortName": "SYKDOMSTILFELLENUMMER",
