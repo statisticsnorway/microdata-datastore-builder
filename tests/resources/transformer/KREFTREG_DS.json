@@ -1,6 +1,6 @@
 {
   "shortName": "KREFTREG_DS",
-  "temporalityType": "FIXED",
+  "temporalityType": "STATUS",
   "unitType": {
     "shortName": "SYKDOMSTILFELLE",
     "title": [
@@ -17,6 +17,9 @@
     "description": [
       {"languageCode": "no", "value": "Første publisering."}
     ],
+    "temporalCoverageStart": "2015-01-01",
+    "temporalCoverageLatest": "2020-12-31",
+    "temporalStatusDates": ["2015-01-01", "2016-01-01", "2017-01-01", "2018-01-01", "2019-01-01"],
     "temporalEndOfSeries": false
   },
   "variables" : [
@@ -144,6 +147,12 @@
           "code": "999",
           "categoryTitle": [
             {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
+          ]
+        },
+        {
+          "code": "888",
+          "categoryTitle": [
+            {"languageCode": "no", "value": "Uidentifiserbar verdi"}
           ]
         }
       ]
