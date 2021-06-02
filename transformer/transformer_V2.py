@@ -21,95 +21,12 @@ class Transformer:
         return datetime.strptime(date_string, '%Y-%m-%d')
 
     @staticmethod
-    def transform_dataset(dataset: dict) -> dict:
-        start = dataset['dataRevision']['temporalCoverageStart']
-        stop = dataset['dataRevision']['temporalCoverageLatest']
-
-        measure = [variable for variable in dataset["variables"] if variable['variableRole'] == 'MEASURE'][0]
-
-        measureVariable = {}
-        measureVariable['name'] = measure['shortName']
-        measureVariable['label'] = Transformer.get_norwegian_text(measure['title'])
-        measureVariable['dataType'] = measure['dataType']
-        measureVariable['representedVariables'] = Transformer.transform_represented_variables(measure, start, stop)
-        for representedVariable in measureVariable['representedVariables']:
-            if representedVariable['description'] is None:
-                representedVariable['description'] = Transformer.get_norwegian_text(dataset['description'])
-
-        if 'unitType' in dataset.keys():
-            measureVariable['keyType'] = Transformer.transform_unit_type(dataset["unitType"])
-
-        transformed = {'name': dataset['shortName'],
-                       'temporality': dataset['temporalityType'],
-                       'measureVariable': measureVariable}
-
-        return transformed
-
-        # return {
-        #     # "attributeVariables": Transformer.get_attribute_variables(dataset['attribute'], start, stop),
-        #     # "identifierVariables": Transformer.transform_identifier(dataset['identifier'], start, stop),
-        #     # "measureVariable": Transformer.transform_measure(dataset['measure'], dataset, start, stop),
-        #     "name": dataset['shortName'],
-        #     # "populationDescription": Transformer.get_norwegian_text(dataset['populationDescription']),
-        #     "temporality": dataset['temporalityType'],
-        #     "measureVariable": {
-        #         "keyType": Transformer.transform_unit_type(dataset["unitType"])
-        #     }
-        #     # "temporalCoverage": Transformer.get_temporal_coverage(dataset['dataRevision']),
-        #     # "subjectFields": Transformer.get_subject_fields(dataset['measure']['subjectField']),
-        #     # "languageCode": "no"
-        # }
-
-    @staticmethod
-    def transform_measure(measure: dict, dataset: dict, start: str, stop: str) -> dict:
-        result = {}
-        result['name'] = measure['name']
-        if 'title' in measure.keys():
-            result['label'] = Transformer.get_norwegian_text(measure['title'])
-        else:
-            result['label'] = Transformer.get_norwegian_text(dataset['title'])
-        result['dataType'] = Transformer.transform_data_type(measure['dataType'])
-
-        result['representedVariables'] = Transformer.transform_represented_variables(measure, start, stop)
-        for representedVariable in result['representedVariables']:
-            if representedVariable['description'] is None:
-                representedVariable['description'] = Transformer.get_norwegian_text(dataset['description'])
-
-        if 'unitType' in measure.keys():
-            result['keyType'] = Transformer.transform_unit_type(measure["unitType"])
-        if 'format' in measure.keys():
-            result['format'] = measure['format']
-        result['variableRole'] = "Measure"
-        return result
-
-    @staticmethod
-    def get_attribute_variables(attributes: list, start: str, stop: str) -> list:
-        result = []
-        for attribute in attributes:
-            attr = {
-                "name": attribute["name"],
-                "label": Transformer.get_norwegian_text(attribute["title"]),
-                "representedVariables": Transformer.transform_represented_variables(attribute, start, stop),
-                "dataType": Transformer.transform_data_type(attribute['dataType']),
-                "variableRole": Transformer.get_variable_role(attribute['attributeType'])
-            }
-            if "unitType" in attribute:
-                attr['keyType'] = Transformer.transform_unit_type(attribute["unitType"])
-            if "format" in attribute:
-                attr['format'] = attribute["format"]
-
-            result.append(attr)
-
-        return result
-
-    @staticmethod
     def get_variable_role(attribute_type: str) -> str:
         variable_roles_mapping = {
             "stop": "Stop",
             "start": "Start",
             "source": "Source"
         }
-
         return variable_roles_mapping.get(attribute_type.lower(), attribute_type)
 
     @staticmethod
@@ -120,14 +37,12 @@ class Transformer:
             "DOUBLE": "Double",
             "DATE": "Instant"
         }
-
         return data_types_mapping.get(data_type, data_type)
 
     @staticmethod
     def transform_unit_type(unit_type: dict) -> dict:
         if not unit_type:
             return {}
-
         return {
             'name': unit_type["shortName"],
             'label': Transformer.get_norwegian_text(unit_type["title"]),
@@ -156,32 +71,6 @@ class Transformer:
         return valid_period
 
     @staticmethod
-    def transform_identifier(identifiers: list, start: str, stop: str) -> list:
-        result = []
-        for identifier in identifiers:
-            transformed = {
-                'name': identifier['name'],
-                'label': Transformer.get_norwegian_text(identifier['title']),
-                'dataType': 'Long',
-                'representedVariables': Transformer.transform_represented_variables(identifier, start, stop),
-                'keyType': Transformer.transform_name_title_description(identifier['unitType']),
-                'format': identifier['format'],
-                'variableRole': 'Identifier'
-            }
-            result.append(transformed)
-        return result
-
-    @staticmethod
-    def transform_name_title_description(input: dict) -> dict:
-        if not input:
-            return {}
-        return {
-            'name': input['name'],
-            'label': Transformer.get_norwegian_text(input['title']),
-            'description': Transformer.get_norwegian_text(input['description'])
-        }
-
-    @staticmethod
     def transform_represented_variables(entity: dict, start: str, stop: str) -> list:
         value_domain = entity['valueDomain']
         description = Transformer.get_norwegian_text(entity['description']) if 'description' in entity else None
@@ -195,7 +84,6 @@ class Transformer:
             return represented_variables
         else:
             return Transformer.transform_value_domain_without_codelist(value_domain, description, start, stop)
-        # Her må vi sette inn sentinelAndMissingValues for begge
 
     @staticmethod
     def transform_missing_values(missing_values: list) -> list:
@@ -313,3 +201,74 @@ class Transformer:
                 time_periods.append([days_since_epoch_list[i], None])
 
         return time_periods
+
+    @staticmethod
+    def get_attribute_variable(attribute: dict, start: str, stop: str) -> list:
+        attr = {
+            "name": attribute["shortName"],
+            "label": Transformer.get_norwegian_text(attribute["title"]),
+            "dataType": Transformer.transform_data_type(attribute['dataType']),
+            "variableRole": Transformer.get_variable_role(attribute['variableRole'])
+        }
+        if "valueDomain" in attribute:
+            attr['representedVariables'] = Transformer.transform_represented_variables(attribute, start, stop)
+        if "unitType" in attribute:
+            attr['keyType'] = Transformer.transform_unit_type(attribute["unitType"])
+        if "format" in attribute:
+            attr['format'] = attribute["format"]
+        return attr
+
+    @staticmethod
+    def transform_dataset(dataset: dict) -> dict:
+        start = dataset['dataRevision']['temporalCoverageStart']
+        stop = dataset['dataRevision']['temporalCoverageLatest']
+
+        identifierVariables = []
+        identifiers = [variable for variable in dataset["variables"] if variable['variableRole'] == 'IDENTIFIER']
+        for identifier_instance in identifiers:
+            identifierVariable = {
+                'variableRole': 'Identifier',
+                'name': identifier_instance['shortName'],
+                'label': Transformer.get_norwegian_text(identifier_instance['title']),
+                'dataType': identifier_instance['dataType'],
+                'format': identifier_instance['format'],
+                'representedVariables': Transformer.transform_represented_variables(identifier_instance, start, stop)
+            }
+            if 'unitType' in identifier_instance.keys():
+                identifierVariable['keyType'] = Transformer.transform_unit_type(identifier_instance["unitType"])
+            identifierVariables.append(identifierVariable)
+
+        measure = [variable for variable in dataset["variables"] if variable['variableRole'] == 'MEASURE'][0]
+        measureVariable = {'name': measure['shortName'],
+                           'label': Transformer.get_norwegian_text(measure['title']),
+                           'dataType': measure['dataType'],
+                           'representedVariables': Transformer.transform_represented_variables(measure, start, stop)}
+        for representedVariable in measureVariable['representedVariables']:
+            if representedVariable['description'] is None:
+                representedVariable['description'] = Transformer.get_norwegian_text(dataset['description'])
+
+        if 'unitType' in dataset.keys():
+            measureVariable['keyType'] = Transformer.transform_unit_type(dataset["unitType"])
+
+        subjectFields = Transformer.get_subject_fields(measure['subjectFields'])
+
+        attributeVariables = []
+        if any(element['variableRole'] == 'START_TIME' for element in dataset["variables"]):
+            attribute_start = [variable for variable in dataset["variables"] if variable['variableRole'] == 'START_TIME'][0]
+            attributeVariables.append(Transformer.get_attribute_variable(attribute_start, start, stop))
+
+        if any(element['variableRole'] == 'STOP_TIME' for element in dataset["variables"]):
+            attribute_stop = [variable for variable in dataset["variables"] if variable['variableRole'] == 'STOP_TIME'][0]
+            attributeVariables.append(Transformer.get_attribute_variable(attribute_stop, start, stop))
+
+        transformed = {'name': dataset['shortName'],
+                       'populationDescription': Transformer.get_norwegian_text(dataset['populationDescription']),
+                       'temporalCoverage': Transformer.get_temporal_coverage(dataset['dataRevision']),
+                       'temporality': dataset['temporalityType'],
+                       'identifierVariables': identifierVariables,
+                       'measureVariable': measureVariable,
+                       'subjectFields': subjectFields,
+                       'languageCode': 'no'}
+        if attributeVariables:
+            transformed['attributeVariables'] = attributeVariables
+        return transformed
