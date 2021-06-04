@@ -1,0 +1,72 @@
+{
+  "name": "KREFTREG_DS",
+  "populationDescription": "Alle personer som har f\u00e5tt kreft.",
+  "temporalCoverage": {
+    "start": 16436,
+    "stop": 18627
+  },
+  "temporality": "STATUS",
+  "identifierVariables": [
+    {
+      "variableRole": "Identifier",
+      "name": "SYKDOMSTILFELLENUMMER",
+      "label": "Sykdomstilfelle-nummer",
+      "dataType": "STRING",
+      "format": "RandomUInt48",
+      "representedVariables": [
+        {
+          "validPeriod": {
+            "start": 16436,
+            "stop": 18627
+          },
+          "description": "Identifikator for sykdomstilfelle",
+          "valueDomain": {
+            "description": "Pseudonymisert sykdomstilfellenummer"
+          }
+        }
+      ]
+    }
+  ],
+  "measureVariable": {
+    "name": "KREFTREG_DS",
+    "label": "Diagnosens sikkerhet",
+    "dataType": "STRING",
+    "representedVariables": [
+      {
+        "validPeriod": {
+          "start": 16436,
+          "stop": 18627
+        },
+        "description": "Hvor p\u00e5litelig diagnosen i meldingen er. P\u00e5liteligheten vurderes ut fra sikkerhet rundt tumors malignitetspotensiale og sikkerhet rundt tumors prim\u00e6re utgangspunkt.",
+        "valueDomain": {
+          "description": "N/A",
+          "unitOfMeasure": "N/A"
+        }
+      }
+    ],
+    "keyType": {
+      "name": "SYKDOMSTILFELLE",
+      "label": "Sykdomstilfelle",
+      "description": "Sykdomstilfelle(r) for personer."
+    }
+  },
+  "subjectFields": [
+    "Helse",
+    "Helsetjenester"
+  ],
+  "languageCode": "no",
+  "attributeVariables": [
+    {
+      "name": "START",
+      "label": "Startdato",
+      "dataType": "Instant",
+      "variableRole": "START_TIME"
+    },
+    {
+      "name": "STOP",
+      "label": "Stoppdato",
+      "dataType": "Instant",
+      "variableRole": "STOP_TIME"
+    }
+  ]
+}
