@@ -31,6 +31,7 @@ jobs:
       - script: |
           pytest tests --ignore=tests/resources --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
         displayName: 'Test with pytest'
+        workingDirectory: $(System.DefaultWorkingDirectory)
 
       - task: PublishTestResults@2
         condition: succeededOrFailed()
