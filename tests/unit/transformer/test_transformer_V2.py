@@ -10,19 +10,19 @@ class TestTransformer(unittest.TestCase):
         self.transformer = Transformer()
 
     def test_dataset_with_enumerated_valuedomain(self):
-        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS.json")) as json_file:
+        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS_enumerated.json")) as json_file:
             dataset = json.load(json_file)
-        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS_expected.json")) as expected_json_file:
+        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS_enumerated_expected.json")) as expected_json_file:
             expected = json.load(expected_json_file)
         actual = self.transformer.transform_dataset(dataset)
         print(json.dumps(actual, indent=1))
         self.assertEqual(expected, actual)
 
     def test_dataset_with_described_valuedomain(self):
-        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS_no_codelist.json")) as json_file:
+        with open(os.path.abspath("../../resources/transformer/KREFTREG_DS_described.json")) as json_file:
             dataset = json.load(json_file)
         with open(os.path.abspath(
-                "../../resources/transformer/KREFTREG_DS_no_codelist_expected.json")) as expected_json_file:
+                "../../resources/transformer/KREFTREG_DS_described_expected.json")) as expected_json_file:
             expected = json.load(expected_json_file)
         actual = self.transformer.transform_dataset(dataset)
         print(json.dumps(actual, indent=1))
