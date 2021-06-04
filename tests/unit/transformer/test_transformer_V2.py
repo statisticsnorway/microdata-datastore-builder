@@ -41,8 +41,11 @@ class TestTransformer(unittest.TestCase):
         print (Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_described.json'))
 
     def test_dataset_with_enumerated_valuedomain(self):
-        json_path = Path('../../resources/transformer/KREFTREG_DS_described.json')
-        expected_json_path = Path('../../resources/transformer/KREFTREG_DS_described_expected.json')
+        # json_path = Path('../../resources/transformer/KREFTREG_DS_enumerated.json')
+        json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated.json')
+
+        # expected_json_path = Path('../../resources/transformer/KREFTREG_DS_enumerated_expected.json')
+        expected_json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated_expected.json')
 
         with open(json_path.resolve()) as json_file:
             dataset = json.load(json_file)
