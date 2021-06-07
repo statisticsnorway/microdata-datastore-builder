@@ -65,7 +65,8 @@ class DatasetInput():
         metadata = DatasetUtils.read_json_file(self.__dataset_metadata_file)
 
         if "$ref" in metadata["unitType"]:
-            metadata["unitType"] = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(str(metadata["unitType"]["$ref"])))
+            ref_to_unit_type = str(metadata["unitType"]["$ref"])
+            metadata["unitType"] = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_unit_type))
 
         variable_idx = 0
         for variable in metadata["variables"]:
