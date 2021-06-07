@@ -71,6 +71,14 @@
             {
               "category": "Det foreligger histologi-/cytologimelding eller d\u00f8dsattest om svulst med usikker malignitetsgrad (usikkert benign/premalign/malign svulst) og sikker topografi f\u00f8r klinisk melding er registrert",
               "code": "7"
+            },
+            {
+              "category": "Ugyldig/manglende verdi",
+              "code": "999"
+            },
+            {
+              "category": "Uidentifiserbar verdi",
+              "code": "888"
             }
           ],
           "missingValues": [
@@ -113,6 +121,14 @@
             {
               "category": "Det foreligger histologi-/cytologimelding eller d\u00f8dsattest om svulst med usikker malignitetsgrad (usikkert benign/premalign/malign svulst) og sikker topografi f\u00f8r klinisk melding er registrert",
               "code": "7"
+            },
+            {
+              "category": "Ugyldig/manglende verdi",
+              "code": "999"
+            },
+            {
+              "category": "Uidentifiserbar verdi",
+              "code": "888"
             }
           ],
           "missingValues": [

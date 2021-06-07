@@ -72,13 +72,17 @@ class Transformer:
 
     @staticmethod
     def transform_represented_variables(entity: dict, start: str, stop: str) -> list:
-        value_domain = entity['valueDomain']
         description = Transformer.get_norwegian_text(entity['description']) if 'description' in entity else None
+        value_domain = entity['valueDomain']
+
+        if 'sentinelAndMissingValues' in entity.keys():
+            sentinel_missing_values = entity['sentinelAndMissingValues']
 
         if 'codeList' in value_domain.keys():
-            represented_variables = Transformer.transform_enumerated_value_domain(value_domain, description)
-            if 'sentinelAndMissingValues' in entity.keys():
-                missing_codes = Transformer.transform_missing_values(entity['sentinelAndMissingValues'])
+            represented_variables = Transformer.transform_enumerated_value_domain(value_domain,
+                                                                                  sentinel_missing_values, description)
+            if sentinel_missing_values:
+                missing_codes = Transformer.transform_missing_values(sentinel_missing_values)
                 for represented_variable in represented_variables:
                     represented_variable['valueDomain']['missingValues'] = missing_codes
             return represented_variables
@@ -113,7 +117,7 @@ class Transformer:
         return transformed
 
     @staticmethod
-    def transform_enumerated_value_domain(value_domain: dict, description: str) -> list:
+    def transform_enumerated_value_domain(value_domain: dict, sentinel_missing_values: list, description: str) -> list:
         transformed = []
 
         dates_from_all_code_items = []
@@ -133,7 +137,9 @@ class Transformer:
                 code_list_out = []
                 for code_item in value_domain['codeList']['codeItems']:
                     Transformer.select_code_item(code_item, code_list_out, time_period)
-
+                if sentinel_missing_values:
+                    for code_item in sentinel_missing_values:
+                        Transformer.append_code_item_to_list(code_item, code_list_out)
                 value_domain_out = {
                     "codeList": code_list_out
                 }
