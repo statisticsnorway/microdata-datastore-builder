@@ -48,16 +48,18 @@ class TestTransformer(unittest.TestCase):
         print (Path(__file__))
         print(Path.cwd().parent)
         print(Path(__file__).parent.parent)
-        print (Path('../../resources/transformer/KREFTREG_DS_described.json').resolve())
-        print (Path(__file__).parent.parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_described.json'))
+        print (Path('../../resources/transformer/KREFTREG_DS_enumerated.json').resolve())
+        print (Path(__file__).parent.parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated.json'))
 
         # json_path = Path('../../resources/transformer/KREFTREG_DS_enumerated.json')
-        json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated.json')
+        # json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated.json')
         # json_path = Path('microdata-datastore-builder/tests/resources/transformer/KREFTREG_DS_enumerated.json')
+        json_path = Path(__file__).parent.parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated.json')
 
         # expected_json_path = Path('../../resources/transformer/KREFTREG_DS_enumerated_expected.json')
-        expected_json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated_expected.json')
-        #expected_json_path = Path('microdata-datastore-builder/tests/resources/transformer/KREFTREG_DS_enumerated_expected.json')
+        # expected_json_path = Path.cwd().parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated_expected.json')
+        # expected_json_path = Path('microdata-datastore-builder/tests/resources/transformer/KREFTREG_DS_enumerated_expected.json')
+        expected_json_path = Path(__file__).parent.parent.parent.joinpath('resources', 'transformer', 'KREFTREG_DS_enumerated_expected.json')
 
         with open(json_path.resolve()) as json_file:
             dataset = json.load(json_file)
