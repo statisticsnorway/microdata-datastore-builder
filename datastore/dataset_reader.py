@@ -71,6 +71,13 @@ class DatasetInput():
         variable_idx = 0
         for variable in metadata["variables"]:
             if (variable["variableRole"] == "MEASURE"):
+                subject_field_idx = 0
+                for subject_field in variable["subjectFields"]:
+                    if ("$ref" in subject_field):
+                        ref_to_subject_field = str(subject_field["$ref"])
+                        metadata["variables"][variable_idx]["subjectFields"][subject_field_idx] = \
+                             DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_subject_field))
+                    subject_field_idx +=1
                 if ("$ref" in variable["subjectFields"][0]):
                     subject_field_idx = 0
                     for subject_field in variable["subjectFields"]:
