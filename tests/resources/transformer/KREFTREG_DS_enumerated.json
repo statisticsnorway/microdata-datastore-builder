@@ -1,0 +1,192 @@
+{
+  "shortName": "KREFTREG_DS",
+  "temporalityType": "STATUS",
+  "$comment": "populationDescription has been added by vak",
+  "populationDescription": [
+    {"languageCode": "no", "value": "Alle personer som har fått kreft."},
+    {"languageCode": "en", "value": "All persons who are suffering from cancer."}
+  ],
+  "unitType": {
+    "shortName": "SYKDOMSTILFELLE",
+    "title": [
+      {"languageCode": "no", "value": "Sykdomstilfelle"}
+    ],
+    "description": [
+      {"languageCode": "no", "value": "Sykdomstilfelle(r) for personer."}
+    ]
+  },
+  "spatialCoverageDescription": [
+    {"languageCode": "no", "value": "Norge"}
+  ],
+  "dataRevision": {
+    "description": [
+      {"languageCode": "no", "value": "Første publisering."}
+    ],
+    "$comment": "temporalCoverageStart, temporalCoverageLatest, temporalStatusDates have been added by vak",
+    "temporalCoverageStart": "2015-01-01",
+    "temporalCoverageLatest": "2020-12-31",
+    "temporalStatusDates": ["2015-01-01", "2016-01-01", "2017-01-01", "2018-01-01", "2019-01-01"],
+    "temporalEndOfSeries": false
+  },
+  "variables" : [
+    {
+      "variableRole": "IDENTIFIER",
+      "shortName": "SYKDOMSTILFELLENUMMER",
+      "title": [
+        {"languageCode": "no", "value": "Sykdomstilfelle-nummer"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Identifikator for sykdomstilfelle"}
+      ],
+      "dataType": "STRING",
+      "format": "RandomUInt48",
+      "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
+      "valueDomain": {
+        "shortName": "SYKDOMSTILFELLENUMMER",
+        "title": [
+          {"languageCode": "no", "value": "Pseudonymisert sykdomstilfellenummer"}
+        ]
+      }
+    },
+    {
+      "variableRole": "MEASURE",
+      "shortName": "KREFTREG_DS",
+      "title": [
+        {"languageCode": "no", "value": "Diagnosens sikkerhet"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Hvor pålitelig diagnosen i meldingen er. Påliteligheten vurderes ut fra sikkerhet rundt tumors malignitetspotensiale og sikkerhet rundt tumors primære utgangspunkt."}
+      ],
+      "populationDescription": [
+        {"languageCode": "no", "value": "Alle krefttilfeller, forstadier til kreft og enkelte benigne svulster for personer i Norge."}
+      ],
+      "subjectFields": [
+        {
+          "shortName": "HELSE",
+          "title": [
+            {"languageCode": "no", "value": "Helse"}
+          ],
+          "description": [
+            {"languageCode": "no", "value": "Helse"}
+          ]
+        },
+        {
+          "shortName": "HELSETJENESTER",
+          "title": [
+            {"languageCode": "no", "value": "Helsetjenester"}
+          ],
+          "description": [
+            {"languageCode": "no", "value": "Helsetjenester"}
+          ]
+        }
+      ],
+      "dataType": "STRING",
+      "uriDefinition": ["https://metadata.kreftregisteret.no/variables/detail/8"],
+      "valueDomain": {
+        "shortName": "KREFTREG_DS",
+        "title": [
+          {"languageCode": "no", "value": "Verdier for diagnosens sikkerhet"}
+        ],
+        "codeList": {
+          "codeItems": [
+            {
+              "code": "0",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger svulst med usikker malignitet og usikker topografi"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "1",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger svulst uten påvist malignitet, men sikker topografi"}
+              ],
+              "validFrom": "1953-01-01",
+              "validUntil": "2020-12-31"
+            },
+            {
+              "code": "2",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger svulst med sikker malignitet, men usikker topografi (benyttes bare for solide svulster)"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "3",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger svulst med sikker malignitet og sikker topografi"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "4",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Der foreligger svulst med sikker malignitet og sikker topografi hos pasient som er registrert med premalign tilstand i samme organ mer enn fire hele måneder forut for diagnosemåneden til aktuelle krefttilfelle"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "5",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger klinisk sikker kreft og sikker topografi"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "6",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger klinisk sikker kreft og sikker topografi"}
+              ],
+              "validFrom": "1953-01-01"
+            },
+            {
+              "code": "7",
+              "categoryTitle": [
+                {"languageCode": "no", "value": "Det foreligger histologi-/cytologimelding eller dødsattest om svulst med usikker malignitetsgrad (usikkert benign/premalign/malign svulst) og sikker topografi før klinisk melding er registrert"}
+              ],
+              "validFrom": "1953-01-01"
+            }
+          ]
+        }
+      },
+      "sentinelAndMissingValues" : [
+        {
+          "code": "999",
+          "categoryTitle": [
+            {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
+          ]
+        },
+        {
+          "code": "888",
+          "categoryTitle": [
+            {"languageCode": "no", "value": "Uidentifiserbar verdi"}
+          ]
+        }
+      ]
+    },
+    {
+      "variableRole": "START_TIME",
+      "shortName": "START",
+      "title": [
+        {"languageCode": "no", "value": "Startdato"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Startdato/måletidspunktet for hendelsen"}
+      ],
+      "dataType": "DATE"
+    },
+    {
+      "variableRole": "STOP_TIME",
+      "shortName": "STOP",
+      "title": [
+        {"languageCode": "no", "value": "Stoppdato"},
+        {"languageCode": "en", "value": "Stop date"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Stoppdato/sluttdato for hendelsen"},
+        {"languageCode": "en", "value": "Event stop/end date"}
+      ],
+      "dataType": "DATE"
+    }
+  ]
+}

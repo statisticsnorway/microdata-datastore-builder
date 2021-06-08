@@ -1,0 +1,125 @@
+{
+  "shortName": "KREFTREG_DS",
+  "temporalityType": "STATUS",
+  "$comment": "populationDescription has been added by vak",
+  "populationDescription": [
+    {"languageCode": "no", "value": "Alle personer som har fått kreft."},
+    {"languageCode": "en", "value": "All persons who are suffering from cancer."}
+  ],
+  "unitType": {
+    "shortName": "SYKDOMSTILFELLE",
+    "title": [
+      {"languageCode": "no", "value": "Sykdomstilfelle"}
+    ],
+    "description": [
+      {"languageCode": "no", "value": "Sykdomstilfelle(r) for personer."}
+    ]
+  },
+  "spatialCoverageDescription": [
+    {"languageCode": "no", "value": "Norge"}
+  ],
+  "dataRevision": {
+    "description": [
+      {"languageCode": "no", "value": "Første publisering."}
+    ],
+    "$comment": "temporalCoverageStart, temporalCoverageLatest, temporalStatusDates have been added by vak",
+    "temporalCoverageStart": "2015-01-01",
+    "temporalCoverageLatest": "2020-12-31",
+    "temporalStatusDates": ["2015-01-01", "2016-01-01", "2017-01-01", "2018-01-01", "2019-01-01"],
+    "temporalEndOfSeries": false
+  },
+  "variables" : [
+    {
+      "variableRole": "IDENTIFIER",
+      "shortName": "SYKDOMSTILFELLENUMMER",
+      "title": [
+        {"languageCode": "no", "value": "Sykdomstilfelle-nummer"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Identifikator for sykdomstilfelle"}
+      ],
+      "dataType": "STRING",
+      "format": "RandomUInt48",
+      "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
+      "valueDomain": {
+        "shortName": "SYKDOMSTILFELLENUMMER",
+        "title": [
+          {"languageCode": "no", "value": "Pseudonymisert sykdomstilfellenummer"}
+        ]
+      }
+    },
+    {
+      "variableRole": "MEASURE",
+      "shortName": "KREFTREG_DS",
+      "title": [
+        {"languageCode": "no", "value": "Diagnosens sikkerhet"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Hvor pålitelig diagnosen i meldingen er. Påliteligheten vurderes ut fra sikkerhet rundt tumors malignitetspotensiale og sikkerhet rundt tumors primære utgangspunkt."}
+      ],
+      "populationDescription": [
+        {"languageCode": "no", "value": "Alle krefttilfeller, forstadier til kreft og enkelte benigne svulster for personer i Norge."}
+      ],
+      "subjectFields": [
+        {
+          "shortName": "HELSE",
+          "title": [
+            {"languageCode": "no", "value": "Helse"}
+          ],
+          "description": [
+            {"languageCode": "no", "value": "Helse"}
+          ]
+        },
+        {
+          "shortName": "HELSETJENESTER",
+          "title": [
+            {"languageCode": "no", "value": "Helsetjenester"}
+          ],
+          "description": [
+            {"languageCode": "no", "value": "Helsetjenester"}
+          ]
+        }
+      ],
+      "dataType": "STRING",
+      "uriDefinition": ["https://metadata.kreftregisteret.no/variables/detail/8"],
+      "valueDomain": {
+        "shortName": "KREFTREG_DS",
+        "title": [
+          {"languageCode": "no", "value": "Verdier for diagnosens sikkerhet"}
+        ],
+        "uriDefinition": [
+          "http://www.ssb.no/a/metadata/conceptvariable/vardok/26/nb",
+          "https://www.ssb.no/a/metadata/conceptvariable/vardok/26/en"
+        ],
+        "measurementUnitDescription": [
+          {"languageCode": "no", "value": "N/A"},
+          {"languageCode": "en", "value": "N/A"}
+        ]
+      }
+    },
+    {
+      "variableRole": "START_TIME",
+      "shortName": "START",
+      "title": [
+        {"languageCode": "no", "value": "Startdato"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Startdato/måletidspunktet for hendelsen"}
+      ],
+      "dataType": "DATE"
+    },
+    {
+      "variableRole": "STOP_TIME",
+      "shortName": "STOP",
+      "title": [
+        {"languageCode": "no", "value": "Stoppdato"},
+        {"languageCode": "en", "value": "Stop date"}
+      ],
+      "description": [
+        {"languageCode": "no", "value": "Stoppdato/sluttdato for hendelsen"},
+        {"languageCode": "en", "value": "Event stop/end date"}
+      ],
+      "dataType": "DATE"
+    }
+  ]
+}
