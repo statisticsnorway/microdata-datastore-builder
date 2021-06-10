@@ -1,6 +1,6 @@
 import logging
 import json
-from os import path
+#from os import path
 from pathlib import Path
 from typing import Union
 
@@ -31,6 +31,11 @@ class DatasetUtils():
                     + "\n" + str(e)
                 )
                 return None
+
+
+    @staticmethod
+    def write_json_file(dict_obj: dict, json_file: Path):
+        json_file.write_text(json.dumps(dict_obj, indent=4, ensure_ascii=False), encoding="utf-8")
 
 
 class DatasetInput():
@@ -78,13 +83,6 @@ class DatasetInput():
                         metadata["variables"][variable_idx]["subjectFields"][subject_field_idx] = \
                              DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_subject_field))
                     subject_field_idx +=1
-                if ("$ref" in variable["subjectFields"][0]):
-                    subject_field_idx = 0
-                    for subject_field in variable["subjectFields"]:
-                        ref_to_subject_field = str(metadata["variables"][variable_idx]["subjectFields"][subject_field_idx]["$ref"])
-                        metadata["variables"][variable_idx]["subjectFields"][subject_field_idx] = \
-                            DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_subject_field))
-                        subject_field_idx +=1
                 if ("$ref" in variable["valueDomain"]):
                     ref_to_value_domain = str(metadata["variables"][variable_idx]["valueDomain"]["$ref"])
                     value_domain_new = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_value_domain))
@@ -112,13 +110,14 @@ class DatasetInput():
                 metadata["variables"][variable_idx].pop("$ref")  # remove old "$ref"
             variable_idx += 1
         return metadata
-        #print(json.dumps(metadata, indent=2, ensure_ascii=False))
+        print(json.dumps(metadata, indent=2, ensure_ascii=False))
 
 
 #####################
 ### Usage example ###
 #####################
-di = DatasetInput(Path(r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\tests\resources\InputTestData\DataSet\KREFTREG_DS"))
-metadata = di.build_metadata_dict()
-print(json.dumps(metadata, indent=2, ensure_ascii=False))
+# dataset_path = Path(r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\tests\resources\InputTestData\DataSet\KREFTREG_DS")
+# di = DatasetInput(dataset_path)
+# metadata = di.build_metadata_dict()
+# DatasetUtils.write_json_file(metadata, dataset_path.joinpath("test_output.json"))
 
