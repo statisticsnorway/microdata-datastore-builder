@@ -24,7 +24,8 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('update_metadata_all.py -i <dataset_transformed_file> -o <metadata_all_file>')
+            print('Reads a transformed json file and updates metadata_all\n' \
+                  'update_metadata_all.py -i <dataset_transformed_file> -o <metadata_all_file>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             dataset_transformed_file = arg

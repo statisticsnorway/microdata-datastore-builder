@@ -1,7 +1,5 @@
-# Dette er en kommentar
-./dataset_reader.py -d tests/resources/datasets/KREFTREG_DS.csv -m tests/resources/datasets/KREFTREG_DS.json -v all -f ";" -l 100
+# Comments and empty lines are allowed in this file.
+./dataset_reader.py -d tests/resources/datasets/KREFTREG_DS.csv -x tests/resources/datasets/KREFTREG_DS.json -v all -f ";" -l 100
 
 ./metadata_transform_dataset.py --ifile /Users/vak/temp/KREFTREG_DS_described.json --ofile /Users/vak/temp/KREFTREG_DS_described_transformed.json
 ./update_metadata_all.py -i /Users/vak/temp/KREFTREG_DS_described_transformed.json -o /Users/vak/temp/metadata-all__1_0_0.json
-
-echo $PATH

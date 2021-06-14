@@ -24,7 +24,9 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('metadata_transform_dataset.py -i <input_file> -o <output_file>')
+            print('Reads a json file, transforms it according to NSD swagger spesification ' \
+                  'and stores the result into output file\n' \
+                  'metadata_transform_dataset.py -i <input_file> -o <output_file>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             input_file = arg
