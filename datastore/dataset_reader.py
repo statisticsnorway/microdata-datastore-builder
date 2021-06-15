@@ -73,44 +73,43 @@ class DatasetInput():
             ref_to_unit_type = str(metadata["unitType"]["$ref"])
             metadata["unitType"] = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_unit_type))
 
-        variable_idx = 0
-        for variable in metadata["variables"]:
-            if (variable["variableRole"] == "MEASURE"):
-                subject_field_idx = 0
-                for subject_field in variable["subjectFields"]:
-                    if ("$ref" in subject_field):
-                        ref_to_subject_field = str(subject_field["$ref"])
-                        metadata["variables"][variable_idx]["subjectFields"][subject_field_idx] = \
-                             DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_subject_field))
-                    subject_field_idx +=1
-                if ("$ref" in variable["valueDomain"]):
-                    ref_to_value_domain = str(metadata["variables"][variable_idx]["valueDomain"]["$ref"])
-                    value_domain_new = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_value_domain))
-                    value_domain_current = metadata["variables"][variable_idx]["valueDomain"]
-                    value_domain_new.update(value_domain_current)
-                    value_domain_new.pop("$ref")  # remove old "$ref"
-                    metadata["variables"][variable_idx]["valueDomain"] = value_domain_new
+        identifier_variable = [variable for variable in metadata["variables"] if variable.get("variableRole") == "IDENTIFIER"]
+        if len(identifier_variable) > 0 and "$ref" in identifier_variable[0]:
+            ref_to_identifier = identifier_variable[0]["$ref"]
+            identifier_variable[0].update(DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_identifier)))
+            identifier_variable[0].pop("$ref")  # remove old "$ref"
 
-            elif (variable["variableRole"] == "IDENTIFIER") and ("$ref" in variable):
-                ref_to_identifier = str(metadata["variables"][variable_idx]["$ref"])
-                identifier_new = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_identifier))
-                metadata["variables"][variable_idx].update(identifier_new)
-                metadata["variables"][variable_idx].pop("$ref")  # remove old "$ref"
+        measure_variable = [variable for variable in metadata["variables"] if variable.get("variableRole") == "MEASURE"]
+        if len(measure_variable) > 0:
+            for subject_field in measure_variable[0].get("subjectFields"):
+                if "$ref" in subject_field:
+                    ref_to_subject_field = subject_field["$ref"]
+                    subject_field.update(DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_subject_field)))
+                    subject_field.pop("$ref")  # remove old "$ref"
+            
+            value_domain = measure_variable[0].get("valueDomain")
+            if "$ref" in value_domain:
+                ref_to_value_domain = value_domain["$ref"]
+                value_domain.update(DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_value_domain)))
+                value_domain.pop("$ref")  # remove old "$ref"
+                if "sentinelAndMissingValues" in value_domain:
+                    # If "sentinelAndMissingValues" exists in JSON then move it to the end of valueDomain for better human readability
+                    sentinel_and_missing_values = value_domain.pop("sentinelAndMissingValues")
+                    value_domain.update({"sentinelAndMissingValues": sentinel_and_missing_values})
 
-            elif (variable["variableRole"] == "START_TIME") and ("$ref" in variable):
-                ref_to_start = str(metadata["variables"][variable_idx]["$ref"])
-                start_new = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_start))
-                metadata["variables"][variable_idx].update(start_new)
-                metadata["variables"][variable_idx].pop("$ref")  # remove old "$ref"
+        start_time_variable = [variable for variable in metadata["variables"] if variable.get("variableRole") == "START_TIME"]
+        if len(start_time_variable) > 0 and "$ref" in start_time_variable[0]:
+            ref_to_start_time = start_time_variable[0]["$ref"]
+            start_time_variable[0].update(DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_start_time)))
+            start_time_variable[0].pop("$ref")  # remove old "$ref"
 
-            elif (variable["variableRole"] == "STOP_TIME") and ("$ref" in variable):
-                ref_to_stop = str(metadata["variables"][variable_idx]["$ref"])
-                stop_new = DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_stop))
-                metadata["variables"][variable_idx].update(stop_new)
-                metadata["variables"][variable_idx].pop("$ref")  # remove old "$ref"
-            variable_idx += 1
+        stop_time_variable = [variable for variable in metadata["variables"] if variable.get("variableRole") == "STOP_TIME"]
+        if len(stop_time_variable) > 0 and "$ref" in stop_time_variable[0]:
+            ref_to_stop_time = stop_time_variable[0]["$ref"]
+            stop_time_variable[0].update(DatasetUtils.read_json_file(self.__data_input_root_path.joinpath(ref_to_stop_time)))
+            stop_time_variable[0].pop("$ref")  # remove old "$ref"
+        
         return metadata
-        print(json.dumps(metadata, indent=2, ensure_ascii=False))
 
 
 #####################
@@ -119,5 +118,5 @@ class DatasetInput():
 # dataset_path = Path(r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\tests\resources\InputTestData\DataSet\KREFTREG_DS")
 # di = DatasetInput(dataset_path)
 # metadata = di.build_metadata_dict()
-# DatasetUtils.write_json_file(metadata, dataset_path.joinpath("test_output.json"))
-
+# DatasetUtils.write_json_file(metadata, dataset_path.joinpath("KREFTREG_DS_merged_result.json"))
+# #print(json.dumps(metadata, indent=2, ensure_ascii=False))
