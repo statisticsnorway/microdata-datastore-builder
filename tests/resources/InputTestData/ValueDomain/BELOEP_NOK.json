@@ -1,0 +1,7 @@
+{
+    "shortName": "BELOEP_NOK",
+    "title": "Beløp i norske kroner (NOK)",
+    "measurementUnitDescription": [
+        {"languageCode": "no", "value": "NOK"}
+    ]
+}
