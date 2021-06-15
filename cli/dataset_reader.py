@@ -4,7 +4,11 @@
 # https://www.tutorialspoint.com/python/python_command_line_arguments.htm
 
 import sys, getopt
+import logging
+from log_config import set_up_logging
 
+set_up_logging()
+log = logging.getLogger("dataset_reader")
 
 # Fake dataset_reader, for demonstration purposes ONLY!
 
@@ -38,12 +42,12 @@ def main(argv):
         elif opt in ("-l", "--data_error_limit"):
             data_error_limit = arg
 
-    print('This is dataset_reader.py')
-    print('data_file : ' + data_file)
-    print('metadata_file : ' + metadata_file)
-    print('validate : ' + validate)
-    print('field_separator : ' + field_separator)
-    print('data_error_limit : ' + data_error_limit)
+    log.info('This is dataset_reader.py')
+    log.info('data_file : ' + data_file)
+    log.info('metadata_file : ' + metadata_file)
+    log.info('validate : ' + validate)
+    log.info('field_separator : ' + field_separator)
+    log.info('data_error_limit : ' + data_error_limit)
 
 
 if __name__ == "__main__":

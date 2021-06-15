@@ -6,6 +6,12 @@
 import sys, getopt
 from pathlib import Path
 
+import logging
+from log_config import set_up_logging
+
+set_up_logging()
+log = logging.getLogger("update_metadata_all")
+
 # This should be moved to environment, PYTHONPATH
 new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
 if new_path not in sys.path:
@@ -32,9 +38,9 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             metadata_all_file = arg
 
-    print('Dette er update_metadata_all.py')
-    print('input_file : ' + dataset_transformed_file)
-    print('output_file : ' + metadata_all_file)
+    log.info('Dette er update_metadata_all.py')
+    log.info('input_file : ' + dataset_transformed_file)
+    log.info('output_file : ' + metadata_all_file)
 
     updater.Updater.update_metadata_all(Path(dataset_transformed_file), Path(metadata_all_file))
 
