@@ -13,9 +13,9 @@ set_up_logging()
 log = logging.getLogger("update_metadata_all")
 
 # This should be moved to environment, PYTHONPATH
-new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
-if new_path not in sys.path:
-    sys.path.append(new_path)
+# new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
+# if new_path not in sys.path:
+#     sys.path.append(new_path)
 
 import updater
 
