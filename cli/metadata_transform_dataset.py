@@ -7,6 +7,12 @@ import sys, getopt
 import json
 from pathlib import Path
 
+import logging
+from log_config import set_up_logging
+
+set_up_logging()
+log = logging.getLogger("metadata_transform_dataset")
+
 # This should be moved to environment, PYTHONPATH
 new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
 if new_path not in sys.path:
@@ -33,9 +39,9 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             output_file = arg
 
-    print('This is script metadata_transform_dataset.py calling module Transformer')
-    print('input_file : ' + input_file)
-    print('output_file : ' + output_file)
+    log.info("This is script metadata_transform_dataset.py calling module Transformer")
+    log.info('input_file : ' + input_file)
+    log.info('output_file : ' + output_file)
 
     dataset = json.loads(Path(input_file).read_text())
     transformed_dataset = transformer.Transformer.transform_dataset(dataset)
