@@ -137,16 +137,16 @@
                             "validFrom": "1953-01-01"
                         }
                     ]
-                }
-            },
-            "sentinelAndMissingValues" : [
-                {
-                    "code": "999",
-                    "categoryTitle": [
-                        {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
-                    ]
-                }
-            ]
+                },
+                "sentinelAndMissingValues": [
+                    {
+                        "code": "999",
+                        "categoryTitle": [
+                            {"languageCode": "no", "value": "Ugyldig/manglende verdi"}
+                        ]
+                    }
+                ]
+            }
         },
         {
             "variableRole": "START_TIME",
