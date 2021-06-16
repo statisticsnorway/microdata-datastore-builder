@@ -56,6 +56,7 @@ def main(argv):
     command_list.append(dataset_reader_str.format(data_file, metadata_file))
 
     metadata_transform_str = "./metadata_transform_dataset.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
+    # metadata_transform_str = "./transformer.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
     command_list.append(metadata_transform_str.format(metadata_file, transformed_file(metadata_file)))
 
     update_metadata_all_str = "./update_metadata_all.py -i /Users/vak/temp/{} -o /Users/vak/temp/metadata-all__1_0_0.json"

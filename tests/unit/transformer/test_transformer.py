@@ -3,7 +3,8 @@ import sys
 import unittest
 import json
 
-from transformer.transformer import Transformer
+from datastore_builder.transformer import Transformer
+
 from pathlib import Path
 
 if __name__ == '__main__':

@@ -1,10 +1,67 @@
+#!/usr/bin/python3
+import getopt
+import json
 from datetime import datetime
+from pathlib import Path
+
+import logging
+
+# BRA!
+# https://docs.python.org/3/howto/logging-cookbook.html
+import sys
+
+# import logging
+# from log_config import set_up_logging
+#
+# set_up_logging()
+# module_logger = logging.getLogger('module.transformer')
+#
+#
+# def main(argv):
+#     input_file = ''
+#     output_file = ''
+#     try:
+#         opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+#     except getopt.GetoptError:
+#         print('transformer.py -i <input_file> -o <output_file>')
+#         sys.exit(2)
+#     for opt, arg in opts:
+#         if opt == '-h':
+#             print('Reads a json file, transforms it according to NSD swagger spesification ' \
+#                   'and stores the result into output file\n' \
+#                   'transformer.py -i <input_file> -o <output_file>')
+#             sys.exit()
+#         elif opt in ("-i", "--ifile"):
+#             input_file = arg
+#         elif opt in ("-o", "--ofile"):
+#             output_file = arg
+#     module_logger.info("This is script transformer.py calling class Transformer")
+#     module_logger.info('input_file : ' + input_file)
+#     module_logger.info('output_file : ' + output_file)
+#
+#     dataset = json.loads(Path(input_file).read_text())
+#     transformer = Transformer()
+#     transformed_dataset = transformer.transform_dataset(dataset)
+#     Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
 
 
 class Transformer:
 
+    # Eksempel på konstruktør
+
+    # first = 0
+    # second = 0
+    # answer = 0
+    #
+    # # parameterized constructor
+    # def __init__(self, f, s):
+    #     self.first = f
+    #     self.second = s
+
     def __init__(self):
-        pass
+        self.logger = logging.getLogger('dataset_import.Transformer')
+        self.logger.info('creating an instance of Transformer')
+
 
     @staticmethod
     def get_norwegian_text(texts: list) -> str:
@@ -224,8 +281,8 @@ class Transformer:
             attr['format'] = attribute["format"]
         return attr
 
-    @staticmethod
-    def transform_dataset(dataset: dict) -> dict:
+    def transform_dataset(self, dataset: dict) -> dict:
+        self.logger.info("Dette er Transformer transform_dataset")
         start = dataset['dataRevision']['temporalCoverageStart']
         stop = dataset['dataRevision']['temporalCoverageLatest']
 

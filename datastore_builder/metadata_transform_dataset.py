@@ -7,6 +7,7 @@ import sys, getopt
 import json
 from pathlib import Path
 
+from transformer import Transformer
 import logging
 from log_config import set_up_logging
 
@@ -14,11 +15,10 @@ set_up_logging()
 log = logging.getLogger("metadata_transform_dataset")
 
 # This should be moved to environment, PYTHONPATH
-new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
-if new_path not in sys.path:
-    sys.path.append(new_path)
+# new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
+# if new_path not in sys.path:
+#     sys.path.append(new_path)
 
-import transformer
 
 def main(argv):
     input_file = ''
@@ -44,7 +44,8 @@ def main(argv):
     log.info('output_file : ' + output_file)
 
     dataset = json.loads(Path(input_file).read_text())
-    transformed_dataset = transformer.Transformer.transform_dataset(dataset)
+    transformer = Transformer()
+    transformed_dataset = transformer.transform_dataset(dataset)
     Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
 
 
