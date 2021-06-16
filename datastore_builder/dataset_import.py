@@ -50,13 +50,14 @@ def main(argv):
     log.info('Data: ' + data_file)
 
     command_list = []
-    dataset_reader_str = "./dataset_reader.py -d tests/resources/datasets/{} -m tests/resources/datasets/{} -v all -f \";\" -l 100"
+
+    dataset_reader_str = "./reader_wrapper.py -d tests/resources/datasets/{} -m tests/resources/datasets/{} -v all -f \";\" -l 100"
     command_list.append(dataset_reader_str.format(data_file, metadata_file))
 
-    metadata_transform_str = "./metadata_transform_dataset.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
+    metadata_transform_str = "./transformer_wrapper.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
     command_list.append(metadata_transform_str.format(metadata_file, transformed_file(metadata_file)))
 
-    update_metadata_all_str = "./update_metadata_all.py -i /Users/vak/temp/{} -o /Users/vak/temp/metadata-all__1_0_0.json"
+    update_metadata_all_str = "./updater_wrapper.py -i /Users/vak/temp/{} -o /Users/vak/temp/metadata-all__1_0_0.json"
     command_list.append(update_metadata_all_str.format(transformed_file(metadata_file)))
 
     count = 0

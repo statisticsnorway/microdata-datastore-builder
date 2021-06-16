@@ -12,7 +12,7 @@ import logging
 from log_config import set_up_logging
 
 set_up_logging()
-log = logging.getLogger("metadata_transform_dataset")
+log = logging.getLogger("transformer_wrapper")
 
 # This should be moved to environment, PYTHONPATH
 # new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
@@ -26,20 +26,20 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
     except getopt.GetoptError:
-        print('metadata_transform_dataset.py -i <input_file> -o <output_file>')
+        print('transformer_wrapper.py -i <input_file> -o <output_file>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print('Reads a json file, transforms it according to NSD swagger spesification ' \
                   'and stores the result into output file\n' \
-                  'metadata_transform_dataset.py -i <input_file> -o <output_file>')
+                  'transformer_wrapper.py -i <input_file> -o <output_file>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             input_file = arg
         elif opt in ("-o", "--ofile"):
             output_file = arg
 
-    log.info("This is script metadata_transform_dataset.py")
+    log.info("This is script transformer_wrapper.py")
     log.info('input_file : ' + input_file)
     log.info('output_file : ' + output_file)
 

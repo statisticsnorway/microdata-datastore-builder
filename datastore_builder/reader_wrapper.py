@@ -8,7 +8,7 @@ import logging
 from log_config import set_up_logging
 
 set_up_logging()
-log = logging.getLogger("dataset_reader")
+log = logging.getLogger("reader_wrapper")
 
 # Fake dataset_reader, for demonstration purposes ONLY!
 
@@ -23,12 +23,12 @@ def main(argv):
                                    ["data_file=", "metadata_file=", "validate=", "field_separator=",
                                     "data_error_limit="])
     except getopt.GetoptError:
-        print('dataset_reader.py -d <data_file> -m <metadata_file> -v <validate> -f <field_separator> -l '
+        print('reader_wrapper.py -d <data_file> -m <metadata_file> -v <validate> -f <field_separator> -l '
               '<data_error_limit>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('dataset_reader.py -d <data_file> -m <metadata_file> -v <validate> -f <field_separator> -l '
+            print('reader_wrapper.py -d <data_file> -m <metadata_file> -v <validate> -f <field_separator> -l '
                   '<data_error_limit>')
             sys.exit()
         elif opt in ("-d", "--data_file"):
@@ -42,7 +42,7 @@ def main(argv):
         elif opt in ("-l", "--data_error_limit"):
             data_error_limit = arg
 
-    log.info('This is dataset_reader.py')
+    log.info('This is script reader_wrapper.py')
     log.info('data_file : ' + data_file)
     log.info('metadata_file : ' + metadata_file)
     log.info('validate : ' + validate)
