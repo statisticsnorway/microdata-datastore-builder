@@ -3,7 +3,7 @@ import sys
 import unittest
 import json
 
-from datastore_builder.dataset_import.transformer import Transformer
+from datastore_builder.transformer import Transformer
 
 from pathlib import Path
 
