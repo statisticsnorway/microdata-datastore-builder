@@ -39,7 +39,7 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             output_file = arg
 
-    log.info("This is script metadata_transform_dataset.py calling module Transformer")
+    log.info("This is script metadata_transform_dataset.py")
     log.info('input_file : ' + input_file)
     log.info('output_file : ' + output_file)
 

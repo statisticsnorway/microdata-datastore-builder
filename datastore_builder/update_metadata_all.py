@@ -9,6 +9,8 @@ from pathlib import Path
 import logging
 from log_config import set_up_logging
 
+from updater import Updater
+
 set_up_logging()
 log = logging.getLogger("update_metadata_all")
 
@@ -42,7 +44,9 @@ def main(argv):
     log.info('input_file : ' + dataset_transformed_file)
     log.info('output_file : ' + metadata_all_file)
 
-    updater.Updater.update_metadata_all(Path(dataset_transformed_file), Path(metadata_all_file))
+    updater = Updater()
+    updater.update_metadata_all(Path(dataset_transformed_file), Path(metadata_all_file))
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

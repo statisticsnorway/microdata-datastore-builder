@@ -46,17 +46,14 @@ def main(argv):
         elif opt in ("-d", "--data"):
             data_file = arg
 
-    insert_dash_line()
     log.info('Metadata: ' + metadata_file)
     log.info('Data: ' + data_file)
-    insert_dash_line()
 
     command_list = []
     dataset_reader_str = "./dataset_reader.py -d tests/resources/datasets/{} -m tests/resources/datasets/{} -v all -f \";\" -l 100"
     command_list.append(dataset_reader_str.format(data_file, metadata_file))
 
     metadata_transform_str = "./metadata_transform_dataset.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
-    # metadata_transform_str = "./transformer.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
     command_list.append(metadata_transform_str.format(metadata_file, transformed_file(metadata_file)))
 
     update_metadata_all_str = "./update_metadata_all.py -i /Users/vak/temp/{} -o /Users/vak/temp/metadata-all__1_0_0.json"
@@ -65,8 +62,10 @@ def main(argv):
     count = 0
     for command in command_list:
         count += 1
-        log.info("Line{}: {}".format(count, command))
-        insert_dash_line()
+        log_str = "Step {}: {}".format(count, command)
+        insert_dash_line(len(log_str))
+        log.info(log_str)
+        insert_dash_line(len(log_str))
         command_with_parms = command.split(" ")
         sub = subprocess.run(command_with_parms)
         if sub.returncode != 0:
@@ -74,8 +73,8 @@ def main(argv):
             exit(-1)
 
 
-def insert_dash_line():
-    log.info("-" * 65)
+def insert_dash_line(length: int):
+    log.info("-" * length)
 
 
 if __name__ == "__main__":
