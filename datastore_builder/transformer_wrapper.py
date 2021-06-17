@@ -9,18 +9,21 @@ from pathlib import Path
 
 from transformer import Transformer
 import logging
-from log_config import set_up_logging
 
-set_up_logging()
-log = logging.getLogger("transformer_wrapper")
-
-# This should be moved to environment, PYTHONPATH
-# new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
-# if new_path not in sys.path:
-#     sys.path.append(new_path)
+from common import log_config, util
 
 
 def main(argv):
+
+    log_config.log_setup_for_import_pipeline()
+
+    log = logging.getLogger("transformer_wrapper")
+    log_filter = log_config.ContextFilter(util.create_run_id())
+    log.addFilter(log_filter)
+
+    log.info('This is script transformer_wrapper.py')
+    log.info(sys.version_info)
+
     input_file = ''
     output_file = ''
     try:
@@ -44,7 +47,7 @@ def main(argv):
     log.info('output_file : ' + output_file)
 
     dataset = json.loads(Path(input_file).read_text())
-    transformer = Transformer()
+    transformer = Transformer(log_filter)
     transformed_dataset = transformer.transform_dataset(dataset)
     Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
 

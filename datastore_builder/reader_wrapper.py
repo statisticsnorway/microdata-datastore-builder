@@ -1,18 +1,21 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-
-# https://www.tutorialspoint.com/python/python_command_line_arguments.htm
 
 import sys, getopt
 import logging
-from log_config import set_up_logging
+from common import log_config, util
 
-set_up_logging()
-log = logging.getLogger("reader_wrapper")
 
 # Fake dataset_reader, for demonstration purposes ONLY!
 
 def main(argv):
+
+    log_config.log_setup_for_import_pipeline()
+
+    log = logging.getLogger("reader_wrapper")
+    log_filter = log_config.ContextFilter(util.create_run_id())
+    log.addFilter(log_filter)
+
     data_file = ''
     metadata_file = ''
     validate = ''

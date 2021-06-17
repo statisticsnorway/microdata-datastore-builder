@@ -5,8 +5,9 @@ import logging
 
 class Updater:
 
-    def __init__(self):
+    def __init__(self, log_filter):
         self.logger = logging.getLogger('Updater')
+        self.logger.addFilter(log_filter)
         self.logger.info('creating an instance of Updater')
 
     def update_metadata_all(self, transformed_dataset: str, metadata_all_file: str) -> None:

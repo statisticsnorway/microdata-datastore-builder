@@ -1,28 +1,26 @@
 #!/usr/bin/python3
 
 
-# https://www.tutorialspoint.com/python/python_command_line_arguments.htm
-
-import sys, getopt
+import logging
 from pathlib import Path
 
-import logging
-from log_config import set_up_logging
+import getopt
+import sys
 
+from common import log_config, util
 from updater import Updater
-
-set_up_logging()
-log = logging.getLogger("updater_wrapper")
-
-# This should be moved to environment, PYTHONPATH
-# new_path = '/Users/vak/projects/github/microdata-datastore-builder/transformer'
-# if new_path not in sys.path:
-#     sys.path.append(new_path)
-
-import updater
 
 
 def main(argv):
+    log_config.log_setup_for_import_pipeline()
+
+    log = logging.getLogger("updater_wrapper")
+    log_filter = log_config.ContextFilter(util.create_run_id())
+    log.addFilter(log_filter)
+
+    log.info('This is script updater_wrapper.py')
+    log.info(sys.version_info)
+
     dataset_transformed_file = ''
     metadata_all_file = ''
     try:
@@ -40,11 +38,10 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             metadata_all_file = arg
 
-    log.info('This is script updater_wrapper.py')
     log.info('input_file : ' + dataset_transformed_file)
     log.info('output_file : ' + metadata_all_file)
 
-    updater = Updater()
+    updater = Updater(log_filter)
     updater.update_metadata_all(Path(dataset_transformed_file), Path(metadata_all_file))
 
 

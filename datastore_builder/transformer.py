@@ -1,11 +1,13 @@
 import logging
+import os
 from datetime import datetime
 
 
 class Transformer:
 
-    def __init__(self):
+    def __init__(self, log_filter):
         self.logger = logging.getLogger('Transformer')
+        self.logger.addFilter(log_filter)
         self.logger.info('creating an instance of Transformer')
 
     @staticmethod
