@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 from common import log_config, util
+from common.config import WORKING_DIR, METADATA_ALL_FILE
 from reader import Reader
 from transformer import Transformer
 from updater import Updater
@@ -19,9 +20,6 @@ def transformed_file(metadata_file):
     tmp = metadata_file.rsplit(".", 1)[0]
     return tmp + "_transformed.json"
 
-
-WORKING_DIR = "/Users/vak/temp/"
-METADATA_ALL_FILE = "metadata-all__1_0_0.json"
 
 
 def main(argv):
