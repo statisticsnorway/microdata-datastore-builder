@@ -21,7 +21,7 @@ class ContextFilter(logging.Filter):
 LOG_FORMAT = '%(asctime)s - %(runId)s - %(name)s - %(levelname)s  - %(message)s'
 
 
-def get_rotating_file_handler():
+def __get_rotating_file_handler():
     rotating_file_handler = TimedRotatingFileHandler(LOG_FILE_FOR_IMPORT_PIPELINE, when='midnight',
                                                      backupCount=7, interval=1)
     rotating_file_handler.setLevel(logging.DEBUG)
@@ -29,7 +29,7 @@ def get_rotating_file_handler():
     return rotating_file_handler
 
 
-def get_stream_handler():
+def __get_stream_handler():
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
     stream_handler.setFormatter(logging.Formatter(LOG_FORMAT))
@@ -39,6 +39,6 @@ def get_stream_handler():
 def get_logger_for_import_pipeline(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
-    logger.addHandler(get_rotating_file_handler())
-    logger.addHandler(get_stream_handler())
+    logger.addHandler(__get_rotating_file_handler())
+    logger.addHandler(__get_stream_handler())
     return logger
