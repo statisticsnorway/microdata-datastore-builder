@@ -1,19 +1,17 @@
 import json
 from pathlib import Path
-import logging
+
+from common import log_config
 
 
 class Updater:
 
     def __init__(self, log_filter):
-        self.logger = logging.getLogger('Updater')
+        self.logger = log_config.get_logger_for_import_pipeline("Updater")
         self.logger.addFilter(log_filter)
         self.logger.info('creating an instance of Updater')
 
     def update_metadata_all(self, transformed_dataset: str, metadata_all_file: str) -> None:
-
-        # transformed_dataset_path = Path(transformed_dataset)
-        # metadata_all_file_path = Path(metadata_all_file)
 
         dataset = json.loads(Path(transformed_dataset).read_text())
         metadata_all_json = json.loads(Path(metadata_all_file).read_text())

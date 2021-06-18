@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 import getopt
 import json
-import logging.handlers
 from pathlib import Path
 
 import sys
 
 from common import log_config, util
+from reader import Reader
 from transformer import Transformer
 from updater import Updater
-from reader import Reader
 
 
 def version_tuple(v) -> tuple:
@@ -26,9 +25,7 @@ METADATA_ALL_FILE = "metadata-all__1_0_0.json"
 
 
 def main(argv):
-    log_config.log_setup_for_import_pipeline()
-
-    log = logging.getLogger("dataset_import")
+    log = log_config.get_logger_for_import_pipeline("dataset_import")
     log_filter = log_config.ContextFilter(util.create_run_id())
     log.addFilter(log_filter)
 

@@ -1,20 +1,16 @@
 #!/usr/bin/python3
 
 
-import sys, getopt
-import logging
-from common import log_config, util
+import getopt
 
+import sys
+
+from common import log_config, util
 from reader import Reader
 
 
-# Fake dataset_reader, for demonstration purposes ONLY!
-
 def main(argv):
-
-    log_config.log_setup_for_import_pipeline()
-
-    log = logging.getLogger("reader_wrapper")
+    log = log_config.get_logger_for_import_pipeline("reader_wrapper")
     log_filter = log_config.ContextFilter(util.create_run_id())
     log.addFilter(log_filter)
 
@@ -54,7 +50,7 @@ def main(argv):
     log.info('field_separator : ' + field_separator)
     log.info('data_error_limit : ' + data_error_limit)
 
-    reader= Reader(log_filter)
+    reader = Reader(log_filter)
     reader.hello()
 
 

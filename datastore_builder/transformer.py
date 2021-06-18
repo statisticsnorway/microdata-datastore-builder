@@ -1,12 +1,12 @@
-import logging
-import os
 from datetime import datetime
+
+from common import log_config
 
 
 class Transformer:
 
     def __init__(self, log_filter):
-        self.logger = logging.getLogger('Transformer')
+        self.logger = log_config.get_logger_for_import_pipeline("Transformer")
         self.logger.addFilter(log_filter)
         self.logger.info('creating an instance of Transformer')
 

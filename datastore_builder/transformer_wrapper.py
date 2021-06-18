@@ -1,23 +1,18 @@
 #!/usr/bin/python3
 
 
-# https://www.tutorialspoint.com/python/python_command_line_arguments.htm
-
-import sys, getopt
+import getopt
 import json
 from pathlib import Path
 
-from transformer import Transformer
-import logging
+import sys
 
 from common import log_config, util
+from transformer import Transformer
 
 
 def main(argv):
-
-    log_config.log_setup_for_import_pipeline()
-
-    log = logging.getLogger("transformer_wrapper")
+    log = log_config.get_logger_for_import_pipeline("transformer_wrapper")
     log_filter = log_config.ContextFilter(util.create_run_id())
     log.addFilter(log_filter)
 

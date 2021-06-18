@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
 
-import logging
+import getopt
 from pathlib import Path
 
-import getopt
 import sys
 
 from common import log_config, util
@@ -12,9 +11,7 @@ from updater import Updater
 
 
 def main(argv):
-    log_config.log_setup_for_import_pipeline()
-
-    log = logging.getLogger("updater_wrapper")
+    log = log_config.get_logger_for_import_pipeline("updater_wrapper")
     log_filter = log_config.ContextFilter(util.create_run_id())
     log.addFilter(log_filter)
 
