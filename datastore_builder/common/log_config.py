@@ -2,6 +2,7 @@ import logging
 
 LOG_FILE_FOR_IMPORT_PIPELINE = "/Users/vak/temp/dataset_import.log"
 
+
 def log_setup_for_import_pipeline():
     log_format = '%(asctime)s - %(runId)s - %(name)s - %(levelname)s  - %(message)s'
     stream_handler = logging.StreamHandler()

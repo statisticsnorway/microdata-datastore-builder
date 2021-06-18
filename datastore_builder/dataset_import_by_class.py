@@ -9,6 +9,7 @@ import sys
 from common import log_config, util
 from transformer import Transformer
 from updater import Updater
+from reader import Reader
 
 
 def version_tuple(v) -> tuple:
@@ -59,6 +60,8 @@ def main(argv):
     log.info('Metadata: ' + metadata_file)
     log.info('Data: ' + data_file)
 
+    run_reader(log, log_filter)
+
     metadata_path = WORKING_DIR + metadata_file
     transformed_metadata_path = transformed_file(metadata_path)
 
@@ -90,6 +93,13 @@ def run_transformer(input_file, output_file, log, log_filter):
     transformer = Transformer(log_filter)
     transformed_dataset = transformer.transform_dataset(dataset)
     Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
+
+
+def run_reader(log, log_filter):
+    insert_dash_line(log)
+    log.info("Calling Reader")
+    reader = Reader(log_filter)
+    reader.hello()
 
 
 def insert_dash_line(log):

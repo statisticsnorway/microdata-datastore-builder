@@ -5,6 +5,8 @@ import sys, getopt
 import logging
 from common import log_config, util
 
+from reader import Reader
+
 
 # Fake dataset_reader, for demonstration purposes ONLY!
 
@@ -51,6 +53,9 @@ def main(argv):
     log.info('validate : ' + validate)
     log.info('field_separator : ' + field_separator)
     log.info('data_error_limit : ' + data_error_limit)
+
+    reader= Reader(log_filter)
+    reader.hello()
 
 
 if __name__ == "__main__":
