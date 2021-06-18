@@ -1,67 +1,14 @@
-#!/usr/bin/python3
-import getopt
-import json
 from datetime import datetime
-from pathlib import Path
 
-import logging
-
-# BRA!
-# https://docs.python.org/3/howto/logging-cookbook.html
-import sys
-
-# import logging
-# from log_config import set_up_logging
-#
-# set_up_logging()
-# module_logger = logging.getLogger('module.transformer')
-#
-#
-# def main(argv):
-#     input_file = ''
-#     output_file = ''
-#     try:
-#         opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
-#     except getopt.GetoptError:
-#         print('transformer.py -i <input_file> -o <output_file>')
-#         sys.exit(2)
-#     for opt, arg in opts:
-#         if opt == '-h':
-#             print('Reads a json file, transforms it according to NSD swagger spesification ' \
-#                   'and stores the result into output file\n' \
-#                   'transformer.py -i <input_file> -o <output_file>')
-#             sys.exit()
-#         elif opt in ("-i", "--ifile"):
-#             input_file = arg
-#         elif opt in ("-o", "--ofile"):
-#             output_file = arg
-#     module_logger.info("This is script transformer.py calling class Transformer")
-#     module_logger.info('input_file : ' + input_file)
-#     module_logger.info('output_file : ' + output_file)
-#
-#     dataset = json.loads(Path(input_file).read_text())
-#     transformer = Transformer()
-#     transformed_dataset = transformer.transform_dataset(dataset)
-#     Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
+from common import log_config
 
 
 class Transformer:
 
-    # Eksempel på konstruktør
-
-    # first = 0
-    # second = 0
-    # answer = 0
-    #
-    # # parameterized constructor
-    # def __init__(self, f, s):
-    #     self.first = f
-    #     self.second = s
-
-    def __init__(self):
-        self.logger = logging.getLogger('dataset_import.Transformer')
+    def __init__(self, log_filter):
+        self.logger = log_config.get_logger_for_import_pipeline("Transformer")
+        self.logger.addFilter(log_filter)
         self.logger.info('creating an instance of Transformer')
-
 
     @staticmethod
     def get_norwegian_text(texts: list) -> str:
@@ -282,9 +229,11 @@ class Transformer:
         return attr
 
     def transform_dataset(self, dataset: dict) -> dict:
-        self.logger.info("Dette er Transformer transform_dataset")
         start = dataset['dataRevision']['temporalCoverageStart']
         stop = dataset['dataRevision']['temporalCoverageLatest']
+
+        log_str = "Transforms {}, {}, {}, {}".format(dataset['shortName'], dataset['temporalityType'], start, stop)
+        self.logger.info(log_str)
 
         identifierVariables = Transformer.transform_identifiers(dataset, start, stop)
         dataset_measure, measureVariable = Transformer.transform_measure(dataset, start, stop)
@@ -301,6 +250,7 @@ class Transformer:
                        'languageCode': 'no'}
         if attributeVariables:
             transformed['attributeVariables'] = attributeVariables
+        self.logger.info("Finished transformation")
         return transformed
 
     @staticmethod
@@ -322,7 +272,8 @@ class Transformer:
         measureVariable = {'name': dataset_measure['shortName'],
                            'label': Transformer.get_norwegian_text(dataset_measure['title']),
                            'dataType': dataset_measure['dataType'],
-                           'representedVariables': Transformer.transform_represented_variables(dataset_measure, start, stop)}
+                           'representedVariables': Transformer.transform_represented_variables(dataset_measure, start,
+                                                                                               stop)}
         for representedVariable in measureVariable['representedVariables']:
             if representedVariable['description'] is None:
                 representedVariable['description'] = Transformer.get_norwegian_text(dataset['description'])

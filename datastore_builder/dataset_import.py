@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 import getopt
-import logging.handlers
-import subprocess
+import json
+from pathlib import Path
 
 import sys
 
-from log_config import set_up_logging
+from common import log_config, util
+from common.config import WORKING_DIR, METADATA_ALL_FILE
+from reader import Reader
+from transformer import Transformer
+from updater import Updater
 
-set_up_logging()
-log = logging.getLogger("dataset_import")
 
-
-def versiontuple(v) -> tuple:
+def version_tuple(v) -> tuple:
     return tuple(map(int, (v.split("."))))
 
 
@@ -20,12 +21,17 @@ def transformed_file(metadata_file):
     return tmp + "_transformed.json"
 
 
+
 def main(argv):
+    log = log_config.get_logger_for_import_pipeline("dataset_import")
+    log_filter = log_config.ContextFilter(util.create_run_id())
+    log.addFilter(log_filter)
+
     log.info('This is script dataset_import.py')
     log.info(sys.version_info)
 
     actual_version = '{}.{}.{}'.format(sys.version_info[0], sys.version_info[1], sys.version_info[2])
-    if versiontuple(actual_version) < versiontuple("3.8.2"):
+    if version_tuple(actual_version) < version_tuple("3.8.2"):
         log.error('Python version is {}, required minimum 3.8.2'.format(actual_version))
         raise Exception('Python version is {}, required minimum 3.8.2'.format(actual_version))
 
@@ -46,35 +52,52 @@ def main(argv):
         elif opt in ("-d", "--data"):
             data_file = arg
 
-    insert_dash_line()
     log.info('Metadata: ' + metadata_file)
     log.info('Data: ' + data_file)
-    insert_dash_line()
 
-    command_list = []
-    dataset_reader_str = "./dataset_reader.py -d tests/resources/datasets/{} -m tests/resources/datasets/{} -v all -f \";\" -l 100"
-    command_list.append(dataset_reader_str.format(data_file, metadata_file))
+    run_reader(log, log_filter)
 
-    metadata_transform_str = "./metadata_transform_dataset.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
-    # metadata_transform_str = "./transformer.py -i /Users/vak/temp/{} -o /Users/vak/temp/{}"
-    command_list.append(metadata_transform_str.format(metadata_file, transformed_file(metadata_file)))
+    metadata_path = WORKING_DIR + metadata_file
+    transformed_metadata_path = transformed_file(metadata_path)
 
-    update_metadata_all_str = "./update_metadata_all.py -i /Users/vak/temp/{} -o /Users/vak/temp/metadata-all__1_0_0.json"
-    command_list.append(update_metadata_all_str.format(transformed_file(metadata_file)))
+    run_transformer(metadata_path, transformed_metadata_path, log, log_filter)
 
-    count = 0
-    for command in command_list:
-        count += 1
-        log.info("Line{}: {}".format(count, command))
-        insert_dash_line()
-        command_with_parms = command.split(" ")
-        sub = subprocess.run(command_with_parms)
-        if sub.returncode != 0:
-            log.error('Failed with ERROR!')
-            exit(-1)
+    metadata_all_path = WORKING_DIR + METADATA_ALL_FILE
+    run_updater(transformed_metadata_path, metadata_all_path, log, log_filter)
 
 
-def insert_dash_line():
+def metadata_path(metadata_file):
+    return WORKING_DIR + metadata_file
+
+
+def run_updater(input_file, output_file, log, log_filter):
+    insert_dash_line(log)
+    log.info("Calling Updater")
+    log.info('input_file : ' + input_file)
+    log.info('output_file : ' + output_file)
+    updater = Updater(log_filter)
+    updater.update_metadata_all(Path(input_file), Path(output_file))
+
+
+def run_transformer(input_file, output_file, log, log_filter):
+    insert_dash_line(log)
+    log.info("Calling Transformer")
+    log.info('input_file : ' + input_file)
+    log.info('output_file : ' + output_file)
+    dataset = json.loads(Path(input_file).read_text())
+    transformer = Transformer(log_filter)
+    transformed_dataset = transformer.transform_dataset(dataset)
+    Path(output_file).write_text(json.dumps(transformed_dataset, sort_keys=False, indent=4, ensure_ascii=False))
+
+
+def run_reader(log, log_filter):
+    insert_dash_line(log)
+    log.info("Calling Reader")
+    reader = Reader(log_filter)
+    reader.hello()
+
+
+def insert_dash_line(log):
     log.info("-" * 65)
 
 
