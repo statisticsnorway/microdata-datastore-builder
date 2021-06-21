@@ -9,11 +9,11 @@ This pipeline prepares and imports data and metadata into the datastore.
 dataset_import.py -m <metadata_file> -d <data_file>
 ```
 It runs the following steps in this order:
-#### Reader (reader.py)
+- #### Reader (reader.py)
 Reads, validates and enhances data and metadata.
-#### Transformer (transformer.py)                                                   
+- #### Transformer (transformer.py)                                                   
 Transforms metadata of a dataset into NSD information model.
-#### Updater (updater.py)                                             
+- #### Updater (updater.py)                                             
 Adds the dataset in a metadata file that contains all transformed datasets (**"metadata_all"**).
   
 ***The steps above may be run individually using python scripts as wrappers:***
