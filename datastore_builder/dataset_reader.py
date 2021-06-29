@@ -1,69 +1,18 @@
 import logging
 import json
 from pathlib import Path
-from sqlite3.dbapi2 import Cursor
+#from sqlite3.dbapi2 import Cursor
 from typing import List, Tuple, Union
 import datetime
 import csv
 import sqlite3 as db
 
 import common.config as conf
+from common.dataset_utils import DatasetUtils
 
 # TODO: remove imports:
 from time import gmtime, strftime
 
-
-class DatasetUtils():
-    # @staticmethod
-    # def search_dictionary(var:Union[dict, list], search_key:str):
-    #     """Takes a dict with nested lists and dicts,
-    #     and searches all dicts (recursively) for the spesified search_key.
-    #     """
-    #     if isinstance(var, dict):
-    #         for k, v in var.items():
-    #             if k == search_key:
-    #                 yield v
-    #             if isinstance(v, (dict, list)):
-    #                 yield from search_dictionary(v, search_key)
-    #     elif isinstance(var, list):
-    #         for d in var:
-    #             yield from search_dictionary(d, search_key)
-
-    @staticmethod
-    def read_json_file(json_file: Path) -> Union[dict, None]:
-        with open(json_file, encoding="utf-8") as f:
-            try:
-                return json.load(f)
-            except Exception as e:
-                logging.error("Not a valid JSON file: " + str(json_file) \
-                    + "\n" + str(e)
-                )
-                return None
-
-    @staticmethod
-    def write_json_file(dict_obj: dict, json_file: Path):
-        json_file.write_text(json.dumps(dict_obj, indent=4, ensure_ascii=False), encoding="utf-8")
-
-    @staticmethod
-    def create_temp_sqlite_db_file(db_file: Path) -> Tuple[db.Connection, db.Cursor]:
-        if db_file.exists():
-            db_file.unlink()  # removes a file or symbolic link
-
-        sql_create_table = f"""\
-            CREATE TABLE temp_dataset (
-                unit_id TEXT NOT NULL, 
-                value TEXT NOT NULL, 
-                start TEXT, 
-                stop TEXT, 
-                attributes TEXT) """
-
-        db_conn = db.connect(db_file) 
-        cursor = db_conn.cursor()
-        cursor.execute(sql_create_table)
-        # Set Sqlite-params to speed up performance
-        cursor.execute("PRAGMA synchronous = OFF")
-        cursor.execute("BEGIN TRANSACTION")
-        return (db_conn, cursor)
 
 
 class DatasetInput():
@@ -283,10 +232,9 @@ class DatasetInput():
 #####################
 ### Usage example ###
 #####################
-dsi = DatasetInput("KREFTREG_DS")
-dsi.run_reader()
+#dsi = DatasetInput("KREFTREG_DS")
+#dsi.run_reader()
 #print(dsi.is_data_file_valid())
-
 
 
 #####################
