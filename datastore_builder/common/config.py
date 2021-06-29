@@ -1,3 +1,5 @@
-WORKING_DIR = "/Users/vak/temp/"
+#WORKING_DIR = "/Users/vak/temp/"
+WORKING_DIR = r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\temp"
+DATA_INPUT_ROOT_DIR = r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\tests\resources\InputTestData"
 LOG_FILE_FOR_IMPORT_PIPELINE = "/Users/vak/temp/dataset_import.log"
 METADATA_ALL_FILE = "metadata-all__1_0_0.json"
