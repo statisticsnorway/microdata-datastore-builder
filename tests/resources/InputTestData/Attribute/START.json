@@ -1,6 +1,6 @@
 {
     "shortName": "START",
-    "title": [
+    "name": [
         {"languageCode": "no", "value": "Startdato"}
     ],
     "description": [

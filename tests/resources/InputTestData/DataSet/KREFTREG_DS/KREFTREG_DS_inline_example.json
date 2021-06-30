@@ -3,7 +3,7 @@
     "temporalityType": "FIXED",
     "unitType": {
         "shortName": "SYKDOMSTILFELLE",
-        "title": [
+        "name": [
             {"languageCode": "no", "value": "Sykdomstilfelle"}
         ],
         "description": [
@@ -23,7 +23,7 @@
         {
             "variableRole": "IDENTIFIER",
             "shortName": "SYKDOMSTILFELLENUMMER",
-            "title": [
+            "name": [
                 {"languageCode": "no", "value": "Sykdomstilfelle-nummer"}
             ],
             "description": [
@@ -33,7 +33,7 @@
             "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
             "valueDomain": {
                 "shortName": "SYKDOMSTILFELLENUMMER",
-                "title": [
+                "name": [
                     {"languageCode": "no", "value": "Pseudonymisert sykdomstilfellenummer"}
                 ]
             }
@@ -41,7 +41,7 @@
         {
             "variableRole": "MEASURE",
             "shortName": "KREFTREG_DS",
-            "title": [
+            "name": [
                 {"languageCode": "no", "value": "Diagnosens sikkerhet"}
             ],
             "description": [
@@ -53,7 +53,7 @@
             "subjectFields": [
                 {
                     "shortName": "HELSE",
-                    "title": [
+                    "name": [
                         {"languageCode": "no", "value": "Helse"}
                     ],
                     "description": [
@@ -62,7 +62,7 @@
                 },
                 {
                     "shortName": "HELSETJENESTER",
-                    "title": [
+                    "name": [
                         {"languageCode": "no", "value": "Helsetjenester"}
                     ],
                     "description": [
@@ -74,7 +74,7 @@
             "uriDefinition": ["https://metadata.kreftregisteret.no/variables/detail/8"],
             "valueDomain": {
                 "shortName": "KREFTREG_DS",
-                "title": [
+                "name": [
                     {"languageCode": "no", "value": "Verdier for diagnosens sikkerhet"}
                 ],
                 "codeList": {
@@ -151,7 +151,7 @@
         {
             "variableRole": "START_TIME",
             "shortName": "START",
-            "title": [
+            "name": [
                 {"languageCode": "no", "value": "Startdato"}
             ],
             "description": [
@@ -162,7 +162,7 @@
         {
             "variableRole": "STOP_TIME",
             "shortName": "STOP",
-            "title": [
+            "name": [
                 {"languageCode": "no", "value": "Stoppdato"},
                 {"languageCode": "en", "value": "Stop date"}
             ],

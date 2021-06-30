@@ -1,6 +1,6 @@
 {
     "shortName": "PERSON",
-    "title": [
+    "name": [
         {"languageCode": "no", "value": "Person"}
     ],
     "description": [

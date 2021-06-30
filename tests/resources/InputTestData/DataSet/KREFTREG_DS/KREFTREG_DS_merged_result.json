@@ -3,7 +3,7 @@
     "temporalityType": "FIXED",
     "unitType": {
         "shortName": "SYKDOMSTILFELLE",
-        "title": [
+        "name": [
             {
                 "languageCode": "no",
                 "value": "Sykdomstilfelle"
@@ -38,7 +38,7 @@
         {
             "variableRole": "IDENTIFIER",
             "shortName": "SYKDOMSTILFELLENUMMER",
-            "title": [
+            "name": [
                 {
                     "languageCode": "no",
                     "value": "Sykdomstilfelle-nummer"
@@ -54,7 +54,7 @@
             "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
             "valueDomain": {
                 "shortName": "SYKDOMSTILFELLENUMMER",
-                "title": [
+                "name": [
                     {
                         "languageCode": "no",
                         "value": "Pseudonymisert sykdomstilfellenummer"
@@ -86,7 +86,7 @@
             "subjectFields": [
                 {
                     "shortName": "HELSE",
-                    "title": [
+                    "name": [
                         {
                             "languageCode": "no",
                             "value": "Helse"
@@ -101,7 +101,7 @@
                 },
                 {
                     "shortName": "HELSETJENESTER",
-                    "title": [
+                    "name": [
                         {
                             "languageCode": "no",
                             "value": "Helsetjenester"
@@ -122,7 +122,7 @@
             ],
             "valueDomain": {
                 "shortName": "KREFTREG_DS",
-                "title": [
+                "name": [
                     {
                         "languageCode": "no",
                         "value": "Verdier for diagnosens sikkerhet"
@@ -229,7 +229,7 @@
         {
             "variableRole": "START_TIME",
             "shortName": "START",
-            "title": [
+            "name": [
                 {
                     "languageCode": "no",
                     "value": "Startdato"
@@ -246,7 +246,7 @@
         {
             "variableRole": "STOP_TIME",
             "shortName": "STOP",
-            "title": [
+            "name": [
                 {
                     "languageCode": "no",
                     "value": "Stoppdato"

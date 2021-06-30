@@ -1,6 +1,6 @@
 {
     "shortName": "SYKDOMSTILFELLENUMMER",
-    "title": [
+    "name": [
         {"languageCode": "no", "value": "Sykdomstilfelle-nummer"}
     ],
     "description": [
@@ -10,7 +10,7 @@
     "$comment": "OBS! Ved pseudonymisering av identifiers (f.eks. fødselsnummer) korrigeres/settes dataType=NUMBER og format=RandomUInt48 automatisk!",
     "valueDomain": {
         "shortName": "SYKDOMSTILFELLENUMMER",
-        "title": [
+        "name": [
             {"languageCode": "no", "value": "Pseudonymisert sykdomstilfellenummer"}
         ]
     }

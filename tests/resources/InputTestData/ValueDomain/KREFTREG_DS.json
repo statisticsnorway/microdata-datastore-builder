@@ -1,6 +1,6 @@
 {
     "shortName": "KREFTREG_DS",
-    "title": [
+    "name": [
         {"languageCode": "no", "value": "Verdier for diagnosens sikkerhet"}
     ],
     "codeList": {
