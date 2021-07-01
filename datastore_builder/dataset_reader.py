@@ -104,20 +104,20 @@ class DatasetInput():
         db_conn = temp_db[0]
         cursor = temp_db[1]
 
-        print("SQL Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
+        print("SQL insert data Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
         with open(file=self.__dataset_data_file, newline='', encoding='utf-8') as f:
             #csv.register_dialect('my_dialect', delimiter=';', quoting=csv.QUOTE_NONE)
             reader = csv.reader(f, delimiter=self.__field_separator)
             cursor.executemany("INSERT INTO temp_dataset (unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?)", reader)
         db_conn.commit()
         db_conn.close()
-        print("SQL Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
+        print("SQL insert data Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
 
 
     def is_data_file_valid(self) -> bool:
         """Validate fields for each data row in the data file (unit_id, value, start, stop, attribute)"""
 
-        print("Validate Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
+        print("Data file validate Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
 
         data_errors = []  # used for error-reporting
         rows_validated = 0
@@ -172,7 +172,7 @@ class DatasetInput():
                 print('Error in file {}, line {}: {}'.format(self.__dataset_data_file, reader.line_num, e))
                 return False
 
-        print("Validate Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
+        print("Data file validate Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
 
         if data_errors:
             print(f"Error in file - {self.__dataset_data_file}")
@@ -215,10 +215,7 @@ class DatasetInput():
         """Main run for DatasetInput class"""
         temp_dir = Path(conf.WORKING_DIR)
 
-        #TODO: Hvis metadatafilen ikke inneholder ref kan den bare kopieres til temp-katalogen
         self.__build_metadata_dict()
-
-        #TODO: Validate metadata-json with json-schema!!!!
 
         if self.is_data_file_valid():
             self.__read_data_file()
@@ -226,22 +223,19 @@ class DatasetInput():
         if self.__meta_temporal_coverage_start or self.__meta_temporal_coverage_latest or self.__meta_temporal_status_dates:
             self.__metadata_update_temporal_coverage()
 
-        DatasetUtils.write_json_file(self.__metadata_dict, temp_dir.joinpath(self.__dataset_name + ".json"))
+        temp_metadata_json_file = temp_dir.joinpath(self.__dataset_name + ".json")
+        DatasetUtils.write_json_file(self.__metadata_dict, temp_metadata_json_file)
+
+        json_schema_for_dataset = Path(__file__).parent.joinpath("common").joinpath("JsonSchema_DataSet.json")
+        status, message = DatasetUtils.is_json_file_valid(temp_metadata_json_file, json_schema_for_dataset)
+        if not status:
+            print(message)
 
 
 #####################
 ### Usage example ###
 #####################
-#dsi = DatasetInput("KREFTREG_DS")
-#dsi.run_reader()
-#print(dsi.is_data_file_valid())
+# dsi = DatasetInput("KREFTREG_DS")
+# dsi.run_reader()
 
 
-#####################
-### Usage example ###
-#####################
-# dataset_path = Path(r"C:\BNJ\prosjektutvikling\GitHub\statisticsnorway\microdata-datastore-builder\tests\resources\InputTestData\DataSet\KREFTREG_DS")
-# di = DatasetInput(dataset_path)
-# metadata = di.build_metadata_dict()
-# DatasetUtils.write_json_file(metadata, dataset_path.joinpath("KREFTREG_DS_merged_result.json"))
-# #print(json.dumps(metadata, indent=2, ensure_ascii=False))
