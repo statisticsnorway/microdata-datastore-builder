@@ -6,6 +6,12 @@ from typing import List, Tuple, Union
 #import csv
 import sqlite3 as db
 
+# See https://pypi.org/project/jsonschema/
+# pip install jsonschema==3.2.0
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
+
 class DatasetUtils():
     # @staticmethod
     # def search_dictionary(var:Union[dict, list], search_key:str):
@@ -38,6 +44,26 @@ class DatasetUtils():
     @staticmethod
     def write_json_file(dict_obj: dict, json_file: Path):
         json_file.write_text(json.dumps(dict_obj, indent=4, ensure_ascii=False), encoding="utf-8")
+
+
+    @staticmethod
+    def is_json_file_valid(json_file: Path, json_schema_file: Path) -> Tuple[bool, str]:
+        """Validate the metadata file (JSON) using JSON Schema."""
+        with open(json_schema_file, mode="r", encoding="utf-8") as json_schema_dataset_file: 
+            json_schema_dataset = json.load(json_schema_dataset_file)
+
+        with open(json_file, mode="r", encoding="utf-8") as dataset_metadata_json_file:
+            dataset_metadata_json = json.load(dataset_metadata_json_file)
+
+        try:
+            # If no exception is raised by validate(), the instance is valid.
+            validate(
+                instance=dataset_metadata_json, 
+                schema=json_schema_dataset
+            )
+            return (True, "OK")
+        except ValidationError as err:
+            return (False, "ERROR in metadata JSON-file:\n" + str(err))
 
 
     @staticmethod
