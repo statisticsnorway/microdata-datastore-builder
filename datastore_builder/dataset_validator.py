@@ -9,39 +9,25 @@ import common.config as conf
 from common.dataset_utils import DatasetUtils
 
 
-# TODO:
-# Create temp catalog
-# Validate lines sdv
-# Read sdv, write Sqlite to /temp
-# Sort Sqlite
-# Validate consistency
-# Update temporalCoverage-start-stop-list
-# Write to stage catalog????
-
-
 class DatasetValidator:
 
-    # TODO: Skrive loggfil (til loggtjeneset)
-    # TODO: Skrive flere UNIT-tester
-    # TODO: Støtte attributes i sql-insert og innlesing av datafil?
-    # TODO: Pseudonymisering
-    # TODO: Støtte for DRAFT-datasett
-    # TODO: Støtte for version bumping
-    # TODO: support for startType and stopType?
-    # TODO: Replace with PySpark SQL when migrating to SSB DAPLA.
-    #       - Inkludert støtte for partisjonering av tid (start-dato)
+    # TODO: Skriv rader med valideringsfeil til egen err-fil slik at S380 kan se på denne, f.eks. til filen "KREFTREG_DS.err"
+    # TODO: Bytte ut print()-meldinger med common.logger
+    # TODO: Skrive UNIT-tester
+    # TODO: Legges inn i kall til denne modulen fra "reader_wrappe.py" eller en ny "validator_wrapper.py"
+    # TODO: Støtte for attributes???
+    # TODO: Skrive .MD-dokumentasjon for denne modulen.
 
 
     def __init__(self, dataset_name: str, data_error_limit: int=100) -> None:
         """
-        Constructor.
-
+        Constructor:
         :param dataset_name: The name of the dataset, eg. "PERSON_INCOME"
         :param data_error_limit: Terminate the data validation program when reached the number (limit) of errors. Default is 100.
         """
         self.__dataset_name = dataset_name
         self.__data_error_limit = data_error_limit
-        self._data_errors = []  # used for error-reporting
+        self.__data_errors = []  # used for error-reporting
         self.__sqlite_db_file = Path(conf.WORKING_DIR).joinpath(self.__dataset_name + ".db")
         self.__metadata = DatasetUtils.read_json_file(Path(conf.WORKING_DIR).joinpath(self.__dataset_name + ".json"))
         self.__metadata_temporality_type = self.__metadata["temporalityType"]
@@ -75,7 +61,7 @@ class DatasetValidator:
         return meta_missing_values
 
 
-    def validate_data(self) -> bool:
+    def validate_data(self) -> int:
         """Read and validate sorted data rows from the temporary Sqlite database file (sorted by unit_id, start, stop)"""
         temp_db = DatasetUtils.read_temp_sqlite_db_data_sorted(self.__sqlite_db_file)
         db_conn = temp_db[0]
@@ -86,6 +72,8 @@ class DatasetValidator:
         data_errors = 0
         for data_row in cursor:   # data-rows in cursor sorted by unit_id, start, stop
             row_number += 1
+            if row_number % 1000000 == 0:
+                print(".. now validating row: " + str(row_number))
             if not self.__is_data_row_consistent(data_row, previous_data_row, row_number):
                 data_errors += 1
             if not self.__is_data_row_consistent_with_metadata(data_row, row_number):
@@ -193,10 +181,22 @@ class DatasetValidator:
         return True
 
 
+    def run_validator(self):
+        """Main run for DatasetValidator class"""
+        print(f'Dataset "{self.__dataset_name}" - validate consistency between data and metadata, event-history (unit_id * start * stop) and check for row duplicates')
+        number_of_errors = self.validate_data()
+        if number_of_errors > 0:
+            print(f'ERROR - data consistency error(s):')
+            for error in self.__data_errors:
+                print(f'  {error[1]}')
+        else:
+             print(f'OK - consistency validation for dataset "{self.__dataset_name}"')
+
+
+
 
 #####################
 ### Usage example ###
 #####################
-dsv = DatasetValidator("KREFTREG_DS")
-print(dsv.validate_data())
+#dsv = DatasetValidator("KREFTREG_DS")
 #dsv.run_validator()

@@ -10,10 +10,6 @@ import sqlite3 as db
 import common.config as conf
 from common.dataset_utils import DatasetUtils
 
-# TODO: remove imports:
-from time import gmtime, strftime
-
-
 
 class DatasetInput():
     """Expected catalog structure for input data and metadata:
@@ -32,6 +28,16 @@ class DatasetInput():
             /UnitType
             /ValueDomain
     """
+
+
+    # TODO: Bytte ut print()-meldinger med common.logger
+    # TODO: Skrive UNIT-tester
+    # TODO: Støtte for "dry-runs" (validere datafil og metadata-fil, men uten at det lastes inn i datastore)
+    # TODO: Legges inn i kall til denne modulen fra "reader_wrappe.py"
+    # TODO: Støtte for attributes???
+    # TODO: Skrive .MD-dokumentasjon for denne modulen.
+    # TODO: Støtte for pseudonymisering???
+
 
     def __init__(self, dataset_name: str, field_separator: str=";", data_error_limit: int=100) -> None:
         """
@@ -129,7 +135,7 @@ class DatasetInput():
             try:
                 for data_row in reader:
                     if reader.line_num % 1000000 == 0:
-                        print(".. now validating row: " + str(reader.line_num))
+                        print(".. now reading row: " + str(reader.line_num))
 
                     rows_validated += 1
                     if len(data_errors) >= self.__data_error_limit:
