@@ -34,6 +34,12 @@ class DatasetInput():
     """
 
     def __init__(self, dataset_name: str, field_separator: str=";", data_error_limit: int=100) -> None:
+        """
+        Constructor:
+        :param dataset_name: The name of the dataset, eg. "PERSON_INCOME"
+        :param field_separator: The field separator for the data items in the .csv-file.
+        :param data_error_limit: Terminate the data reader program when reached the number (limit) of errors. Default is 100.
+        """
         self.__dataset_name = dataset_name
         self.__field_separator = field_separator
         self.__data_error_limit = data_error_limit
@@ -104,39 +110,34 @@ class DatasetInput():
         db_conn = temp_db[0]
         cursor = temp_db[1]
 
-        print("SQL insert data Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
         with open(file=self.__dataset_data_file, newline='', encoding='utf-8') as f:
             #csv.register_dialect('my_dialect', delimiter=';', quoting=csv.QUOTE_NONE)
             reader = csv.reader(f, delimiter=self.__field_separator)
             cursor.executemany("INSERT INTO temp_dataset (unit_id, value, start, stop, attributes) VALUES (?, ?, ?, ?, ?)", reader)
         db_conn.commit()
         db_conn.close()
-        print("SQL insert data Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
+        print(f'Done reading datafile "{self.__dataset_data_file}" into temp Sqlite database table.')
 
 
     def is_data_file_valid(self) -> bool:
         """Validate fields for each data row in the data file (unit_id, value, start, stop, attribute)"""
-
-        print("Data file validate Start:" + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
-
         data_errors = []  # used for error-reporting
         rows_validated = 0
+
         with open(file=self.__dataset_data_file, newline='', encoding='utf-8') as f:
             reader = csv.reader(f, delimiter=self.__field_separator)
             try:
                 for data_row in reader:
                     if reader.line_num % 1000000 == 0:
-                        print("Rad: " + str(reader.line_num))
+                        print(".. now validating row: " + str(reader.line_num))
 
                     rows_validated += 1
                     if len(data_errors) >= self.__data_error_limit:
-                        print(f"Error in file - {self.__dataset_data_file}")
-                        print(f"  Error limit reached, {str(rows_validated)} rows validated")
+                        print(f"ERROR in file - {self.__dataset_data_file}")
+                        print(f"  Validation stopped - error limit reached, {str(rows_validated)} rows validated")
                         for data_error in data_errors:
                             print(f"  {data_error}")
                         return False
-
-                    # TODO: support for validation of attributes
 
                     if not data_row:
                         data_errors.append((reader.line_num, "Empty data row/line (Null/missing). Expected row with fields UNIT_ID, VALUE, (START), (STOP), (ATTRIBUTES))", None))
@@ -166,22 +167,22 @@ class DatasetInput():
                                 datetime.datetime(int(stop[:4]), int(stop[5:7]), int(stop[8:10]))
                             except:
                                 data_errors.append((reader.line_num, "STOP-date not valid", stop))
+                        #TODO: validate "attributes"?
 
+                        # find temporalCoverage from datafile
                         self.__metadata_set_temporal_dates(str(start).strip('"'), str(stop).strip('"'))
             except csv.Error as e:
-                print('Error in file {}, line {}: {}'.format(self.__dataset_data_file, reader.line_num, e))
+                print('ERROR (csv.reader error) in file {}, line {}: {}'.format(self.__dataset_data_file, reader.line_num, e))
                 return False
 
-        print("Data file validate Ferdig: " + strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
-
         if data_errors:
-            print(f"Error in file - {self.__dataset_data_file}")
+            print(f"ERROR in file - {self.__dataset_data_file}")
             print(f"  {str(rows_validated)} rows validated")
             for data_error in data_errors:
                 print(f"  {data_error}")
             return False
         else:
-            print(f"Datafile OK - {self.__dataset_data_file}")
+            #print(f"Datafile OK - {self.__dataset_data_file}")
             print(f"  {str(rows_validated)} rows validated")
             return True
 
@@ -213,29 +214,38 @@ class DatasetInput():
 
     def run_reader(self):
         """Main run for DatasetInput class"""
+        print(f'Start reading dataset "{self.__dataset_name}"')
         temp_dir = Path(conf.WORKING_DIR)
 
+        print(f'Reading metadata for dataset "{self.__dataset_name}" from file "{self.__dataset_metadata_file}"')
         self.__build_metadata_dict()
 
+        print(f'Validate data for dataset "{self.__dataset_name}", reading datafile "{self.__dataset_data_file}"')
         if self.is_data_file_valid():
+            print(f'Read dataset "{self.__dataset_name}" into a temp Sqlite database table from datafile "{self.__dataset_data_file}"')
             self.__read_data_file()
 
         if self.__meta_temporal_coverage_start or self.__meta_temporal_coverage_latest or self.__meta_temporal_status_dates:
+            print(f'Append temporal coverage (start, stop, status dates) to metadata')
             self.__metadata_update_temporal_coverage()
 
+        print(f'Writing metadata JSON file to temp/stage catalog')
         temp_metadata_json_file = temp_dir.joinpath(self.__dataset_name + ".json")
         DatasetUtils.write_json_file(self.__metadata_dict, temp_metadata_json_file)
 
+        print(f'Validating metadata JSON file in temp/stage with JSON Schema')
         json_schema_for_dataset = Path(__file__).parent.joinpath("common").joinpath("JsonSchema_DataSet.json")
         status, message = DatasetUtils.is_json_file_valid(temp_metadata_json_file, json_schema_for_dataset)
         if not status:
             print(message)
+        else:
+            print(f'OK - reading dataset "{self.__dataset_name}"')
 
 
 #####################
 ### Usage example ###
 #####################
-# dsi = DatasetInput("KREFTREG_DS")
-# dsi.run_reader()
+#dsi = DatasetInput("KREFTREG_DS")
+#dsi.run_reader()
 
 
